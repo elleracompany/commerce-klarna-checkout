@@ -1,7 +1,7 @@
 {
   "name": "elleracompany/commerce-klarna-checkout",
   "description": "Klarna Checkout integration for Craft Commerce 2",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "type": "craft-plugin",
   "keywords": [
     "klarna",
@@ -10,7 +10,7 @@
     "kco",
     "yii2"
   ],
-  "license": "proprietary",
+  "license": "Craft",
   "authors": [
     {
       "name": "Ellera AS",
