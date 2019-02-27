@@ -1,0 +1,42 @@
+{
+  "name": "elleracompany/commerce-klarna-checkout",
+  "description": "Klarna Checkout integration for Craft Commerce 2",
+  "version": "1.0.0",
+  "type": "craft-plugin",
+  "keywords": [
+    "klarna",
+    "commerce",
+    "craftcms",
+    "kco",
+    "yii2"
+  ],
+  "license": "Craft",
+  "authors": [
+    {
+      "name": "Ellera AS",
+      "homepage": "https://ellera.no/"
+    }
+  ],
+  "support": {
+    "email": "support@ellera.no",
+    "issues": "https://github.com/ellera/commerce-klarna-checkout/issues?state=open",
+    "source": "https://github.com/ellera/commerce-klarna-checkout",
+    "docs": "https://github.com/ellera/commerce-klarna-checkout",
+    "rss": "https://github.com/ellera/commerce-klarna-checkout/commits/master.atom"
+  },
+  "require": {
+    "ext-json": "*",
+    "craftcms/cms": "^3.1.0",
+    "craftcms/commerce": "^2.0.0",
+    "guzzlehttp/guzzle": "~6.3.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "ellera\\commerce\\klarna\\": "src/"
+    }
+  },
+  "extra": {
+    "name": "Klarna Checkout for Craft Commerce",
+    "handle": "commerce-klarna-checkout"
+  }
+}
