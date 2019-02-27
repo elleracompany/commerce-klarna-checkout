@@ -39,4 +39,10 @@ You can copy and overwrite your shop default `checkout/payment.html` file with `
 
 #### VAT and Taxes
 
-Klarna requires tax to be sent per order line, not on the order in total, so for VAT and Taxes to be passed along to Klarna correctly, the taxable subject must be set to the Line item - not the order.
+Klarna requires tax to be sent per order line, not on the order in total, so for VAT and Taxes to be passed along to Klarna correctly, the taxable subject must be set to **yes/on** under "*Is this tax is already included in the price of items?*".
+
+
+## Development
+
+- Add support non-included tax
+- Add support for non-european stores

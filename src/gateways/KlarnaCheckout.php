@@ -7,7 +7,6 @@ use craft\commerce\base\Gateway as BaseGateway;
 use craft\commerce\models\Address;
 use craft\commerce\base\RequestResponseInterface;
 use craft\commerce\elements\Order;
-use craft\commerce\models\Country;
 use craft\commerce\models\payments\BasePaymentForm;
 use craft\commerce\models\PaymentSource;
 use craft\commerce\models\Transaction;
