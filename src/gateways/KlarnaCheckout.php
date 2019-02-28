@@ -14,6 +14,7 @@ use craft\web\Response as WebResponse;
 use ellera\commerce\klarna\models\KlarnaOrder;
 use ellera\commerce\klarna\models\KlarnaPaymentForm;
 use ellera\commerce\klarna\models\KlarnaResponse;
+use yii\base\InvalidConfigException;
 use yii\web\BadRequestHttpException;
 
 /**
@@ -211,6 +212,7 @@ class KlarnaCheckout extends BaseGateway
 	 *
 	 * @return RequestResponseInterface
 	 * @throws BadRequestHttpException
+	 * @throws InvalidConfigException
 	 * @throws \GuzzleHttp\Exception\GuzzleException
 	 * @throws \yii\base\ErrorException
 	 */
@@ -219,7 +221,11 @@ class KlarnaCheckout extends BaseGateway
 		if(!$form instanceof KlarnaPaymentForm) throw new BadRequestHttpException('Klarna authorize only accepts KlarnaPaymentForm');
 
 		/** @var KlarnaResponse $response */
-		$response = $this->getKlarnaResponse('POST', '/checkout/v3/orders', $form->getRequestBody());
+		try {
+			$response = $this->getKlarnaResponse('POST', '/checkout/v3/orders', $form->getRequestBody());
+		} catch (\GuzzleHttp\Exception\ClientException $e) {
+			throw new InvalidConfigException('Klarna is expecting other values, make sure you\'ve added taxes as described in the documentation for the Klarna Checkout Plugin');
+		}
 		$order = new KlarnaOrder($response);
 
 		$transaction->note = 'Created Klarna Order';

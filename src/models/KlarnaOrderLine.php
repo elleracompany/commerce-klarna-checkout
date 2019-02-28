@@ -3,6 +3,8 @@
 namespace ellera\commerce\klarna\models;
 
 use craft\base\Model;
+use craft\commerce\base\ShippingMethodInterface;
+use craft\commerce\elements\Order;
 use craft\commerce\models\LineItem;
 use ellera\commerce\klarna\helpers\TaxExtractor;
 
@@ -71,6 +73,27 @@ class KlarnaOrderLine extends Model
 		$this->tax_rate = $tax->getTaxRate();
 		$this->total_amount = $tax->getTotalGross();
 		$this->total_tax_amount = $tax->getTaxTotal();
+	}
+
+	/**
+	 * Populate the model based on shipping method
+	 *
+	 * @param ShippingMethodInterface $method
+	 * @param Order                   $order
+	 * @param float                     $order_line_tax
+	 */
+	public function shipping(ShippingMethodInterface $method, Order $order, float $order_line_tax)
+	{
+		$shipping_base_price = 0;
+		foreach ($order->getAdjustments() as $adjustment) {
+			if($adjustment->type == 'shipping' && $adjustment->lineItemId == null) $shipping_base_price += $adjustment->amount;
+		}
+		$this->name = $method->getName();
+		$this->total_amount = (int) $shipping_base_price*100;
+		$this->total_tax_amount = 0;
+		$this->quantity = 1;
+		$this->unit_price = (int) $shipping_base_price*100;
+		$this->tax_rate = 0;
 	}
 
 	/**
