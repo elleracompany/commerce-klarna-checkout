@@ -4,7 +4,7 @@ This plugin provides [Klarna](https://www.klarna.com) integrations for [Craft Co
 
 ## Requirements
 
-This plugin requires Craft Commerce 2.0.0-alpha.5 or later.
+This plugin requires Craft Commerce 2.0.0 or later.
 
 ## Installation
 
