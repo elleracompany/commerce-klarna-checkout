@@ -19,10 +19,10 @@
   ],
   "support": {
     "email": "support@ellera.no",
-    "issues": "https://github.com/ellera/commerce-klarna-checkout/issues?state=open",
-    "source": "https://github.com/ellera/commerce-klarna-checkout",
-    "docs": "https://github.com/ellera/commerce-klarna-checkout",
-    "rss": "https://github.com/ellera/commerce-klarna-checkout/commits/master.atom"
+    "issues": "https://github.com/elleracompany/commerce-klarna-checkout/issues?state=open",
+    "source": "https://github.com/elleracompany/commerce-klarna-checkout",
+    "docs": "https://github.com/elleracompany/commerce-klarna-checkout",
+    "rss": "https://github.com/elleracompany/commerce-klarna-checkout/commits/master.atom"
   },
   "require": {
     "ext-json": "*",

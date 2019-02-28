@@ -1,4 +1,4 @@
-# Release Notes for PayPal for Craft Commerce
+# Release Notes for Klarna Checkout for Craft Commerce
 
 ## 1.0.3 - 2018-02-28
 
