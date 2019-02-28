@@ -2,6 +2,11 @@
 
 ## 1.0.3 - 2018-02-28
 
+### Updated
+- Fixed typos
+
+## 1.0.3 - 2018-02-28
+
 ### Added
 - Added support for Shipping cost
 
