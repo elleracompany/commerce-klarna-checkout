@@ -1,5 +1,10 @@
 # Release Notes for Klarna Checkout for Craft Commerce
 
+## 1.0.5 - 2018-02-28
+
+### Bugfix
+- Added taxable shipping
+
 ## 1.0.4 - 2018-02-28
 
 ### Updated
