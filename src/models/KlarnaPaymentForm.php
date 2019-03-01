@@ -117,12 +117,10 @@ class KlarnaPaymentForm extends BasePaymentForm
 		/** @var $item LineItem */
 
 		$order_lines = $this->getOrderLines($transaction->order, $gateway);
-
 		$this->purchase_country = $country->iso;
 		$this->purchase_currency = $transaction->order->currency;
 		$this->locale = $transaction->order->orderLanguage;
 		$this->order_amount = $transaction->order->getTotalPrice()*100;
-		$this->order_tax_amount = $transaction->order->getAdjustmentsTotalByType('tax')*100;
 		$this->billing_address = $gateway->formatAddress($transaction->order->billingAddress, $transaction->order->email);
 		$this->shipping_address = $gateway->formatAddress($transaction->order->shippingAddress, $transaction->order->email);
 		$this->order_lines = $order_lines;
@@ -165,6 +163,7 @@ class KlarnaPaymentForm extends BasePaymentForm
 
 			$order_lines[] = $order_line;
 		}
+		$this->order_tax_amount = $total_tax;
 		return $order_lines;
 	}
 

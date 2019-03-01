@@ -219,7 +219,7 @@ class KlarnaCheckout extends BaseGateway
 	public function authorize(Transaction $transaction, BasePaymentForm $form): RequestResponseInterface
 	{
 		if(!$form instanceof KlarnaPaymentForm) throw new BadRequestHttpException('Klarna authorize only accepts KlarnaPaymentForm');
-
+		//die(json_encode($form->getRequestBody()));
 		/** @var KlarnaResponse $response */
 		try {
 			$response = $this->getKlarnaResponse('POST', '/checkout/v3/orders', $form->getRequestBody());

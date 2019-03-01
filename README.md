@@ -2,9 +2,10 @@
 
 This plugin provides [Klarna](https://www.klarna.com) integrations for [Craft Commerce](https://craftcms.com/commerce).
 
+**Note: this plugin is still undergoing testing and improvements. Please report any and all errors trough our support channels.**
 ## Requirements
 
-This plugin requires Craft Commerce 2.0.0-alpha.5 or later.
+This plugin requires Craft Commerce 2.0.0 or later.
 
 ## Installation
 
@@ -40,6 +41,7 @@ You can copy and overwrite your shop default `checkout/payment.html` file with `
 #### VAT and Taxes
 
 Klarna requires tax to be sent per order line, not on the order in total, so for VAT and Taxes to be passed along to Klarna correctly, the taxable subject must be set to the Line item - not the order.
+If the shipping cost is taxable as well, use "Order total taxable price (Line item subtotal + Total discounts + Total shipping)".
 
 ## Development
 
