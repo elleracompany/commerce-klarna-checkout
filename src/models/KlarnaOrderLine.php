@@ -80,20 +80,27 @@ class KlarnaOrderLine extends Model
 	 *
 	 * @param ShippingMethodInterface $method
 	 * @param Order                   $order
-	 * @param float                     $order_line_tax
 	 */
-	public function shipping(ShippingMethodInterface $method, Order $order, float $order_line_tax)
+	public function shipping(ShippingMethodInterface $method, Order $order)
 	{
+		$tax_excluded = 0;
+		$tax_included = 0;
 		$shipping_base_price = 0;
 		foreach ($order->getAdjustments() as $adjustment) {
-			if($adjustment->type == 'shipping' && $adjustment->lineItemId == null) $shipping_base_price += $adjustment->amount;
+			if($adjustment->type == 'shipping' && $adjustment->lineItemId == null) {
+				$shipping_base_price += $adjustment->amount;
+			}
+			if(isset($adjustment->sourceSnapshot['taxable']) && $adjustment->sourceSnapshot['taxable'] == 'order_total_shipping') {
+				if($adjustment->included == "1") $tax_included+=$adjustment->amount;
+				else $tax_excluded+=$adjustment->amount;
+			}
 		}
-		$this->name = $method->getName();
-		$this->total_amount = (int) $shipping_base_price*100;
-		$this->total_tax_amount = 0;
+		$this->unit_price = (int) ($shipping_base_price+$tax_excluded)*100;
 		$this->quantity = 1;
-		$this->unit_price = (int) $shipping_base_price*100;
-		$this->tax_rate = 0;
+		$this->name = $method->getName();
+		$this->total_amount = (int) ($shipping_base_price+$tax_excluded)*100*$this->quantity;
+		$this->total_tax_amount = (int) ($tax_included+$tax_excluded)*100;
+		$this->tax_rate = (int) round((($tax_excluded+$tax_included)/($shipping_base_price-$tax_included))*10000);
 	}
 
 	/**
