@@ -1,7 +1,7 @@
 {
   "name": "elleracompany/commerce-klarna-checkout",
   "description": "Klarna Checkout integration for Craft Commerce 2",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "type": "craft-plugin",
   "keywords": [
     "klarna",
