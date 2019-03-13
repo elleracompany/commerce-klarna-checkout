@@ -155,11 +155,12 @@ class KlarnaPaymentForm extends BasePaymentForm
 			$order_lines[] = $order_line;
 			$total_tax += $order_line->getLineTax();
 		}
-
 		$shipping_method = $order->shippingMethod;
 		if($shipping_method->getPriceForOrder($order) > 0) {
+
 			$order_line = new KlarnaOrderLine();
-			$order_line->shipping($shipping_method, $order , $total_tax/100);
+			$order_line->shipping($shipping_method, $order);
+			$total_tax += $order_line->getLineTax();
 
 			$order_lines[] = $order_line;
 		}
