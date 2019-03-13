@@ -1,6 +1,6 @@
 # Release Notes for Klarna Checkout for Craft Commerce
 
-## 1.0.6 - 2018-02-28
+## 1.0.6 - 2018-03-13
 
 ### Bugfix
 - The plugin should now correctly calculate tax for both lines and shipping (Included or not) when configured correctly. All tax on products must be set with "Line item price" and tax for shipping must be separate and set to "Order total shipping cost"
