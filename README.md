@@ -40,8 +40,8 @@ You can copy and overwrite your shop default `checkout/payment.html` file with `
 
 #### VAT and Taxes
 
-Klarna requires tax to be sent per order line, not on the order in total, so for VAT and Taxes to be passed along to Klarna correctly, the taxable subject must be set to the Line item - not the order.
-If the shipping cost is taxable as well, use "Order total taxable price (Line item subtotal + Total discounts + Total shipping)".
+Klarna requires tax to be sent per order line, not on the order in total, so for VAT and Taxes to be passed along to Klarna correctly, the taxable subject must be set to "Line item price".
+If the shipping cost is taxable as well, you need to create a separate tax rate for shipping and set that to "Order total shipping cost"
 
 ## Development
 
