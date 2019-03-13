@@ -3,12 +3,12 @@
 
 namespace ellera\commerce\klarna\models;
 
+use craft\commerce\elements\Order;
 use craft\commerce\models\payments\BasePaymentForm;
 use craft\commerce\models\Transaction;
 use ellera\commerce\klarna\gateways\KlarnaCheckout;
 use craft\commerce\models\LineItem;
 use yii\base\InvalidConfigException;
-use yii\web\HttpException;
 
 class KlarnaPaymentForm extends BasePaymentForm
 {
@@ -110,31 +110,17 @@ class KlarnaPaymentForm extends BasePaymentForm
 	 */
 	public function populate(Transaction $transaction, KlarnaCheckout $gateway) : void
 	{
-		$order_lines = [];
-		$total_tax = 0;
-
 		$commerce = \craft\commerce\Plugin::getInstance();
 		$country = $commerce->getAddresses()->getStoreLocationAddress()->getCountry();
 		if($country->iso == null) throw new InvalidConfigException('Klarna requires Store Location Country to be set. Please visit Commerce -> Settings -> Store Location and update the information.');
 
 		/** @var $item LineItem */
-		foreach ($transaction->order->lineItems as $line) {
-			$order_line = new KlarnaOrderLine();
-			$order_line->populate($line);
 
-			if($gateway->send_product_urls == '1') {
-				$order_line->product_url = $line->purchasable->getUrl();
-			}
-
-			$order_lines[] = $order_line;
-			$total_tax += $order_line->getLineTax();
-		}
-
+		$order_lines = $this->getOrderLines($transaction->order, $gateway);
 		$this->purchase_country = $country->iso;
 		$this->purchase_currency = $transaction->order->currency;
 		$this->locale = $transaction->order->orderLanguage;
 		$this->order_amount = $transaction->order->getTotalPrice()*100;
-		$this->order_tax_amount = $total_tax;
 		$this->billing_address = $gateway->formatAddress($transaction->order->billingAddress, $transaction->order->email);
 		$this->shipping_address = $gateway->formatAddress($transaction->order->shippingAddress, $transaction->order->email);
 		$this->order_lines = $order_lines;
@@ -152,6 +138,34 @@ class KlarnaPaymentForm extends BasePaymentForm
 			'checkout' => \craft\helpers\UrlHelper::baseUrl().$transaction->order->gateway->checkout,
 			'push' => \craft\helpers\UrlHelper::baseUrl().$transaction->order->gateway->push.'?number='.$transaction->order->number
 		];
+	}
+
+	private function getOrderLines(Order $order, KlarnaCheckout $gateway)
+	{
+		$total_tax = 0;
+		$order_lines = [];
+		foreach ($order->lineItems as $line) {
+			$order_line = new KlarnaOrderLine();
+			$order_line->populate($line);
+
+			if($gateway->send_product_urls == '1') {
+				$order_line->product_url = $line->purchasable->getUrl();
+			}
+
+			$order_lines[] = $order_line;
+			$total_tax += $order_line->getLineTax();
+		}
+		$shipping_method = $order->shippingMethod;
+		if($shipping_method->getPriceForOrder($order) > 0) {
+
+			$order_line = new KlarnaOrderLine();
+			$order_line->shipping($shipping_method, $order);
+			$total_tax += $order_line->getLineTax();
+
+			$order_lines[] = $order_line;
+		}
+		$this->order_tax_amount = $total_tax;
+		return $order_lines;
 	}
 
 	public function getRequestBody() : array
