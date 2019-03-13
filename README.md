@@ -43,6 +43,6 @@ Klarna requires tax to be sent per order line, not on the order in total, so for
 
 ## Development
 
-- Add support non-included tax
+- Add support non-included tax :heavy_check_mark:
 - Add support for non-european stores
 - Add support for Commerce Lite
