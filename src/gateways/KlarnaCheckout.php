@@ -224,9 +224,7 @@ class KlarnaCheckout extends BaseGateway
 		try {
 			$response = $this->getKlarnaResponse('POST', '/checkout/v3/orders', $form->getRequestBody());
 		} catch (\GuzzleHttp\Exception\ClientException $e) {
-			echo "<pre>";
-			die(var_dump($form));
-			throw new InvalidConfigException('Klarna is expecting other values, make sure you\'ve added taxes as described in the documentation for the Klarna Checkout Plugin');
+			throw new InvalidConfigException('Klarna is expecting other values, make sure you\'ve added taxes as described in the documentation for the Klarna Checkout Plugin, and that you\'ve correctly set the Site Base URL. Klarna Response: '.$e->getMessage());
 		}
 		$order = new KlarnaOrder($response);
 

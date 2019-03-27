@@ -9,6 +9,7 @@ use craft\commerce\models\Transaction;
 use ellera\commerce\klarna\gateways\KlarnaCheckout;
 use craft\commerce\models\LineItem;
 use yii\base\InvalidConfigException;
+use craft\helpers\UrlHelper;
 
 class KlarnaPaymentForm extends BasePaymentForm
 {
@@ -112,7 +113,7 @@ class KlarnaPaymentForm extends BasePaymentForm
 	{
 		$commerce = \craft\commerce\Plugin::getInstance();
 		$country = $commerce->getAddresses()->getStoreLocationAddress()->getCountry();
-		if($country->iso == null) throw new InvalidConfigException('Klarna requires Store Location Country to be set. Please visit Commerce -> Settings -> Store Location and update the information.');
+		if(!isset($country->iso) || $country->iso == null) throw new InvalidConfigException('Klarna requires Store Location Country to be set. Please visit Commerce -> Settings -> Store Location and update the information.');
 
 		/** @var $item LineItem */
 
@@ -133,11 +134,24 @@ class KlarnaPaymentForm extends BasePaymentForm
 			'show_subtotal_detail' => true
 		];
 		$this->merchant_urls = [
-			'terms' => \craft\helpers\UrlHelper::baseUrl().$transaction->order->gateway->terms,
-			'confirmation' => \craft\helpers\UrlHelper::baseUrl().'actions/commerce-klarna-checkout/klarna/confirmation?hash='.$transaction->hash,
-			'checkout' => \craft\helpers\UrlHelper::baseUrl().$transaction->order->gateway->checkout,
-			'push' => \craft\helpers\UrlHelper::baseUrl().$transaction->order->gateway->push.'?number='.$transaction->order->number
+			'terms' => $this->getStoreUrl().$transaction->order->gateway->terms,
+			'confirmation' => $this->getStoreUrl().'actions/commerce-klarna-checkout/klarna/confirmation?hash='.$transaction->hash,
+			'checkout' => $this->getStoreUrl().$transaction->order->gateway->checkout,
+			'push' => $this->getStoreUrl().$transaction->order->gateway->push.'?number='.$transaction->order->number
 		];
+	}
+
+	public function getStoreUrl()
+	{
+		$siteUrl = UrlHelper::baseUrl();
+		if(!UrlHelper::isAbsoluteUrl($siteUrl))
+		{
+			$myUrl = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] && !in_array(strtolower($_SERVER['HTTPS']),['off','no'])) ? 'https' : 'http';
+			$myUrl .= '://'.$_SERVER['HTTP_HOST'];
+			$siteUrl = $myUrl.$siteUrl;
+		}
+
+		return $siteUrl;
 	}
 
 	private function getOrderLines(Order $order, KlarnaCheckout $gateway)
@@ -156,7 +170,7 @@ class KlarnaPaymentForm extends BasePaymentForm
 			$total_tax += $order_line->getLineTax();
 		}
 		$shipping_method = $order->shippingMethod;
-		if($shipping_method->getPriceForOrder($order) > 0) {
+		if($shipping_method && $shipping_method->getPriceForOrder($order) > 0) {
 
 			$order_line = new KlarnaOrderLine();
 			$order_line->shipping($shipping_method, $order);
