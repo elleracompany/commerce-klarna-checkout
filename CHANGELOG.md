@@ -1,5 +1,12 @@
 # Release Notes for Klarna Checkout for Craft Commerce
 
+## 1.0.7 - 2018-03-27
+
+### Enhancements
+- Added more information to error messages when Klarna is not accepting the order
+- Added storeUrl function to accurately send correct urls to Klarna
+- Fixed bug where orders without shipping would fail
+
 ## 1.0.6 - 2018-03-13
 
 ### Bugfix
