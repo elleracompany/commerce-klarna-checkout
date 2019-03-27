@@ -3,6 +3,7 @@
 
 namespace ellera\commerce\klarna\models;
 
+use Craft;
 use craft\commerce\elements\Order;
 use craft\commerce\models\payments\BasePaymentForm;
 use craft\commerce\models\Transaction;
@@ -10,6 +11,7 @@ use ellera\commerce\klarna\gateways\KlarnaCheckout;
 use craft\commerce\models\LineItem;
 use yii\base\InvalidConfigException;
 use craft\helpers\UrlHelper;
+use craft\commerce\Plugin as Commerce;
 
 class KlarnaPaymentForm extends BasePaymentForm
 {
@@ -111,13 +113,13 @@ class KlarnaPaymentForm extends BasePaymentForm
 	 */
 	public function populate(Transaction $transaction, KlarnaCheckout $gateway) : void
 	{
-		$commerce = \craft\commerce\Plugin::getInstance();
+		$commerce = Commerce::getInstance();
 		$country = $commerce->getAddresses()->getStoreLocationAddress()->getCountry();
 		if(!isset($country->iso) || $country->iso == null) throw new InvalidConfigException('Klarna requires Store Location Country to be set. Please visit Commerce -> Settings -> Store Location and update the information.');
 
-		/** @var $item LineItem */
+		if(Craft::$app->plugins->getPlugin('commerce')->is(Commerce::EDITION_LITE)) $order_lines = $this->getOrderLinesLite($transaction->order, $gateway);
+		else $order_lines = $this->getOrderLines($transaction->order, $gateway);
 
-		$order_lines = $this->getOrderLines($transaction->order, $gateway);
 		$this->purchase_country = $country->iso;
 		$this->purchase_currency = $transaction->order->currency;
 		$this->locale = $transaction->order->orderLanguage;
@@ -141,6 +143,12 @@ class KlarnaPaymentForm extends BasePaymentForm
 		];
 	}
 
+	/**
+	 * Returns the full store URL
+	 *
+	 * @return string
+	 * @throws \craft\errors\SiteNotFoundException
+	 */
 	public function getStoreUrl()
 	{
 		$siteUrl = UrlHelper::baseUrl();
@@ -180,6 +188,12 @@ class KlarnaPaymentForm extends BasePaymentForm
 		}
 		$this->order_tax_amount = $total_tax;
 		return $order_lines;
+	}
+
+	private function getOrderLinesLite(Order $order, KlarnaCheckout $gateway)
+	{
+		// TODO: Create order lines for Commerce Lite
+		return [];
 	}
 
 	public function getRequestBody() : array
