@@ -1,5 +1,10 @@
 # Release Notes for Klarna Checkout for Craft Commerce
 
+## 1.1.0 - 2018-03-28
+
+### Updated
+- Added support for Commerce Lite
+
 ## 1.0.7 - 2018-03-27
 
 ### Enhancements

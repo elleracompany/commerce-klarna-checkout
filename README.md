@@ -47,4 +47,4 @@ If the shipping cost is taxable as well, you need to create a separate tax rate 
 
 - Add support non-included tax :heavy_check_mark:
 - Add support for non-european stores
-- Add support for Commerce Lite
+- Add support for Commerce Lite :heavy_check_mark:

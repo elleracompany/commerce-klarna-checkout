@@ -1,15 +1,15 @@
 <?php
 
-
 namespace ellera\commerce\klarna\models;
 
+use Craft;
 use craft\commerce\elements\Order;
 use craft\commerce\models\payments\BasePaymentForm;
 use craft\commerce\models\Transaction;
 use ellera\commerce\klarna\gateways\KlarnaCheckout;
-use craft\commerce\models\LineItem;
 use yii\base\InvalidConfigException;
 use craft\helpers\UrlHelper;
+use craft\commerce\Plugin as Commerce;
 
 class KlarnaPaymentForm extends BasePaymentForm
 {
@@ -111,13 +111,13 @@ class KlarnaPaymentForm extends BasePaymentForm
 	 */
 	public function populate(Transaction $transaction, KlarnaCheckout $gateway) : void
 	{
-		$commerce = \craft\commerce\Plugin::getInstance();
+		$commerce = Commerce::getInstance();
 		$country = $commerce->getAddresses()->getStoreLocationAddress()->getCountry();
 		if(!isset($country->iso) || $country->iso == null) throw new InvalidConfigException('Klarna requires Store Location Country to be set. Please visit Commerce -> Settings -> Store Location and update the information.');
 
-		/** @var $item LineItem */
+		if(Craft::$app->plugins->getPlugin('commerce')->is(Commerce::EDITION_LITE)) $order_lines = $this->getOrderLinesLite($transaction->order, $gateway);
+		else $order_lines = $this->getOrderLines($transaction->order, $gateway);
 
-		$order_lines = $this->getOrderLines($transaction->order, $gateway);
 		$this->purchase_country = $country->iso;
 		$this->purchase_currency = $transaction->order->currency;
 		$this->locale = $transaction->order->orderLanguage;
@@ -141,6 +141,12 @@ class KlarnaPaymentForm extends BasePaymentForm
 		];
 	}
 
+	/**
+	 * Returns the full store URL
+	 *
+	 * @return string
+	 * @throws \craft\errors\SiteNotFoundException
+	 */
 	public function getStoreUrl()
 	{
 		$siteUrl = UrlHelper::baseUrl();
@@ -179,6 +185,67 @@ class KlarnaPaymentForm extends BasePaymentForm
 			$order_lines[] = $order_line;
 		}
 		$this->order_tax_amount = $total_tax;
+		return $order_lines;
+	}
+
+	private function getOrderLinesLite(Order $order, KlarnaCheckout $gateway)
+	{
+		$line_tax = 0;
+		$tax_included = false;
+		$shipping = 0;
+		$order_lines = [];
+		$order_tax_amount = 0;
+		foreach ($order->getAdjustments() as $adjustment)
+		{
+			if($adjustment->type == 'tax')
+			{
+				$order_tax_amount += $adjustment->amount;
+				$tax_included = $adjustment->included == 1;
+			}
+			elseif($adjustment->type == 'shipping')
+			{
+				$shipping+= $adjustment->amount;
+			}
+		}
+		if($shipping > 0)
+		{
+			if($tax_included) {
+				$shipping_tax = ($shipping/$order->totalPrice)*$order_tax_amount;
+			}
+			else {
+				$shipping_tax = ($shipping/($order->totalPrice-$order_tax_amount))*$order_tax_amount;
+			}
+			$order_line = new KlarnaOrderLine();
+
+			$order_line->name = 'Shipping';
+			$order_line->quantity = 1;
+			$order_line->unit_price = $tax_included ? (int)($shipping*100) : (int)(($shipping+$shipping_tax)*100);
+			$order_line->tax_rate = $tax_included ? round((($shipping-$shipping_tax)/$shipping_tax)*100) : round((($shipping)/$shipping_tax)*100);
+			$order_line->total_amount = $tax_included ? (int)($shipping*100*$order_line->quantity) : (int)(($shipping+$shipping_tax)*100*$order_line->quantity);
+			$order_line->total_tax_amount = (int)($shipping_tax*100);
+
+			$order_lines[] = $order_line;
+		}
+		else $shipping_tax = 0;
+
+		foreach ($order->lineItems as $line) {
+			$line_tax = $order_tax_amount-$shipping_tax;
+			$order_line = new KlarnaOrderLine();
+
+			$order_line->name = $line->purchasable->title;
+			$order_line->quantity = $line->qty;
+			$order_line->unit_price = $tax_included ? (int)(($line->price)*100) : (int)(($line->price+($line_tax/$line->qty))*100);
+			$order_line->tax_rate = $tax_included ? round((($line->price-($line_tax/$line->qty))/($line_tax/$line->qty))*100) : round(($line->price/($line_tax/$line->qty))*100);
+			$order_line->total_amount = $tax_included ? (int)(($line->price)*100*$line->qty) : (int)((($line->price*$line->qty)+$line_tax)*100);
+			$order_line->total_tax_amount = (int)($line_tax*100);
+
+			if($gateway->send_product_urls == '1') {
+				$order_line->product_url = $line->purchasable->getUrl();
+			}
+
+			$order_lines[] = $order_line;
+		}
+		$this->order_tax_amount = $order_tax_amount*100;
 		return $order_lines;
 	}
 
