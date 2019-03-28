@@ -220,7 +220,7 @@ class KlarnaPaymentForm extends BasePaymentForm
 			$order_line->name = 'Shipping';
 			$order_line->quantity = 1;
 			$order_line->unit_price = $tax_included ? (int)($shipping*100) : (int)(($shipping+$shipping_tax)*100);
-			$order_line->tax_rate = $tax_included ? round((($shipping-$shipping_tax)/$shipping_tax)*100) : round((($shipping)/$shipping_tax)*100);
+			$order_line->tax_rate = $tax_included ? round(($shipping_tax/($shipping-$shipping_tax))*10000) : round(($shipping_tax/$shipping)*10000);
 			$order_line->total_amount = $tax_included ? (int)($shipping*100*$order_line->quantity) : (int)(($shipping+$shipping_tax)*100*$order_line->quantity);
 			$order_line->total_tax_amount = (int)($shipping_tax*100);
 
@@ -235,7 +235,7 @@ class KlarnaPaymentForm extends BasePaymentForm
 			$order_line->name = $line->purchasable->title;
 			$order_line->quantity = $line->qty;
 			$order_line->unit_price = $tax_included ? (int)(($line->price)*100) : (int)(($line->price+($line_tax/$line->qty))*100);
-			$order_line->tax_rate = $tax_included ? round((($line->price-($line_tax/$line->qty))/($line_tax/$line->qty))*100) : round(($line->price/($line_tax/$line->qty))*100);
+			$order_line->tax_rate = $tax_included ? round((($line_tax/$line->qty)/($line->price-($line_tax/$line->qty)))*10000) : round((($line_tax/$line->qty)/$line->price)*10000);
 			$order_line->total_amount = $tax_included ? (int)(($line->price)*100*$line->qty) : (int)((($line->price*$line->qty)+$line_tax)*100);
 			$order_line->total_tax_amount = (int)($line_tax*100);
 
