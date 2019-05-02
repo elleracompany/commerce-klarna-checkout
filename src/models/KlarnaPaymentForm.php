@@ -10,6 +10,7 @@ use ellera\commerce\klarna\gateways\KlarnaCheckout;
 use yii\base\InvalidConfigException;
 use craft\helpers\UrlHelper;
 use craft\commerce\Plugin as Commerce;
+use craft\commerce\models\Address;
 
 class KlarnaPaymentForm extends BasePaymentForm
 {
@@ -122,8 +123,8 @@ class KlarnaPaymentForm extends BasePaymentForm
 		$this->purchase_currency = $transaction->order->currency;
 		$this->locale = $transaction->order->orderLanguage;
 		$this->order_amount = $transaction->order->getTotalPrice()*100;
-		$this->billing_address = $gateway->formatAddress($transaction->order->billingAddress, $transaction->order->email);
-		$this->shipping_address = $gateway->formatAddress($transaction->order->shippingAddress, $transaction->order->email);
+		$this->billing_address = $transaction->order->billingAddress instanceof Address ? $gateway->formatAddress($transaction->order->billingAddress, $transaction->order->email) : null;
+		$this->shipping_address = $transaction->order->shippingAddress instanceof Address ? $gateway->formatAddress($transaction->order->shippingAddress, $transaction->order->email) : null;
 		$this->order_lines = $order_lines;
 		$this->merchant_reference1 = $transaction->order->shortNumber;
 		$this->merchant_reference2 = $transaction->order->number;
@@ -257,14 +258,16 @@ class KlarnaPaymentForm extends BasePaymentForm
 			'locale' => $this->locale,
 			'order_amount' => $this->order_amount,
 			'order_tax_amount' => $this->order_tax_amount,
-			'billing_address' => $this->billing_address,
-			'shipping_address' => $this->shipping_address,
 			'order_lines' => [],
 			'merchant_reference1' => $this->merchant_reference1,
 			'merchant_reference2' => $this->merchant_reference2,
 			'options' => $this->options,
 			'merchant_urls' => $this->merchant_urls
 		];
+
+		if($this->billing_address) $body['billing_address'] = $this->billing_address;
+		if($this->shipping_address) $body['shipping_address'] = $this->shipping_address;
+
 		foreach ($this->order_lines as $order_line) $body['order_lines'][] = [
 			'name' => $order_line->name,
 			'quantity' => $order_line->quantity,

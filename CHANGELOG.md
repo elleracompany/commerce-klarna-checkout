@@ -1,5 +1,10 @@
 # Release Notes for Klarna Checkout for Craft Commerce
 
+## 1.1.1 - 2018-05-02
+
+### Updated
+- Added support for Empty address on order creation.
+
 ## 1.1.0 - 2018-03-28
 
 ### Updated
