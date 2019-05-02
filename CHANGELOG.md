@@ -1,5 +1,10 @@
 # Release Notes for Klarna Checkout for Craft Commerce
 
+## 1.1.2 - 2018-05-02
+
+### Added
+- Function to render Klarna Order Complete HTML.
+
 ## 1.1.1 - 2018-05-02
 
 ### Updated

@@ -10,6 +10,7 @@ use craft\commerce\elements\Order;
 use craft\commerce\models\payments\BasePaymentForm;
 use craft\commerce\models\PaymentSource;
 use craft\commerce\models\Transaction;
+use craft\commerce\records\Country;
 use craft\web\Response as WebResponse;
 use ellera\commerce\klarna\models\KlarnaOrder;
 use ellera\commerce\klarna\models\KlarnaPaymentForm;
@@ -239,6 +240,63 @@ class KlarnaCheckout extends BaseGateway
 		else $this->log('Failed to Authorize order '.$transaction->order->id.'. Klarna responded with '.$response->getCode().': '.$response->getMessage());
 
 		return $response;
+	}
+
+	/**
+	 * @param Order $order
+	 *
+	 * @throws InvalidConfigException
+	 * @throws \GuzzleHttp\Exception\GuzzleException
+	 */
+	public function updateOrder(Order $order)
+	{
+		try {
+			$response = $this->getKlarnaResponse('GET', '/checkout/v3/orders/' . $order->getLastTransaction()->reference);
+		} catch (\GuzzleHttp\Exception\ClientException $e) {
+			throw new InvalidConfigException('Klarna responded with an error: '.$e->getMessage());
+		}
+		if($response->getData()->shipping_address) {
+			$order->setShippingAddress($this->createAddressFromResponse($response->getData()->shipping_address));
+			if($response->getData()->shipping_address->email) $order->setEmail($response->getData()->shipping_address->email);
+		}
+		if($response->getData()->billing_address) {
+			$order->setBillingAddress($this->createAddressFromResponse($response->getData()->billing_address));
+			if($response->getData()->billing_address->email) $order->setEmail($response->getData()->billing_address->email);
+		}
+	}
+
+	/**
+	 * @return false|string
+	 * @throws InvalidConfigException
+	 * @throws \GuzzleHttp\Exception\GuzzleException
+	 */
+	public function getHtml()
+	{
+		try {
+			$response = $this->getKlarnaResponse('GET', '/checkout/v3/orders/' . Craft::$app->session->get('klarna_order_id'));
+		} catch (\GuzzleHttp\Exception\ClientException $e) {
+			throw new InvalidConfigException('Klarna responded with an error: '.$e->getMessage());
+		}
+		return $response->getData()->html_snippet;
+	}
+
+	/**
+	 * @param Object $addr
+	 *
+	 * @return Address
+	 */
+	private function createAddressFromResponse(Object $addr)
+	{
+		$address = new Address();
+		$country = Country::findOne(['iso' => strtoupper($addr->country)]);
+		$address->firstName = $addr->given_name;
+		$address->lastName = $addr->family_name;
+		$address->address1 = $addr->street_address;
+		$address->zipCode = $addr->postal_code;
+		$address->city = $addr->city;
+		$address->phone = $addr->phone;
+		if($country) $address->countryId = $country->id;
+		return $address;
 	}
 
 	/**
