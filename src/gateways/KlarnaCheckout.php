@@ -253,7 +253,7 @@ class KlarnaCheckout extends BaseGateway
 		try {
 			$response = $this->getKlarnaResponse('GET', '/checkout/v3/orders/' . $order->getLastTransaction()->reference);
 		} catch (\GuzzleHttp\Exception\ClientException $e) {
-			throw new InvalidConfigException('Klarna is expecting other values, make sure you\'ve added taxes as described in the documentation for the Klarna Checkout Plugin, and that you\'ve correctly set the Site Base URL. Klarna Response: '.$e->getMessage());
+			throw new InvalidConfigException('Klarna responded with an error: '.$e->getMessage());
 		}
 		if($response->getData()->shipping_address) {
 			$order->setShippingAddress($this->createAddressFromResponse($response->getData()->shipping_address));
@@ -275,7 +275,7 @@ class KlarnaCheckout extends BaseGateway
 		try {
 			$response = $this->getKlarnaResponse('GET', '/checkout/v3/orders/' . Craft::$app->session->get('klarna_order_id'));
 		} catch (\GuzzleHttp\Exception\ClientException $e) {
-			throw new InvalidConfigException('Klarna is expecting other values, make sure you\'ve added taxes as described in the documentation for the Klarna Checkout Plugin, and that you\'ve correctly set the Site Base URL. Klarna Response: '.$e->getMessage());
+			throw new InvalidConfigException('Klarna responded with an error: '.$e->getMessage());
 		}
 		return $response->getData()->html_snippet;
 	}
@@ -298,14 +298,6 @@ class KlarnaCheckout extends BaseGateway
 		if($country) $address->countryId = $country->id;
 		return $address;
 	}
-
-	/**
-	 * ["given_name"]=> string(7) "Jørgen"
-	 * ["family_name"]=> string(9) "Ellingsen"
-	 * ["email"]=> string(16) "jorgen@ellera.no"
-	 * ["street_address"]=> string(22) "Andreas Borgens gate 2" ["postal_code"]=> string(4) "3045" ["city"]=> string(7) "Drammen" ["phone"]=> string(14) "+47 913 12 750" ["country"]=> string(2) "no" }
-	 */
-
 
 	/**
 	 * @param Transaction $transaction
