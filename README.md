@@ -33,7 +33,7 @@ Contact us on support@ellera.no or create a new issue in [GitHub](https://github
 Since Klarna is rendering its own payment button, the craft-commerce default 'Pay' button must be removed.
 You can copy and overwrite your shop default `checkout/payment.html` file with `vendor/ellera/commerce-klarna-checkout/src/templates/pages/checkout/payment.html` or simply update your existing template with
 ```
-{% if cart.gateway.handle is not same as('klarna-checkout') %}
+{% if cart.gateway.handle is not same as('klarna') %}
     <button class="button button-primary" type="submit">Pay {{ cart.totalPrice|commerceCurrency(cart.paymentCurrency,convert=true) }}</button>
 {% endif %}
 ```
@@ -43,6 +43,8 @@ To render the Klarna Order Complete HTML you can use this code in your `shop/cus
     {% if order.gateway.handle is same as('klarna') %}
         {{ order.gateway.getHtml(order.id)|raw }}
     {% else %}
+    // Normal Order Complete Logic
+    {% endif %}
 ```
 #### VAT and Taxes
 
