@@ -62,6 +62,10 @@ class KlarnaController extends BaseFrontEndController
 
 		$order = $last_transaction->order;
 
+		Craft::$app->session->set('klarna_order_id', $klarna_order_id);
+
+		$gateway->updateOrder($order);
+
 		if(isset($gateway->paymentTypeOptions[$gateway->paymentType])) $paymentType = $gateway->paymentType;
 		else $paymentType = 'authorize';
 

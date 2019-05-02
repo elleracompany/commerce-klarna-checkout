@@ -10,6 +10,7 @@ use craft\commerce\elements\Order;
 use craft\commerce\models\payments\BasePaymentForm;
 use craft\commerce\models\PaymentSource;
 use craft\commerce\models\Transaction;
+use craft\commerce\records\Country;
 use craft\web\Response as WebResponse;
 use ellera\commerce\klarna\models\KlarnaOrder;
 use ellera\commerce\klarna\models\KlarnaPaymentForm;
@@ -240,6 +241,71 @@ class KlarnaCheckout extends BaseGateway
 
 		return $response;
 	}
+
+	/**
+	 * @param Order $order
+	 *
+	 * @throws InvalidConfigException
+	 * @throws \GuzzleHttp\Exception\GuzzleException
+	 */
+	public function updateOrder(Order $order)
+	{
+		try {
+			$response = $this->getKlarnaResponse('GET', '/checkout/v3/orders/' . $order->getLastTransaction()->reference);
+		} catch (\GuzzleHttp\Exception\ClientException $e) {
+			throw new InvalidConfigException('Klarna is expecting other values, make sure you\'ve added taxes as described in the documentation for the Klarna Checkout Plugin, and that you\'ve correctly set the Site Base URL. Klarna Response: '.$e->getMessage());
+		}
+		if($response->getData()->shipping_address) {
+			$order->setShippingAddress($this->createAddressFromResponse($response->getData()->shipping_address));
+			if($response->getData()->shipping_address->email) $order->setEmail($response->getData()->shipping_address->email);
+		}
+		if($response->getData()->billing_address) {
+			$order->setBillingAddress($this->createAddressFromResponse($response->getData()->billing_address));
+			if($response->getData()->billing_address->email) $order->setEmail($response->getData()->billing_address->email);
+		}
+	}
+
+	/**
+	 * @return false|string
+	 * @throws InvalidConfigException
+	 * @throws \GuzzleHttp\Exception\GuzzleException
+	 */
+	public function getHtml()
+	{
+		try {
+			$response = $this->getKlarnaResponse('GET', '/checkout/v3/orders/' . Craft::$app->session->get('klarna_order_id'));
+		} catch (\GuzzleHttp\Exception\ClientException $e) {
+			throw new InvalidConfigException('Klarna is expecting other values, make sure you\'ve added taxes as described in the documentation for the Klarna Checkout Plugin, and that you\'ve correctly set the Site Base URL. Klarna Response: '.$e->getMessage());
+		}
+		return $response->getData()->html_snippet;
+	}
+
+	/**
+	 * @param Object $addr
+	 *
+	 * @return Address
+	 */
+	private function createAddressFromResponse(Object $addr)
+	{
+		$address = new Address();
+		$country = Country::findOne(['iso' => strtoupper($addr->country)]);
+		$address->firstName = $addr->given_name;
+		$address->lastName = $addr->family_name;
+		$address->address1 = $addr->street_address;
+		$address->zipCode = $addr->postal_code;
+		$address->city = $addr->city;
+		$address->phone = $addr->phone;
+		if($country) $address->countryId = $country->id;
+		return $address;
+	}
+
+	/**
+	 * ["given_name"]=> string(7) "Jørgen"
+	 * ["family_name"]=> string(9) "Ellingsen"
+	 * ["email"]=> string(16) "jorgen@ellera.no"
+	 * ["street_address"]=> string(22) "Andreas Borgens gate 2" ["postal_code"]=> string(4) "3045" ["city"]=> string(7) "Drammen" ["phone"]=> string(14) "+47 913 12 750" ["country"]=> string(2) "no" }
+	 */
+
 
 	/**
 	 * @param Transaction $transaction
