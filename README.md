@@ -37,7 +37,13 @@ You can copy and overwrite your shop default `checkout/payment.html` file with `
     <button class="button button-primary" type="submit">Pay {{ cart.totalPrice|commerceCurrency(cart.paymentCurrency,convert=true) }}</button>
 {% endif %}
 ```
-
+#### Klarna Order Complete HTML
+To render the Klarna Order Complete HTML you can use this code in your `shop/customer/order` template:
+```
+    {% if order.gateway.handle is same as('klarna') %}
+        {{ order.gateway.getHtml(order.id)|raw }}
+    {% else %}
+```
 #### VAT and Taxes
 
 Klarna requires tax to be sent per order line, not on the order in total, so for VAT and Taxes to be passed along to Klarna correctly, the taxable subject must be set to "Line item price".
