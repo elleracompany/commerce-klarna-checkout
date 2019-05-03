@@ -1,5 +1,12 @@
 # Release Notes for Klarna Checkout for Craft Commerce
 
+## 1.1.2.1 - 2018-05-03
+
+### Updated
+- README.md
+### Enhancements
+- Added extended logging on exceptions.
+
 ## 1.1.2 - 2018-05-02
 
 ### Added

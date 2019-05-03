@@ -225,6 +225,7 @@ class KlarnaCheckout extends BaseGateway
 		try {
 			$response = $this->getKlarnaResponse('POST', '/checkout/v3/orders', $form->getRequestBody());
 		} catch (\GuzzleHttp\Exception\ClientException $e) {
+			$this->log($e->getCode() . ': ' . $e->getMessage());
 			throw new InvalidConfigException('Klarna is expecting other values, make sure you\'ve added taxes as described in the documentation for the Klarna Checkout Plugin, and that you\'ve correctly set the Site Base URL. Klarna Response: '.$e->getMessage());
 		}
 		$order = new KlarnaOrder($response);
@@ -247,12 +248,14 @@ class KlarnaCheckout extends BaseGateway
 	 *
 	 * @throws InvalidConfigException
 	 * @throws \GuzzleHttp\Exception\GuzzleException
+	 * @throws \yii\base\ErrorException
 	 */
 	public function updateOrder(Order $order)
 	{
 		try {
 			$response = $this->getKlarnaResponse('GET', '/checkout/v3/orders/' . $order->getLastTransaction()->reference);
 		} catch (\GuzzleHttp\Exception\ClientException $e) {
+			$this->log($e->getCode() . ': ' . $e->getMessage());
 			throw new InvalidConfigException('Klarna responded with an error: '.$e->getMessage());
 		}
 		if($response->getData()->shipping_address) {
@@ -266,18 +269,29 @@ class KlarnaCheckout extends BaseGateway
 	}
 
 	/**
-	 * @return false|string
+	 * @return mixed
 	 * @throws InvalidConfigException
 	 * @throws \GuzzleHttp\Exception\GuzzleException
+	 * @throws \yii\base\ErrorException
 	 */
 	public function getHtml()
 	{
 		try {
 			$response = $this->getKlarnaResponse('GET', '/checkout/v3/orders/' . Craft::$app->session->get('klarna_order_id'));
 		} catch (\GuzzleHttp\Exception\ClientException $e) {
+			$this->log($$e->getCode() . ': ' . $e->getMessage());
 			throw new InvalidConfigException('Klarna responded with an error: '.$e->getMessage());
 		}
 		return $response->getData()->html_snippet;
+	}
+
+	/**
+	 * @return bool
+	 */
+	public function hasHtml()
+	{
+		if(!Craft::$app->session->get('klarna_order_id') || strlen(Craft::$app->session->get('klarna_order_id')) < 20) return false;
+		return true;
 	}
 
 	/**
