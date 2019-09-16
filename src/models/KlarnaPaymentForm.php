@@ -114,7 +114,7 @@ class KlarnaPaymentForm extends BasePaymentForm
 	{
 		$commerce = Commerce::getInstance();
 		$country = $commerce->getAddresses()->getStoreLocationAddress()->getCountry();
-		if(!isset($country->iso) || $country->iso == null) throw new InvalidConfigException('Klarna requires Store Location Country to be set. Please visit Commerce -> Settings -> Store Location and update the information.');
+		if(!isset($country->iso) || $country->iso == null) throw new InvalidConfigException('Klarna requires Store Location Country to be set. Please visit Commerce -> Store Settings -> Store Location and update the information.');
 
 		if(Craft::$app->plugins->getPlugin('commerce')->is(Commerce::EDITION_LITE)) $order_lines = $this->getOrderLinesLite($transaction->order, $gateway);
 		else $order_lines = $this->getOrderLines($transaction->order, $gateway);
