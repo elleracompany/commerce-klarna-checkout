@@ -1,14 +1,19 @@
 # Release Notes for Klarna Checkout for Craft Commerce
 
-## 1.1.2.1 - 2019-05-03
+## 1.1.3 - 2019-09-16
+
+### Updated
+- Store Location in error message (#14)
+- Fixed github-link in readme (#17)
+- Updated Plugin icon with new Klarna-logo (#20)
+
+
+## 1.1.2 - 2019-05-03
 
 ### Updated
 - README.md
 ### Enhancements
 - Added extended logging on exceptions.
-
-## 1.1.2 - 2019-05-02
-
 ### Added
 - Function to render Klarna Order Complete HTML.
 

@@ -17,7 +17,7 @@ Go to the Plugin Store in your project’s Control Panel and search for “Klarn
 
 ## Support
 
-Contact us on support@ellera.no or create a new issue in [GitHub](https://github.com/ellera/commerce-klarna-checkout/issues).
+Contact us on support@ellera.no or create a new issue in [GitHub](https://github.com/elleracompany/commerce-klarna-checkout/issues).
 
 You can also reach us by messaging @Jorgen on Discord.
 
