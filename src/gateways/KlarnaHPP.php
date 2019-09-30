@@ -23,7 +23,7 @@ use yii\web\BadRequestHttpException;
  * @author    Ellera AS, <support@ellera.no>
  * @since     1.0
  */
-class KlarnaCheckout extends BaseGateway
+class KlarnaHPP extends BaseGateway
 {
 	/**
 	 * Setting: Title
