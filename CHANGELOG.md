@@ -1,5 +1,10 @@
 # Release Notes for Klarna Checkout for Craft Commerce
 
+## 1.1.4 - 2019-10-04
+
+### Fixed
+- Rounding error when using discount codes (PR #22 from  Rizzet)
+
 ## 1.1.3 - 2019-09-16
 
 ### Updated
