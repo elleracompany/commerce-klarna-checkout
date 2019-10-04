@@ -46,7 +46,7 @@ class TaxExtractor
 	 */
 	public function getTaxTotal() : int
 	{
-		return (int)(($this->included + $this->excluded)*100);
+		return (int)round(($this->included + $this->excluded)*100);
 	}
 
 	/**
@@ -101,7 +101,7 @@ class TaxExtractor
 	 */
 	public function getTotalNet() : int
 	{
-		return (int)(($this->line->getTotal()*100)-$this->getTaxTotal());
+		return (int)round(($this->line->getTotal()*100)-$this->getTaxTotal());
 	}
 
 	/**
