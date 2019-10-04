@@ -5,6 +5,7 @@ namespace ellera\commerce\klarna;
 use craft\commerce\services\Gateways;
 use craft\events\RegisterComponentTypesEvent;
 use ellera\commerce\klarna\gateways\KlarnaCheckout;
+use ellera\commerce\klarna\gateways\KlarnaHPP;
 use yii\base\Event;
 
 
@@ -25,6 +26,7 @@ class Plugin extends \craft\base\Plugin
 
         Event::on(Gateways::class, Gateways::EVENT_REGISTER_GATEWAY_TYPES,  function(RegisterComponentTypesEvent $event) {
             $event->types[] = KlarnaCheckout::class;
+            $event->types[] = KlarnaHPP::class;
         });
     }
 }

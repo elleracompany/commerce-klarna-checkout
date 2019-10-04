@@ -3,14 +3,10 @@
 namespace ellera\commerce\klarna\gateways;
 
 use Craft;
-use craft\commerce\models\Address;
 use craft\commerce\base\RequestResponseInterface;
 use craft\commerce\elements\Order;
 use craft\commerce\models\payments\BasePaymentForm;
-use craft\commerce\models\PaymentSource;
 use craft\commerce\models\Transaction;
-use craft\commerce\records\Country;
-use craft\web\Response as WebResponse;
 use ellera\commerce\klarna\models\KlarnaOrder;
 use ellera\commerce\klarna\models\KlarnaPaymentForm;
 use ellera\commerce\klarna\models\KlarnaResponse;
@@ -18,19 +14,36 @@ use yii\base\InvalidConfigException;
 use yii\web\BadRequestHttpException;
 
 /**
- * KlarnaCheckout represents the KCOv3 checkout gateway
+ * KlarnaCheckout represents the KCOv3 Hosted Payment Page gateway
  *
  * @author    Ellera AS, <support@ellera.no>
- * @since     1.0
+ * @since     1.2
  */
 class KlarnaHPP extends BaseGateway
 {
+    // Public Variables
+    // =========================================================================
+
+    /**
+     * Gateway handle
+     *
+     * @var null|string
+     */
+    public $gateway_handle = 'klarna-hpp';
+
+    /**
+     * Setting: Logging
+     *
+     * @var bool
+     */
+    public $log_debug_messages = true;
+
 	/**
 	 * Setting: Title
 	 *
 	 * @var string
 	 */
-	public $title = 'Klarna';
+	public $title = 'Klarna Hosted Payment Page';
 
 	/**
 	 * Setting: Description
@@ -45,13 +58,6 @@ class KlarnaHPP extends BaseGateway
 	 * @var string
 	 */
 	public $send_product_urls = true;
-
-	/**
-	 * Setting: Logging
-	 *
-	 * @var string
-	 */
-	public $log_debug_messages = true;
 
 	/**
 	 * Setting: Test Mode
@@ -189,21 +195,7 @@ class KlarnaHPP extends BaseGateway
 	 */
 	public static function displayName(): string
 	{
-		return Craft::t('commerce', 'Klarna Checkout');
-	}
-
-	/**
-	 * @param $message
-	 *
-	 * @throws \yii\base\ErrorException
-	 */
-	public function log($message)
-	{
-		if($this->log_debug_messages == '1') {
-			$file = Craft::getAlias('@storage/logs/commerce-klarna-checkout.log');
-			$log = date('Y-m-d H:i:s').' '.$message."\n";
-			\craft\helpers\FileHelper::writeToFile($file, $log, ['append' => true]);
-		}
+		return Craft::t('commerce', 'Klarna Hosted Payment Page');
 	}
 
 	/**
@@ -243,76 +235,6 @@ class KlarnaHPP extends BaseGateway
 	}
 
 	/**
-	 * @param Order $order
-	 *
-	 * @throws InvalidConfigException
-	 * @throws \GuzzleHttp\Exception\GuzzleException
-	 * @throws \yii\base\ErrorException
-	 */
-	public function updateOrder(Order $order)
-	{
-		try {
-			$response = $this->getKlarnaResponse('GET', '/checkout/v3/orders/' . $order->getLastTransaction()->reference);
-		} catch (\GuzzleHttp\Exception\ClientException $e) {
-			$this->log($e->getCode() . ': ' . $e->getMessage());
-			throw new InvalidConfigException('Klarna responded with an error: '.$e->getMessage());
-		}
-		if($response->getData()->shipping_address) {
-			$order->setShippingAddress($this->createAddressFromResponse($response->getData()->shipping_address));
-			if($response->getData()->shipping_address->email) $order->setEmail($response->getData()->shipping_address->email);
-		}
-		if($response->getData()->billing_address) {
-			$order->setBillingAddress($this->createAddressFromResponse($response->getData()->billing_address));
-			if($response->getData()->billing_address->email) $order->setEmail($response->getData()->billing_address->email);
-		}
-	}
-
-	/**
-	 * @return mixed
-	 * @throws InvalidConfigException
-	 * @throws \GuzzleHttp\Exception\GuzzleException
-	 * @throws \yii\base\ErrorException
-	 */
-	public function getHtml()
-	{
-		try {
-			$response = $this->getKlarnaResponse('GET', '/checkout/v3/orders/' . Craft::$app->session->get('klarna_order_id'));
-		} catch (\GuzzleHttp\Exception\ClientException $e) {
-			$this->log($$e->getCode() . ': ' . $e->getMessage());
-			throw new InvalidConfigException('Klarna responded with an error: '.$e->getMessage());
-		}
-		return $response->getData()->html_snippet;
-	}
-
-	/**
-	 * @return bool
-	 */
-	public function hasHtml()
-	{
-		if(!Craft::$app->session->get('klarna_order_id') || strlen(Craft::$app->session->get('klarna_order_id')) < 20) return false;
-		return true;
-	}
-
-	/**
-	 * @param Object $addr
-	 *
-	 * @return Address
-	 */
-	private function createAddressFromResponse(Object $addr)
-	{
-		$address = new Address();
-		$country = Country::findOne(['iso' => strtoupper($addr->country)]);
-		$address->firstName = $addr->given_name;
-		$address->lastName = $addr->family_name;
-		$address->address1 = $addr->street_address;
-		$address->zipCode = $addr->postal_code;
-		$address->city = $addr->city;
-		$address->phone = $addr->phone;
-		if($country) $address->countryId = $country->id;
-		return $address;
-	}
-
-	/**
 	 * @param Transaction $transaction
 	 * @param string      $reference
 	 *
@@ -333,30 +255,6 @@ class KlarnaHPP extends BaseGateway
 		else $this->log('Failed to capture order '.$transaction->order->id.'. Klarna responded with '.$response->getCode().': '.$response->getMessage());
 
 		return $response;
-	}
-
-	/**
-	 * @inheritdoc
-	 */
-	public function completeAuthorize(Transaction $transaction): RequestResponseInterface
-	{
-		// TODO: Implement completeAuthorize() method.
-	}
-
-	/**
-	 * @inheritdoc
-	 */
-	public function completePurchase(Transaction $transaction): RequestResponseInterface
-	{
-		// TODO: Implement completePurchase() method.
-	}
-
-	/**
-	 * @inheritdoc
-	 */
-	public function createPaymentSource(BasePaymentForm $sourceData, int $userId): PaymentSource
-	{
-		// TODO: Implement createPaymentSource() method.
 	}
 
 	/**
@@ -415,14 +313,6 @@ class KlarnaHPP extends BaseGateway
 		else $this->log('Failed to refund order '.$transaction->order->id.'. Klarna responded with '.$response->getCode().': '.$response->getMessage());
 
 		return $response;
-	}
-
-	/**
-	 * @inheritdoc
-	 */
-	public function processWebHook(): WebResponse
-	{
-		// TODO: Implement processWebHook() method.
 	}
 
 	/**
@@ -506,107 +396,6 @@ class KlarnaHPP extends BaseGateway
 	}
 
 	/**
-	 * @param array $params
-	 *
-	 * @return null|string
-	 * @throws \GuzzleHttp\Exception\GuzzleException
-	 * @throws \Throwable
-	 * @throws \craft\errors\ElementNotFoundException
-	 * @throws \yii\base\Exception
-	 */
-	public function getPaymentFormHtml(array $params)
-	{
-		$order = $this->createCheckoutOrder();
-		return $order->getHtmlSnippet();
-	}
-
-	/**
-	 * @return KlarnaOrder
-	 * @throws \GuzzleHttp\Exception\GuzzleException
-	 * @throws \Throwable
-	 * @throws \craft\errors\ElementNotFoundException
-	 * @throws \yii\base\Exception
-	 */
-	private function createCheckoutOrder() : KlarnaOrder
-	{
-		$commerce = craft\commerce\Plugin::getInstance();
-		$cart = $commerce->getCarts()->getCart();
-
-		$transaction = $commerce->getTransactions()->createTransaction($cart, null, 'authorize');
-
-		$form = new KlarnaPaymentForm();
-		$form->populate($transaction, $this);
-
-		/** @var $response KlarnaResponse */
-		$response = $this->authorize($transaction, $form);
-		$transaction->reference = $response->getTransactionReference();
-		$transaction->code = $response->getCode();
-		$transaction->message = $response->getMessage();
-		$commerce->getTransactions()->saveTransaction($transaction);
-
-		if($response->isSuccessful()) $this->log('Created order '.$transaction->order->number.' ('.$transaction->order->id.')');
-		else $this->log('Failed to create order '.$transaction->order->id.'. Klarna responded with '.$response->getCode().': '.$response->getMessage());
-
-		return new KlarnaOrder($response);
-	}
-
-	/**
-	 * @param Address $address
-	 * @param string  $email
-	 *
-	 * @return array
-	 */
-	public function formatAddress(Address $address, string $email = '') : array
-	{
-		return [
-			"organization_name" => $address->businessName,
-			"given_name" => $address->firstName,
-			"family_name" => $address->lastName,
-			"title" => $address->title,
-			"email" => $email,
-			"street_address" => $address->address1,
-			"street_address2" => $address->address2,
-			"postal_code" => $address->zipCode,
-			"city" => $address->city,
-			"region" => $address->stateName,
-			"phone" => $address->phone,
-			"country" => $address->country->iso,
-		];
-	}
-
-	/**
-	 * @param $method
-	 * @param $endpoint
-	 * @param $body
-	 *
-	 * @return KlarnaResponse
-	 * @throws \GuzzleHttp\Exception\GuzzleException
-	 */
-	public function getKlarnaResponse($method, $endpoint, $body = []) : KlarnaResponse
-	{
-		return new KlarnaResponse(
-			$method,
-			$this->test_mode !== '1' ? $this->prod_url : $this->test_url,
-			$endpoint,
-			$this->test_mode !== '1' ? $this->api_eu_uid : $this->api_eu_test_uid,
-			$this->test_mode !== '1' ? $this->api_eu_password : $this->api_eu_test_password,
-			$body
-		);
-	}
-
-	/**
-	 * Render Settings HTML
-	 *
-	 * @return null|string
-	 * @throws \Twig_Error_Loader
-	 * @throws \yii\base\Exception
-	 */
-	public function getSettingsHtml()
-	{
-		return Craft::$app->getView()->renderTemplate('commerce-klarna-checkout/settings/checkout', ['gateway' => $this]);
-	}
-
-	/**
 	 * Settings validation rules
 	 *
 	 * @return array
@@ -677,38 +466,5 @@ class KlarnaHPP extends BaseGateway
 			'push' => 'Order Complete Page',
 			'terms' => 'Store Terms Page'
 		];
-	}
-
-	/**
-	 * @param Transaction $transaction
-	 *
-	 * @return KlarnaResponse
-	 * @throws BadRequestHttpException
-	 * @throws \GuzzleHttp\Exception\GuzzleException
-	 * @throws \craft\commerce\errors\TransactionException
-	 * @throws \yii\base\ErrorException
-	 */
-	private function captureKlarnaOrder(Transaction $transaction) : KlarnaResponse
-	{
-		$plugin = \craft\commerce\Plugin::getInstance();
-		$body = [
-			'captured_amount' => (int)$transaction->paymentAmount * 100,
-			'description' => $transaction->hash
-		];
-
-		$response = $this->getKlarnaResponse('POST', "/ordermanagement/v1/orders/{$transaction->reference}/captures", $body);
-
-		$transaction->status = $response->isSuccessful() ? 'success' : 'failed';
-		$transaction->code = $response->getCode();
-		$transaction->message = $response->getMessage();
-		$transaction->note = 'Automatic capture';
-		$transaction->response = $response->get();
-
-		if(!$plugin->getTransactions()->saveTransaction($transaction)) throw new BadRequestHttpException('Could not save capture transaction');
-
-		if($response->isSuccessful()) $this->log('Captured order '.$transaction->order->number.' ('.$transaction->order->id.')');
-		else $this->log('Failed to capture order '.$transaction->order->id.'. Klarna responded with '.$response->getCode().': '.$response->getMessage());
-
-		return $response;
 	}
 }
