@@ -1,5 +1,10 @@
 # Release Notes for Klarna Checkout for Craft Commerce
 
+## 1.1.5 - 2019-10-07
+
+### Fixed
+- License and composer type fixed
+
 ## 1.1.4 - 2019-10-04
 
 ### Fixed
