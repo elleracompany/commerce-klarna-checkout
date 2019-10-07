@@ -8,16 +8,16 @@ class KlarnaOrder
 	/**
 	 * API Response
 	 *
-	 * @var KlarnaOrderResponse
+	 * @var KlarnaBaseResponse
 	 */
 	public $response;
 
 	/**
 	 * KlarnaOrder constructor.
 	 *
-	 * @param KlarnaOrderResponse $response
+	 * @param KlarnaBaseResponse $response
 	 */
-	public function __construct(KlarnaOrderResponse $response)
+	public function __construct(KlarnaBaseResponse $response)
 	{
 		$this->response = $response;
 	}

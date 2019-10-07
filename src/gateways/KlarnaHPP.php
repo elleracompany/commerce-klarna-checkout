@@ -8,9 +8,8 @@ use craft\commerce\elements\Order;
 use craft\commerce\models\payments\BasePaymentForm;
 use craft\commerce\models\Transaction;
 use ellera\commerce\klarna\models\KlarnaOrder;
-use ellera\commerce\klarna\models\KlarnaOrderResponse;
+use ellera\commerce\klarna\models\KlarnaSessionResponse;
 use ellera\commerce\klarna\models\KlarnaPaymentForm;
-use ellera\commerce\klarna\models\KlarnaResponse;
 use yii\base\InvalidConfigException;
 use yii\web\BadRequestHttpException;
 
@@ -182,13 +181,17 @@ class KlarnaHPP extends BaseGateway
 
         $form->populate($transaction, $this);
 
+        echo json_encode($form->getSessionRequestBody());
+        die();
         /** @var KlarnaSessionResponse $response */
 		try {
-			$response = $this->getKlarnaSessionResponse('POST', '/checkout/v3/orders', $form->getRequestBody());
+			$response = $this->getKlarnaSessionResponse('POST', '/payments/v1/sessions', $form->getSessionRequestBody());
 		} catch (\GuzzleHttp\Exception\ClientException $e) {
 			$this->log($e->getCode() . ': ' . $e->getResponse()->getBody()->getContents());
             throw new InvalidConfigException('Error from Klarna. See log for more info');
 		}
+		echo json_encode($response->get());
+		die();
 		$order = new KlarnaOrder($response);
 
 		$transaction->note = 'Created Klarna Order';

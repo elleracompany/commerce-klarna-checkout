@@ -4,22 +4,21 @@
 namespace ellera\commerce\klarna\gateways;
 
 use Craft;
+use craft\web\Response as WebResponse;
+use craft\commerce\elements\Order;
 use craft\commerce\base\Gateway;
 use craft\commerce\records\Country;
 use craft\commerce\models\Address;
-use ellera\commerce\klarna\models\KlarnaOrderResponse;
-use ellera\commerce\klarna\models\KlarnaSessionResponse;
-use ellera\commerce\klarna\models\KlarnaHppSessionResponse;
-use Throwable;
 use craft\commerce\models\Transaction;
 use craft\commerce\models\payments\BasePaymentForm;
 use craft\commerce\base\RequestResponseInterface;
 use craft\commerce\models\PaymentSource;
-use craft\web\Response as WebResponse;
-use craft\commerce\elements\Order;
+use ellera\commerce\klarna\models\KlarnaOrderResponse;
+use ellera\commerce\klarna\models\KlarnaSessionResponse;
+use ellera\commerce\klarna\models\KlarnaHppSessionResponse;
+use Throwable;
 use yii\base\InvalidConfigException;
 use yii\web\BadRequestHttpException;
-use ellera\commerce\klarna\models\KlarnaHppSessionResponse;
 
 class BaseGateway extends Gateway
 {
