@@ -43,4 +43,16 @@ class KlarnaSessionResponse extends KlarnaBaseResponse
 		$this->response = json_decode($this->raw_response->getBody());
 		if(isset($this->response->order_id)) $this->setTransactionReference($this->response->order_id);
 	}
+
+    /**
+     * Return Session ID if exists
+     *
+     * @return string|null
+     */
+    public function getSessionId()
+    {
+        if(!isset($this->response->session_id)) return null;
+        return $this->response->session_id;
+    }
+
 }

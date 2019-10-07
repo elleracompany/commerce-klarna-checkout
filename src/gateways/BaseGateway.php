@@ -85,13 +85,13 @@ class BaseGateway extends Gateway
      * Production API URL
      * @var string
      */
-    private $prod_url = 'https://api.klarna.com';
+    protected $prod_url = 'https://api.klarna.com';
 
     /**
      * Test API URL
      * @var string
      */
-    private $test_url = 'https://api.playground.klarna.com';
+    protected $test_url = 'https://api.playground.klarna.com';
 
     /**
      * Gateway handle

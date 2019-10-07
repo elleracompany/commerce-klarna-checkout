@@ -7,6 +7,7 @@ use craft\commerce\base\RequestResponseInterface;
 use craft\commerce\elements\Order;
 use craft\commerce\models\payments\BasePaymentForm;
 use craft\commerce\models\Transaction;
+use ellera\commerce\klarna\models\KlarnaHppSessionResponse;
 use ellera\commerce\klarna\models\KlarnaOrder;
 use ellera\commerce\klarna\models\KlarnaSessionResponse;
 use ellera\commerce\klarna\models\KlarnaPaymentForm;
@@ -181,8 +182,6 @@ class KlarnaHPP extends BaseGateway
 
         $form->populate($transaction, $this);
 
-        echo json_encode($form->getSessionRequestBody());
-        die();
         /** @var KlarnaSessionResponse $response */
 		try {
 			$response = $this->getKlarnaSessionResponse('POST', '/payments/v1/sessions', $form->getSessionRequestBody());
@@ -190,8 +189,7 @@ class KlarnaHPP extends BaseGateway
 			$this->log($e->getCode() . ': ' . $e->getResponse()->getBody()->getContents());
             throw new InvalidConfigException('Error from Klarna. See log for more info');
 		}
-		echo json_encode($response->get());
-		die();
+
 		$order = new KlarnaOrder($response);
 
 		$transaction->note = 'Created Klarna Order';
@@ -206,11 +204,8 @@ class KlarnaHPP extends BaseGateway
             return null;
 		}
         else {
-            $this->log('Authorized order '.$transaction->order->number.' ('.$transaction->order->id.')');
-            //echo json_encode($form->getSessionRequestBody($response->getPaymentSessionUrl()));
-            //die();
             try {
-                $session = $this->getKlarnaHppSessionResponse('POST', '/hpp/v1/sessions', $form->getSessionRequestBody($response->getPaymentSessionUrl()));
+                $session = $this->getKlarnaHppSessionResponse('POST', '/hpp/v1/sessions', $form->getHppSessionRequestBody($this->getPaymentSessionUrl($response)));
             } catch (\GuzzleHttp\Exception\ClientException $e) {
                 $this->log($e->getCode() . ': ' . $e->getResponse()->getBody()->getContents());
                 throw new InvalidConfigException('Error from Klarna. See log for more info');
@@ -218,6 +213,17 @@ class KlarnaHPP extends BaseGateway
             return $session;
         }
 	}
+
+    /**
+     * Get payment session URL
+     *
+     * @param KlarnaSessionResponse $response
+     * @return string
+     */
+	public function getPaymentSessionUrl(KlarnaSessionResponse $response)
+    {
+        return ($this->test_mode !== '1' ? $this->prod_url : $this->test_url).'/payments/v1/sessions/' . $response->getSessionId();
+    }
 
 	/**
 	 * @param Transaction $transaction
@@ -234,7 +240,7 @@ class KlarnaHPP extends BaseGateway
 			'description' => $transaction->hash
 		];
 
-		$response = $this->getKlarnaResponse('POST', "/ordermanagement/v1/orders/{$transaction->reference}/captures", $body);
+		$response = $this->getKlarnaOrderResponse('POST', "/ordermanagement/v1/orders/{$transaction->reference}/captures", $body);
 		$response->setTransactionReference($reference);
 		if($response->isSuccessful()) $this->log('Captured order '.$transaction->order->number.' ('.$transaction->order->id.')');
 		else $this->log('Failed to capture order '.$transaction->order->id.'. Klarna responded with '.$response->getCode().': '.$response->getMessage());
