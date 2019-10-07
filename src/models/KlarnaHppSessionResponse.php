@@ -6,7 +6,7 @@ namespace ellera\commerce\klarna\models;
 use craft\commerce\base\RequestResponseInterface;
 use yii\helpers\ArrayHelper;
 
-class KlarnaResponse implements RequestResponseInterface
+class KlarnaHppSessionResponse implements RequestResponseInterface
 {
 	/**
 	 * Klarna API Endpoint
@@ -128,7 +128,7 @@ class KlarnaResponse implements RequestResponseInterface
 	 */
 	public function isRedirect(): bool
 	{
-		return false;
+		return true;
 	}
 
 	/**
@@ -138,7 +138,7 @@ class KlarnaResponse implements RequestResponseInterface
 	 */
 	public function getRedirectMethod(): string
 	{
-
+        return 'GET';
 	}
 
 	/**
@@ -158,7 +158,7 @@ class KlarnaResponse implements RequestResponseInterface
 	 */
 	public function getRedirectUrl(): string
 	{
-
+        return $this->response->redirect_url;
 	}
 
 	/**
@@ -226,4 +226,24 @@ class KlarnaResponse implements RequestResponseInterface
 	{
 		return $this->response;
 	}
+
+	public function getDistributionUrl()
+    {
+        $this->response->distribution_url;
+    }
+
+    public function getQrCodeUrl()
+    {
+        $this->response->qr_code_url;
+    }
+
+    public function getSessionId()
+    {
+        $this->response->session_id;
+    }
+
+    public function getSessionUrl()
+    {
+        $this->response->session_url;
+    }
 }

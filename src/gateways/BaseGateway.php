@@ -7,7 +7,9 @@ use Craft;
 use craft\commerce\base\Gateway;
 use craft\commerce\records\Country;
 use craft\commerce\models\Address;
-use ellera\commerce\klarna\models\KlarnaResponse;
+use ellera\commerce\klarna\models\KlarnaOrderResponse;
+use ellera\commerce\klarna\models\KlarnaSessionResponse;
+use ellera\commerce\klarna\models\KlarnaHppSessionResponse;
 use Throwable;
 use craft\commerce\models\Transaction;
 use craft\commerce\models\payments\BasePaymentForm;
@@ -16,13 +18,81 @@ use craft\commerce\models\PaymentSource;
 use craft\web\Response as WebResponse;
 use craft\commerce\elements\Order;
 use yii\base\InvalidConfigException;
-use BadRequestHttpException;
-
+use yii\web\BadRequestHttpException;
+use ellera\commerce\klarna\models\KlarnaHppSessionResponse;
 
 class BaseGateway extends Gateway
 {
     // Public Variables
     // =========================================================================
+
+    /**
+     * Setting: API User (Prod, EU)
+     *
+     * @var string
+     */
+    public $api_eu_uid;
+
+    /**
+     * Setting: API Password (Prod, EU)
+     *
+     * @var string
+     */
+    public $api_eu_password;
+
+    /**
+     * Setting:  API User (Test, EU)
+     *
+     * @var string
+     */
+    public $api_eu_test_uid;
+
+    /**
+     * Setting: API Password (Test, EU)
+     *
+     * @var string
+     */
+    public $api_eu_test_password;
+
+    /**
+     * Setting: API User (Prod, US)
+     *
+     * @var string
+     */
+    public $api_us_uid;
+
+    /**
+     * Setting: API Password (Prod, US)
+     *
+     * @var string
+     */
+    public $api_us_password;
+
+    /**
+     * Setting: API User (Test, US)
+     *
+     * @var string
+     */
+    public $api_us_test_uid;
+
+    /**
+     * Setting: API Password (Test, US)
+     *
+     * @var string
+     */
+    public $api_us_test_password;
+
+    /**
+     * Production API URL
+     * @var string
+     */
+    private $prod_url = 'https://api.klarna.com';
+
+    /**
+     * Test API URL
+     * @var string
+     */
+    private $test_url = 'https://api.playground.klarna.com';
 
     /**
      * Gateway handle
@@ -38,6 +108,28 @@ class BaseGateway extends Gateway
      */
     public $log_debug_messages = true;
 
+    /**
+     * Setting: Test Mode
+     *
+     * @var string
+     */
+    public $test_mode = true;
+
+
+    /**
+     * Setting: Send Product Urls
+     *
+     * @var string
+     */
+    public $send_product_urls = true;
+
+    /**
+     * Setting: Terms Page
+     *
+     * @var string
+     */
+    public $terms = 'shop/terms';
+
     // Public Methods
     // =========================================================================
 
@@ -49,9 +141,47 @@ class BaseGateway extends Gateway
      * @return KlarnaResponse
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
-    public function getKlarnaResponse($method, $endpoint, $body = []) : KlarnaResponse
+    public function getKlarnaOrderResponse($method, $endpoint, $body = []) : KlarnaOrderResponse
     {
-        return new KlarnaResponse(
+        return new KlarnaOrderResponse(
+            $method,
+            $this->test_mode !== '1' ? $this->prod_url : $this->test_url,
+            $endpoint,
+            $this->test_mode !== '1' ? $this->api_eu_uid : $this->api_eu_test_uid,
+            $this->test_mode !== '1' ? $this->api_eu_password : $this->api_eu_test_password,
+            $body
+        );
+    }
+
+    /**
+     * @param $method
+     * @param $endpoint
+     * @param array $body
+     * @return KlarnaHppSessionResponse
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
+    public function getKlarnaSessionResponse($method, $endpoint, $body = []) : KlarnaSessionResponse
+    {
+        return new KlarnaSessionResponse(
+            $method,
+            $this->test_mode !== '1' ? $this->prod_url : $this->test_url,
+            $endpoint,
+            $this->test_mode !== '1' ? $this->api_eu_uid : $this->api_eu_test_uid,
+            $this->test_mode !== '1' ? $this->api_eu_password : $this->api_eu_test_password,
+            $body
+        );
+    }
+
+    /**
+     * @param $method
+     * @param $endpoint
+     * @param array $body
+     * @return KlarnaHppSessionResponse
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
+    public function getKlarnaHppSessionResponse($method, $endpoint, $body = []) : KlarnaHppSessionResponse
+    {
+        return new KlarnaHppSessionResponse(
             $method,
             $this->test_mode !== '1' ? $this->prod_url : $this->test_url,
             $endpoint,
@@ -94,7 +224,7 @@ class BaseGateway extends Gateway
     public function getHtml()
     {
         try {
-            $response = $this->getKlarnaResponse('GET', '/checkout/v3/orders/' . Craft::$app->session->get('klarna_order_id'));
+            $response = $this->getKlarnaOrderResponse('GET', '/checkout/v3/orders/' . Craft::$app->session->get('klarna_order_id'));
         } catch (\GuzzleHttp\Exception\ClientException $e) {
             $this->log($$e->getCode() . ': ' . $e->getMessage());
             throw new InvalidConfigException('Klarna responded with an error: '.$e->getMessage());
@@ -111,7 +241,7 @@ class BaseGateway extends Gateway
     public function updateOrder(Order $order)
     {
         try {
-            $response = $this->getKlarnaResponse('GET', '/checkout/v3/orders/' . $order->getLastTransaction()->reference);
+            $response = $this->getKlarnaOrderResponse('GET', '/checkout/v3/orders/' . $order->getLastTransaction()->reference);
         } catch (\GuzzleHttp\Exception\ClientException $e) {
             $this->log($e->getCode() . ': ' . $e->getMessage());
             throw new InvalidConfigException('Klarna responded with an error: '.$e->getMessage());
@@ -198,7 +328,7 @@ class BaseGateway extends Gateway
             'description' => $transaction->hash
         ];
 
-        $response = $this->getKlarnaResponse('POST', "/ordermanagement/v1/orders/{$transaction->reference}/captures", $body);
+        $response = $this->getKlarnaOrderResponse('POST', "/ordermanagement/v1/orders/{$transaction->reference}/captures", $body);
 
         $transaction->status = $response->isSuccessful() ? 'success' : 'failed';
         $transaction->code = $response->getCode();
@@ -425,7 +555,7 @@ class BaseGateway extends Gateway
      */
     public function availableForUseWithOrder(Order $order): bool
     {
-
+        return true;
     }
 
     /**

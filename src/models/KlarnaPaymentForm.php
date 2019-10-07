@@ -6,6 +6,7 @@ use Craft;
 use craft\commerce\elements\Order;
 use craft\commerce\models\payments\BasePaymentForm;
 use craft\commerce\models\Transaction;
+use ellera\commerce\klarna\gateways\BaseGateway;
 use ellera\commerce\klarna\gateways\KlarnaCheckout;
 use yii\base\InvalidConfigException;
 use craft\helpers\UrlHelper;
@@ -103,14 +104,22 @@ class KlarnaPaymentForm extends BasePaymentForm
 	 */
 	public $merchant_urls;
 
+    /**
+     * Merchant Session URLs
+     * Redirect URLs passed to Klarna HPP
+     *
+     * @var array
+     */
+    public $merchant_session_urls;
+
 	/**
 	 * @param Transaction    $transaction
-	 * @param KlarnaCheckout $gateway
+	 * @param BaseGateway $gateway
 	 *
 	 * @throws InvalidConfigException
 	 * @throws \craft\errors\SiteNotFoundException
 	 */
-	public function populate(Transaction $transaction, KlarnaCheckout $gateway) : void
+	public function populate(Transaction $transaction, BaseGateway $gateway) : void
 	{
 		$commerce = Commerce::getInstance();
 		$country = $commerce->getAddresses()->getStoreLocationAddress()->getCountry();
@@ -140,6 +149,16 @@ class KlarnaPaymentForm extends BasePaymentForm
 			'checkout' => $this->getStoreUrl().$transaction->order->gateway->checkout,
 			'push' => $this->getStoreUrl().$transaction->order->gateway->push.'?number='.$transaction->order->number
 		];
+		$this->merchant_session_urls = [
+		    'back' => $this->getStoreUrl().'back&hppId={{session_id}}',
+            'cancel' => $this->getStoreUrl().'cancel&hppId={{session_id}}',
+            'error' => $this->getStoreUrl().'error&hppId={{session_id}}',
+            'failure' => $this->getStoreUrl().'failure&hppId={{session_id}}',
+            //'privacy_policy' => $this->getStoreUrl().'privacy_policy',
+            //'status_update' => $this->getStoreUrl().'status_update&hppId={{session_id}}',
+            'success' => $this->getStoreUrl().'success&hppId={{session_id}}&token={{authorization_token}}',
+            'terms' => $this->getStoreUrl().$transaction->order->gateway->terms,
+        ];
 	}
 
 	/**
@@ -150,6 +169,7 @@ class KlarnaPaymentForm extends BasePaymentForm
 	 */
 	public function getStoreUrl()
 	{
+	    return 'https://ellera.no/';
 		$siteUrl = UrlHelper::baseUrl();
 		if(!UrlHelper::isAbsoluteUrl($siteUrl))
 		{
@@ -161,10 +181,11 @@ class KlarnaPaymentForm extends BasePaymentForm
 		return $siteUrl;
 	}
 
-	private function getOrderLines(Order $order, KlarnaCheckout $gateway)
+	private function getOrderLines(Order $order, BaseGateway $gateway)
 	{
 		$total_tax = 0;
 		$order_lines = [];
+
 		foreach ($order->lineItems as $line) {
 			$order_line = new KlarnaOrderLine();
 			$order_line->populate($line);
@@ -196,6 +217,7 @@ class KlarnaPaymentForm extends BasePaymentForm
 		$shipping = 0;
 		$order_lines = [];
 		$order_tax_amount = 0;
+
 		foreach ($order->getAdjustments() as $adjustment)
 		{
 			if($adjustment->type == 'tax')
@@ -250,7 +272,7 @@ class KlarnaPaymentForm extends BasePaymentForm
 		return $order_lines;
 	}
 
-	public function getRequestBody() : array
+	public function getOrderRequestBody() : array
 	{
 		$body = [
 			'purchase_country' => $this->purchase_country,
@@ -279,4 +301,28 @@ class KlarnaPaymentForm extends BasePaymentForm
 
 		return $body;
 	}
+
+    public function getHppSessionRequestBody(string $url) : array
+    {
+        $body = [
+            'merchant_urls' => $this->merchant_session_urls,
+            'options' => [
+                'background_images' => [
+                    [
+                        'url' => 'https://ellera.no/images/mustbereplaced-main.jpg',
+                        'width' => 1440
+                    ]
+                ],
+                'logo_url' => 'https://ellera.no/images/ellera_black_transp.png',
+                'page_title' => 'Complete your purchase',
+                'payment_fallback' => true,
+                'payment_method_categories' => 'pay_later',
+                'payment_method_category' => 'pay_later',
+                'purchase_type' => 'buy'
+            ],
+            'payment_session_url' => $url
+        ];
+
+        return $body;
+    }
 }

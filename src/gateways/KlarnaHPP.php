@@ -8,6 +8,7 @@ use craft\commerce\elements\Order;
 use craft\commerce\models\payments\BasePaymentForm;
 use craft\commerce\models\Transaction;
 use ellera\commerce\klarna\models\KlarnaOrder;
+use ellera\commerce\klarna\models\KlarnaOrderResponse;
 use ellera\commerce\klarna\models\KlarnaPaymentForm;
 use ellera\commerce\klarna\models\KlarnaResponse;
 use yii\base\InvalidConfigException;
@@ -51,20 +52,6 @@ class KlarnaHPP extends BaseGateway
 	 * @var string
 	 */
 	public $description = '';
-
-	/**
-	 * Setting: Send Product Urls
-	 *
-	 * @var string
-	 */
-	public $send_product_urls = true;
-
-	/**
-	 * Setting: Test Mode
-	 *
-	 * @var string
-	 */
-	public $test_mode = true;
 
 	/**
 	 * Setting: Mandatory DOB
@@ -151,18 +138,6 @@ class KlarnaHPP extends BaseGateway
 	public $api_us_test_password = '';
 
 	/**
-	 * Production API URL
-	 * @var string
-	 */
-	private $prod_url = 'https://api.klarna.com';
-
-	/**
-	 * Test API URL
-	 * @var string
-	 */
-	private $test_url = 'https://api.playground.klarna.com';
-
-	/**
 	 * Setting: Payment Type
 	 *
 	 * @var string [authorize, purchase]
@@ -184,13 +159,6 @@ class KlarnaHPP extends BaseGateway
 	public $push = 'shop/customer/order';
 
 	/**
-	 * Setting: Terms Page
-	 *
-	 * @var string
-	 */
-	public $terms = 'shop/terms';
-
-	/**
 	 * @inheritdoc
 	 */
 	public static function displayName(): string
@@ -198,26 +166,28 @@ class KlarnaHPP extends BaseGateway
 		return Craft::t('commerce', 'Klarna Hosted Payment Page');
 	}
 
-	/**
-	 * @param Transaction     $transaction
-	 * @param BasePaymentForm $form
-	 *
-	 * @return RequestResponseInterface
-	 * @throws BadRequestHttpException
-	 * @throws InvalidConfigException
-	 * @throws \GuzzleHttp\Exception\GuzzleException
-	 * @throws \yii\base\ErrorException
-	 */
+    /**
+     * @param Transaction $transaction
+     * @param BasePaymentForm $form
+     * @return RequestResponseInterface
+     * @throws BadRequestHttpException
+     * @throws InvalidConfigException
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws \craft\errors\SiteNotFoundException
+     * @throws \yii\base\ErrorException
+     */
 	public function authorize(Transaction $transaction, BasePaymentForm $form): RequestResponseInterface
 	{
 		if(!$form instanceof KlarnaPaymentForm) throw new BadRequestHttpException('Klarna authorize only accepts KlarnaPaymentForm');
-		//die(json_encode($form->getRequestBody()));
-		/** @var KlarnaResponse $response */
+
+        $form->populate($transaction, $this);
+
+        /** @var KlarnaSessionResponse $response */
 		try {
-			$response = $this->getKlarnaResponse('POST', '/checkout/v3/orders', $form->getRequestBody());
+			$response = $this->getKlarnaSessionResponse('POST', '/checkout/v3/orders', $form->getRequestBody());
 		} catch (\GuzzleHttp\Exception\ClientException $e) {
-			$this->log($e->getCode() . ': ' . $e->getMessage());
-			throw new InvalidConfigException('Klarna is expecting other values, make sure you\'ve added taxes as described in the documentation for the Klarna Checkout Plugin, and that you\'ve correctly set the Site Base URL. Klarna Response: '.$e->getMessage());
+			$this->log($e->getCode() . ': ' . $e->getResponse()->getBody()->getContents());
+            throw new InvalidConfigException('Error from Klarna. See log for more info');
 		}
 		$order = new KlarnaOrder($response);
 
@@ -228,10 +198,22 @@ class KlarnaHPP extends BaseGateway
 
 		$order->getOrderId() ? $transaction->status = 'redirect' : $transaction->status = 'failed';
 
-		if($response->isSuccessful()) $this->log('Authorized order '.$transaction->order->number.' ('.$transaction->order->id.')');
-		else $this->log('Failed to Authorize order '.$transaction->order->id.'. Klarna responded with '.$response->getCode().': '.$response->getMessage());
-
-		return $response;
+		if(!$response->isSuccessful()) {
+		    $this->log('Failed to Authorize order '.$transaction->order->id.'. Klarna responded with '.$response->getCode().': '.$response->getMessage());
+            return null;
+		}
+        else {
+            $this->log('Authorized order '.$transaction->order->number.' ('.$transaction->order->id.')');
+            //echo json_encode($form->getSessionRequestBody($response->getPaymentSessionUrl()));
+            //die();
+            try {
+                $session = $this->getKlarnaHppSessionResponse('POST', '/hpp/v1/sessions', $form->getSessionRequestBody($response->getPaymentSessionUrl()));
+            } catch (\GuzzleHttp\Exception\ClientException $e) {
+                $this->log($e->getCode() . ': ' . $e->getResponse()->getBody()->getContents());
+                throw new InvalidConfigException('Error from Klarna. See log for more info');
+            }
+            return $session;
+        }
 	}
 
 	/**
