@@ -150,13 +150,13 @@ class KlarnaPaymentForm extends BasePaymentForm
 			'push' => $this->getStoreUrl().$transaction->order->gateway->push.'?number='.$transaction->order->number
 		];
 		$this->merchant_session_urls = [
-		    'back' => $this->getStoreUrl().'back&hppId={{session_id}}',
-            'cancel' => $this->getStoreUrl().'cancel&hppId={{session_id}}',
-            'error' => $this->getStoreUrl().'error&hppId={{session_id}}',
-            'failure' => $this->getStoreUrl().'failure&hppId={{session_id}}',
-            'privacy_policy' => $this->getStoreUrl().'privacy_policy',
-            'status_update' => $this->getStoreUrl().'status_update&hppId={{session_id}}',
-            'success' => $this->getStoreUrl().'success&hppId={{session_id}}&token={{authorization_token}}',
+		    'back' => $this->getStoreUrl().'back?hppId={{session_id}}',
+            'cancel' => $this->getStoreUrl().'cancel?hppId={{session_id}}',
+            'error' => $this->getStoreUrl().'error?hppId={{session_id}}',
+            'failure' => $this->getStoreUrl().'failure?hppId={{session_id}}',
+            'privacy_policy' => $this->getStoreUrl().'privacy_policy?hppId={{session_id}}',
+            'status_update' => $this->getStoreUrl().'status_update?hppId={{session_id}}',
+            'success' => $this->getStoreUrl().'success?hppId={{session_id}}&token={{authorization_token}}',
             'terms' => $this->getStoreUrl().$transaction->order->gateway->terms,
         ];
 	}
@@ -346,7 +346,6 @@ class KlarnaPaymentForm extends BasePaymentForm
                 'logo_url' => 'https://ellera.no/images/ellera_black_transp.png',
                 'page_title' => 'Complete your purchase',
                 'payment_fallback' => true,
-                'payment_method_categories' => 'pay_later',
                 'payment_method_category' => 'pay_later',
                 'purchase_type' => 'buy'
             ],

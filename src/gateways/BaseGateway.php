@@ -16,6 +16,7 @@ use craft\commerce\models\PaymentSource;
 use ellera\commerce\klarna\models\KlarnaOrderResponse;
 use ellera\commerce\klarna\models\KlarnaSessionResponse;
 use ellera\commerce\klarna\models\KlarnaHppSessionResponse;
+use Klarna\Rest\Transport\ConnectorInterface;
 use Throwable;
 use yii\base\InvalidConfigException;
 use yii\web\BadRequestHttpException;
@@ -169,6 +170,21 @@ class BaseGateway extends Gateway
             $this->test_mode !== '1' ? $this->api_eu_password : $this->api_eu_test_password,
             $body
         );
+    }
+
+    protected function getEndpoint()
+    {
+        return $this->test_mode !== '1' ? ConnectorInterface::EU_BASE_URL : ConnectorInterface::EU_TEST_BASE_URL;
+    }
+
+    protected function getClientId()
+    {
+        return $this->test_mode !== '1' ? $this->api_eu_uid : $this->api_eu_test_uid;
+    }
+
+    protected function getClientSecret()
+    {
+        return $this->test_mode !== '1' ? $this->api_eu_password : $this->api_eu_test_password;
     }
 
     /**

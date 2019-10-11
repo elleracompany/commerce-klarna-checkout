@@ -7,11 +7,11 @@ use craft\commerce\base\RequestResponseInterface;
 use craft\commerce\elements\Order;
 use craft\commerce\models\payments\BasePaymentForm;
 use craft\commerce\models\Transaction;
-use ellera\commerce\klarna\models\KlarnaHppSessionResponse;
-use ellera\commerce\klarna\models\KlarnaOrder;
-use ellera\commerce\klarna\models\KlarnaSessionResponse;
+use ellera\commerce\klarna\models\KlarnaHPPResponse;
 use ellera\commerce\klarna\models\KlarnaPaymentForm;
-use yii\base\InvalidConfigException;
+use Klarna\Rest\HostedPaymentPage\Sessions as HPPSession;
+use Klarna\Rest\Payments\Sessions;
+use Klarna\Rest\Transport\GuzzleConnector;
 use yii\web\BadRequestHttpException;
 
 /**
@@ -171,59 +171,42 @@ class KlarnaHPP extends BaseGateway
      * @param BasePaymentForm $form
      * @return RequestResponseInterface
      * @throws BadRequestHttpException
-     * @throws InvalidConfigException
-     * @throws \GuzzleHttp\Exception\GuzzleException
      * @throws \craft\errors\SiteNotFoundException
      * @throws \yii\base\ErrorException
+     * @throws \yii\base\InvalidConfigException
      */
 	public function authorize(Transaction $transaction, BasePaymentForm $form): RequestResponseInterface
 	{
-		if(!$form instanceof KlarnaPaymentForm) throw new BadRequestHttpException('Klarna authorize only accepts KlarnaPaymentForm');
-
+        /** @var $form KlarnaPaymentForm */
+        if(!$form instanceof KlarnaPaymentForm) throw new BadRequestHttpException('Klarna authorize only accepts KlarnaPaymentForm');
         $form->populate($transaction, $this);
 
-        /** @var KlarnaSessionResponse $response */
-		try {
-			$response = $this->getKlarnaSessionResponse('POST', '/payments/v1/sessions', $form->getSessionRequestBody());
-		} catch (\GuzzleHttp\Exception\ClientException $e) {
-			$this->log($e->getCode() . ': ' . $e->getResponse()->getBody()->getContents());
-            throw new InvalidConfigException('Error from Klarna. See log for more info');
-		}
+        $connector = GuzzleConnector::create(
+            $this->getClientId(),
+            $this->getClientSecret(),
+            $this->getEndpoint()
+        );
 
-		$order = new KlarnaOrder($response);
+        try {
+            $session = new Sessions($connector);
+            $session->create($form->getSessionRequestBody());
+        } catch (\Exception $e) {
+            $this->log($e->getCode() . ': ' . ($e instanceof \GuzzleHttp\Exception\ClientException ? $e->getResponse()->getBody()->getContents() : $e->getMessage()));
+            throw new \Exception('Session Error from Klarna. See log for more info');
+        }
 
-		$transaction->note = 'Created Klarna Order';
-		$transaction->response = $response->get();
-		$transaction->order->returnUrl = $transaction->gateway->push.'?number='.$transaction->order->number;
-		$transaction->order->cancelUrl = $transaction->gateway->checkout;
+        try {
+            $transaction->note = 'Created Klarna HPP';
+            $transaction->order->returnUrl = $transaction->gateway->push.'?number='.$transaction->order->number;
+            $transaction->order->cancelUrl = $transaction->gateway->checkout;
 
-		$order->getOrderId() ? $transaction->status = 'redirect' : $transaction->status = 'failed';
-
-		if(!$response->isSuccessful()) {
-		    $this->log('Failed to Authorize order '.$transaction->order->id.'. Klarna responded with '.$response->getCode().': '.$response->getMessage());
-            return null;
-		}
-        else {
-            try {
-                $session = $this->getKlarnaHppSessionResponse('POST', '/hpp/v1/sessions', $form->getHppSessionRequestBody($this->getPaymentSessionUrl($response)));
-            } catch (\GuzzleHttp\Exception\ClientException $e) {
-                $this->log($e->getCode() . ': ' . $e->getResponse()->getBody()->getContents());
-                throw new InvalidConfigException('Error from Klarna. See log for more info');
-            }
-            return $session;
+            $hpp = new HPPSession($connector);
+            return new KlarnaHPPResponse($transaction, $form, $session, $hpp);
+        } catch (\Exception $e) {
+            $this->log($e->getCode() . ': ' . ($e instanceof \GuzzleHttp\Exception\ClientException ? $e->getResponse()->getBody()->getContents() : $e->getMessage()));
+            throw new \Exception('HPP Error from Klarna. See log for more info');
         }
 	}
-
-    /**
-     * Get payment session URL
-     *
-     * @param KlarnaSessionResponse $response
-     * @return string
-     */
-	public function getPaymentSessionUrl(KlarnaSessionResponse $response)
-    {
-        return ($this->test_mode !== '1' ? $this->prod_url : $this->test_url).'/payments/v1/sessions/' . $response->getSessionId();
-    }
 
 	/**
 	 * @param Transaction $transaction
