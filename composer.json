@@ -27,8 +27,8 @@
   "require": {
     "ext-json": "*",
     "craftcms/cms": "^3.1.0",
-    "craftcms/commerce": "^2.0.0",
-    "guzzlehttp/guzzle": "~6.3.0",
+    "craftcms/commerce": "^2.2.0",
+    "guzzlehttp/guzzle": "^6.4.0",
     "klarna/kco_rest": "4.2.0"
   },
   "autoload": {
