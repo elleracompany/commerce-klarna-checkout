@@ -7,6 +7,8 @@ use craft\commerce\base\RequestResponseInterface;
 use craft\commerce\elements\Order;
 use craft\commerce\models\payments\BasePaymentForm;
 use craft\commerce\models\Transaction;
+use craft\fields\data\MultiOptionsFieldData;
+use craft\fields\data\OptionData;
 use ellera\commerce\klarna\models\KlarnaHPPResponse;
 use ellera\commerce\klarna\models\KlarnaPaymentForm;
 use Klarna\Rest\HostedPaymentPage\Sessions as HPPSession;
@@ -48,6 +50,26 @@ class KlarnaHPP extends BaseGateway
     public $background_images = '';
 
     /**
+     * Setting: Payment Methods
+     *
+     * @var MultiOptionsFieldData
+     */
+    public $methods;
+
+    /**
+     * Setting: Available Payment Methods
+     *
+     * @var array
+     */
+    public $available_methods = [
+        'DIRECT_DEBIT' => 'Direct Debit',
+        'DIRECT_BANK_TRANSFER' => 'Direct Bank Transfer',
+        'PAY_NOW' => 'Pay Now',
+        'PAY_LATER' => 'Pay Later',
+        'PAY_OVER_TIME' => 'Pay over time',
+    ];
+
+    /**
      * Setting: Logo URL
      *
      * @var string
@@ -82,6 +104,7 @@ class KlarnaHPP extends BaseGateway
      */
 
     public $error = 'shop/error';
+
     /**
      * Setting: Failure Page
      *
@@ -240,6 +263,18 @@ class KlarnaHPP extends BaseGateway
 
 		return $response;
 	}
+
+    public function getSettingsHtml()
+    {
+        if(!$this->methods) {
+            $this->methods = new MultiOptionsFieldData();
+            $options = [];
+            foreach ($this->available_methods as $handle => $nicename) $options[] = new OptionData($nicename, $handle, true);
+           
+            $this->methods->setOptions($options);
+        }
+        return parent::getSettingsHtml();
+    }
 
 	/**
 	 * @inheritdoc

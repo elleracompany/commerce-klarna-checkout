@@ -39,6 +39,33 @@
     instructions: 'Log debug messages' | t('klarna-checkout'),
     errors: gateway.getErrors('log_debug_messages')
 }) }}
+{% set field = craft.app.fields.getFieldByHandle('gateway.methods') %}
+
+{# Include a hidden input first so Craft knows to update the
+   existing value, if no options are selected. #}
+{{ hiddenInput('fields[gateway.methods]', '') }}
+
+<select multiple name="fields[gateway.methods][]">
+    {% for option in gateway.methods.options %}
+
+        {% set selected = entry is defined
+            ? gateway.methods.contains(option.value)
+            : true %}
+
+        <option value="{{ option.value }}"
+                {% if selected %}selected{% endif %}>
+            {{ option.label }}
+        </option>
+    {% endfor %}
+</select>
+
+{{ forms.lightswitchField({
+    label: gateway.getAttributeLabel('test_mode'),
+    name: 'test_mode',
+    on: gateway.test_mode,
+    instructions: 'Enable Test Mode' | t('klarna-checkout'),
+    errors: gateway.getErrors('test_mode')
+}) }}
 
 {{ forms.lightswitchField({
     label: gateway.getAttributeLabel('test_mode'),
@@ -73,19 +100,53 @@
     errors: gateway.getErrors('terms')
 }) }}
 {{ forms.textField({
-    label: gateway.getAttributeLabel('push'),
-    name: 'push',
-    value: gateway.push,
-    instructions: 'Order number is passed as parameter <code>number</code>' | t('klarna-checkout'),
-    errors: gateway.getErrors('push')
+    label: gateway.getAttributeLabel('back'),
+    name: 'back',
+    value: gateway.back,
+    instructions: 'Return page when the customer clicks "back" in HPP' | t('klarna-checkout'),
+    errors: gateway.getErrors('back')
 }) }}
 {{ forms.textField({
-    label: gateway.getAttributeLabel('checkout'),
-    name: 'checkout',
-    value: gateway.checkout,
-    errors: gateway.getErrors('checkout')
+    label: gateway.getAttributeLabel('cancel'),
+    name: 'cancel',
+    value: gateway.cancel,
+    instructions: 'Return page when the customer cancels the payment' | t('klarna-checkout'),
+    errors: gateway.getErrors('cancel')
 }) }}
-
+{{ forms.textField({
+    label: gateway.getAttributeLabel('error'),
+    name: 'error',
+    value: gateway.error,
+    instructions: 'Return page when the payment has an error' | t('klarna-checkout'),
+    errors: gateway.getErrors('error')
+}) }}
+{{ forms.textField({
+    label: gateway.getAttributeLabel('failure'),
+    name: 'failure',
+    value: gateway.failure,
+    instructions: 'Return page when the payment fails' | t('klarna-checkout'),
+    errors: gateway.getErrors('failure')
+}) }}
+{{ forms.textField({
+    label: gateway.getAttributeLabel('privacy'),
+    name: 'privacy',
+    value: gateway.privacy,
+    errors: gateway.getErrors('privacy')
+}) }}
+{{ forms.textField({
+    label: gateway.getAttributeLabel('status'),
+    name: 'status',
+    value: gateway.status,
+    instructions: 'Order status page (?)' | t('klarna-checkout'),
+    errors: gateway.getErrors('status')
+}) }}
+{{ forms.textField({
+    label: gateway.getAttributeLabel('success'),
+    name: 'success',
+    value: gateway.status,
+    instructions: 'Order success page' | t('klarna-checkout'),
+    errors: gateway.getErrors('success')
+}) }}
 <h2>API Credentials euope</h2>
 
 {{ forms.textField({
