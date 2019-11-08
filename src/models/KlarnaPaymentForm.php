@@ -169,7 +169,6 @@ class KlarnaPaymentForm extends BasePaymentForm
 	 */
 	public function getStoreUrl()
 	{
-	    return 'https://ellera.no/';
 		$siteUrl = UrlHelper::baseUrl();
 		if(!UrlHelper::isAbsoluteUrl($siteUrl))
 		{

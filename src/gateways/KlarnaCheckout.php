@@ -183,7 +183,7 @@ class KlarnaCheckout extends BaseGateway
 		//die(json_encode($form->getRequestBody()));
 		/** @var KlarnaOrderResponse $response */
 		try {
-			$response = $this->getKlarnaOrderResponse('POST', '/checkout/v3/orders', $form->getRequestBody());
+			$response = $this->getKlarnaOrderResponse('POST', '/checkout/v3/orders', $form->getOrderRequestBody());
 		} catch (\GuzzleHttp\Exception\ClientException $e) {
 			$this->log($e->getCode() . ': ' . $e->getMessage());
 			throw new InvalidConfigException('Klarna is expecting other values, make sure you\'ve added taxes as described in the documentation for the Klarna Checkout Plugin, and that you\'ve correctly set the Site Base URL. Klarna Response: '.$e->getMessage());
