@@ -33,13 +33,6 @@ class KlarnaCheckout extends BaseGateway
      */
     public $gateway_handle = 'klarna-checkout';
 
-    /**
-     * Setting: Logging
-     *
-     * @var bool
-     */
-    public $log_debug_messages = true;
-
 	/**
 	 * Setting: Title
 	 *
@@ -47,117 +40,19 @@ class KlarnaCheckout extends BaseGateway
 	 */
 	public $title = 'Klarna Checkout';
 
-	/**
-	 * Setting: Description
-	 *
-	 * @var string
-	 */
-	public $description = '';
+    /**
+     * Setting: Checkout Page
+     *
+     * @var string
+     */
+    public $checkout = 'shop/checkout';
 
-	/**
-	 * Setting: Mandatory DOB
-	 *
-	 * @var string
-	 */
-	public $mandatory_date_of_birth = false;
-
-	/**
-	 * Setting: Mandatory DOB
-	 *
-	 * @var string
-	 */
-	public $mandatory_national_identification_number = false;
-
-	/**
-	 * Setting: API User (Prod, EU)
-	 *
-	 * @var string
-	 */
-	public $api_eu_uid = '';
-
-	/**
-	 * Setting: API Password (Prod, EU)
-	 *
-	 * @var string
-	 */
-	public $api_eu_password = '';
-
-	/**
-	 * Setting:  API User (Test, EU)
-	 *
-	 * @var string
-	 */
-	public $api_eu_test_uid = '';
-
-	/**
-	 * Setting: API Password (Test, EU)
-	 *
-	 * @var string
-	 */
-	public $api_eu_test_password = '';
-
-	/**
-	 * Setting: Mandatory Title
-	 *
-	 * @var string
-	 */
-	public $api_eu_title_mandatory = false;
-
-	/**
-	 * Setting: Consent Notice
-	 *
-	 * @var string
-	 */
-	public $api_eu_consent_notice = false;
-
-	/**
-	 * Setting: API User (Prod, US)
-	 *
-	 * @var string
-	 */
-	public $api_us_uid = '';
-
-	/**
-	 * Setting: API Password (Prod, US)
-	 *
-	 * @var string
-	 */
-	public $api_us_password = '';
-
-	/**
-	 * Setting: API User (Test, US)
-	 *
-	 * @var string
-	 */
-	public $api_us_test_uid = '';
-
-	/**
-	 * Setting: API Password (Test, US)
-	 *
-	 * @var string
-	 */
-	public $api_us_test_password = '';
-
-	/**
-	 * Setting: Payment Type
-	 *
-	 * @var string [authorize, purchase]
-	 */
-	public $paymentType = 'authorize';
-
-	/**
-	 * Setting: Checkout Page
-	 *
-	 * @var string
-	 */
-	public $checkout = 'shop/checkout';
-
-	/**
-	 * Setting: Order Complete Page
-	 *
-	 * @var string
-	 */
-	public $push = 'shop/customer/order';
+    /**
+     * Setting: Order Complete Page
+     *
+     * @var string
+     */
+    public $push = 'shop/customer/order';
 
 	/**
 	 * @inheritdoc

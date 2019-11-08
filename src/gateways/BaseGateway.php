@@ -27,6 +27,13 @@ class BaseGateway extends Gateway
     // =========================================================================
 
     /**
+     * Setting: Logging
+     *
+     * @var bool
+     */
+    public $log_debug_messages = true;
+
+    /**
      * Setting: API User (Prod, EU)
      *
      * @var string
@@ -95,18 +102,32 @@ class BaseGateway extends Gateway
     protected $test_url = 'https://api.playground.klarna.com';
 
     /**
+     * Setting: Mandatory DOB
+     *
+     * @var string
+     */
+    public $mandatory_national_identification_number = false;
+
+    /**
+     * Setting: Mandatory Title
+     *
+     * @var string
+     */
+    public $api_eu_title_mandatory = false;
+
+    /**
+     * Setting: Consent Notice
+     *
+     * @var string
+     */
+    public $api_eu_consent_notice = false;
+
+    /**
      * Gateway handle
      *
      * @var bool|string
      */
     public $gateway_handle = false;
-
-    /**
-     * Setting: Logging
-     *
-     * @var bool
-     */
-    public $log_debug_messages = true;
 
     /**
      * Setting: Test Mode
@@ -115,13 +136,26 @@ class BaseGateway extends Gateway
      */
     public $test_mode = true;
 
-
     /**
-     * Setting: Send Product Urls
+     * Setting: Mandatory DOB
      *
      * @var string
      */
-    public $send_product_urls = true;
+    public $mandatory_date_of_birth = false;
+
+    /**
+     * Setting: Description
+     *
+     * @var string
+     */
+    public $description = '';
+
+    /**
+     * Setting: Payment Type
+     *
+     * @var string [authorize, purchase]
+     */
+    public $paymentType = 'authorize';
 
     /**
      * Setting: Terms Page
@@ -129,6 +163,13 @@ class BaseGateway extends Gateway
      * @var string
      */
     public $terms = 'shop/terms';
+
+    /**
+     * Setting: Send Product Urls
+     *
+     * @var string
+     */
+    public $send_product_urls = true;
 
     // Public Methods
     // =========================================================================

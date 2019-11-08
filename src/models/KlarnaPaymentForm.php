@@ -8,6 +8,7 @@ use craft\commerce\models\payments\BasePaymentForm;
 use craft\commerce\models\Transaction;
 use ellera\commerce\klarna\gateways\BaseGateway;
 use ellera\commerce\klarna\gateways\KlarnaCheckout;
+use ellera\commerce\klarna\gateways\KlarnaHPP;
 use yii\base\InvalidConfigException;
 use craft\helpers\UrlHelper;
 use craft\commerce\Plugin as Commerce;
@@ -102,15 +103,19 @@ class KlarnaPaymentForm extends BasePaymentForm
 	 *
 	 * @var array
 	 */
-	public $merchant_urls;
+	public $request_body;
 
     /**
-     * Merchant Session URLs
-     * Redirect URLs passed to Klarna HPP
-     *
+     * Merchant Urls
      * @var array
      */
-    public $merchant_session_urls;
+	public $merchant_urls = [];
+
+    /**
+     * HPP Session Request Body
+     * @var array
+     */
+    public $hpp_session_request_body = [];
 
 	/**
 	 * @param Transaction    $transaction
@@ -143,22 +148,47 @@ class KlarnaPaymentForm extends BasePaymentForm
 			'title_mandatory' => $gateway->api_eu_title_mandatory == '1',
 			'show_subtotal_detail' => true
 		];
-		$this->merchant_urls = [
-			'terms' => $this->getStoreUrl().$transaction->order->gateway->terms,
-			'confirmation' => $this->getStoreUrl().'actions/commerce-klarna-checkout/klarna/confirmation?hash='.$transaction->hash,
-			'checkout' => $this->getStoreUrl().$transaction->order->gateway->checkout,
-			'push' => $this->getStoreUrl().$transaction->order->gateway->push.'?number='.$transaction->order->number
-		];
-		$this->merchant_session_urls = [
-		    'back' => $this->getStoreUrl().'back?hppId={{session_id}}',
-            'cancel' => $this->getStoreUrl().'cancel?hppId={{session_id}}',
-            'error' => $this->getStoreUrl().'error?hppId={{session_id}}',
-            'failure' => $this->getStoreUrl().'failure?hppId={{session_id}}',
-            'privacy_policy' => $this->getStoreUrl().'privacy_policy?hppId={{session_id}}',
-            'status_update' => $this->getStoreUrl().'status_update?hppId={{session_id}}',
-            'success' => $this->getStoreUrl().'success?hppId={{session_id}}&token={{authorization_token}}',
-            'terms' => $this->getStoreUrl().$transaction->order->gateway->terms,
-        ];
+
+		if($gateway instanceof KlarnaCheckout)
+        {
+            /** @var $gateway KlarnaCheckout */
+            $this->merchant_urls = [
+                'terms' => $this->getStoreUrl().$gateway->terms,
+                'confirmation' => $this->getStoreUrl().'actions/commerce-klarna-checkout/klarna/confirmation?hash='.$transaction->hash,
+                'checkout' => $this->getStoreUrl().$gateway->checkout,
+                'push' => $this->getStoreUrl().$gateway->push.'?number='.$transaction->order->number
+            ];
+        }
+		elseif($gateway instanceof KlarnaHPP)
+        {
+            /** @var $gateway KlarnaHPP */
+            $this->hpp_session_request_body = [
+                'merchant_urls' => [
+                    'back' => $this->getStoreUrl().'back?hppId={{session_id}}',
+                    'cancel' => $this->getStoreUrl().'cancel?hppId={{session_id}}',
+                    'error' => $this->getStoreUrl().'error?hppId={{session_id}}',
+                    'failure' => $this->getStoreUrl().'failure?hppId={{session_id}}',
+                    'privacy_policy' => $this->getStoreUrl().'privacy_policy?hppId={{session_id}}',
+                    'status_update' => $this->getStoreUrl().'status_update?hppId={{session_id}}',
+                    'success' => $this->getStoreUrl().'success?hppId={{session_id}}&token={{authorization_token}}',
+                    'terms' => $this->getStoreUrl().$gateway->terms,
+                ],
+                'options' => [
+                    'background_images' => [
+                        [
+                            'url' => 'https://ellera.no/images/mustbereplaced-main.jpg',
+                            'width' => 1440
+                        ]
+                    ],
+                    'logo_url' => 'https://ellera.no/images/ellera_black_transp.png',
+                    'page_title' => 'Complete your purchase',
+                    'payment_fallback' => true,
+                    'payment_method_category' => 'pay_later',
+                    'purchase_type' => 'buy'
+                ],
+                'payment_session_url' => null
+            ];
+        }
 	}
 
 	/**
@@ -333,24 +363,7 @@ class KlarnaPaymentForm extends BasePaymentForm
 
     public function getHppSessionRequestBody(string $url) : array
     {
-        $body = [
-            'merchant_urls' => $this->merchant_session_urls,
-            'options' => [
-                'background_images' => [
-                    [
-                        'url' => 'https://ellera.no/images/mustbereplaced-main.jpg',
-                        'width' => 1440
-                    ]
-                ],
-                'logo_url' => 'https://ellera.no/images/ellera_black_transp.png',
-                'page_title' => 'Complete your purchase',
-                'payment_fallback' => true,
-                'payment_method_category' => 'pay_later',
-                'purchase_type' => 'buy'
-            ],
-            'payment_session_url' => $url
-        ];
-
-        return $body;
+        $this->hpp_session_request_body['payment_session_url'] = $url;
+        return $this->hpp_session_request_body;
     }
 }

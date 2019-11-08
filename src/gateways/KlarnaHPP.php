@@ -32,13 +32,6 @@ class KlarnaHPP extends BaseGateway
      */
     public $gateway_handle = 'klarna-hpp';
 
-    /**
-     * Setting: Logging
-     *
-     * @var bool
-     */
-    public $log_debug_messages = true;
-
 	/**
 	 * Setting: Title
 	 *
@@ -46,117 +39,76 @@ class KlarnaHPP extends BaseGateway
 	 */
 	public $title = 'Klarna Hosted Payment Page';
 
-	/**
-	 * Setting: Description
-	 *
-	 * @var string
-	 */
-	public $description = '';
 
-	/**
-	 * Setting: Mandatory DOB
-	 *
-	 * @var string
-	 */
-	public $mandatory_date_of_birth = false;
+    /**
+     * Setting: Background Image
+     *
+     * @var array
+     */
+    public $background_images = '';
 
-	/**
-	 * Setting: Mandatory DOB
-	 *
-	 * @var string
-	 */
-	public $mandatory_national_identification_number = false;
+    /**
+     * Setting: Logo URL
+     *
+     * @var string
+     */
+    public $logo_url = '';
 
-	/**
-	 * Setting: API User (Prod, EU)
-	 *
-	 * @var string
-	 */
-	public $api_eu_uid = '';
+    /**
+     * Setting: Background Image Width
+     *
+     * @var integer
+     */
+    public $background_image_width = null;
 
-	/**
-	 * Setting: API Password (Prod, EU)
-	 *
-	 * @var string
-	 */
-	public $api_eu_password = '';
+    /**
+     * Setting: Back Page
+     *
+     * @var string
+     */
+    public $back = 'shop';
 
-	/**
-	 * Setting:  API User (Test, EU)
-	 *
-	 * @var string
-	 */
-	public $api_eu_test_uid = '';
+    /**
+     * Setting: Cancel Page
+     *
+     * @var string
+     */
+    public $cancel = 'shop/cancelled';
 
-	/**
-	 * Setting: API Password (Test, EU)
-	 *
-	 * @var string
-	 */
-	public $api_eu_test_password = '';
+    /**
+     * Setting: Error Page
+     *
+     * @var string
+     */
 
-	/**
-	 * Setting: Mandatory Title
-	 *
-	 * @var string
-	 */
-	public $api_eu_title_mandatory = false;
+    public $error = 'shop/error';
+    /**
+     * Setting: Failure Page
+     *
+     * @var string
+     */
+    public $failure = 'shop/failure';
 
-	/**
-	 * Setting: Consent Notice
-	 *
-	 * @var string
-	 */
-	public $api_eu_consent_notice = false;
+    /**
+     * Setting: Privacy policy Page
+     *
+     * @var string
+     */
+    public $privacy = 'shop/privacy';
 
-	/**
-	 * Setting: API User (Prod, US)
-	 *
-	 * @var string
-	 */
-	public $api_us_uid = '';
+    /**
+     * Setting: Status Update Page
+     *
+     * @var string
+     */
+    public $status = 'shop/status';
 
-	/**
-	 * Setting: API Password (Prod, US)
-	 *
-	 * @var string
-	 */
-	public $api_us_password = '';
-
-	/**
-	 * Setting: API User (Test, US)
-	 *
-	 * @var string
-	 */
-	public $api_us_test_uid = '';
-
-	/**
-	 * Setting: API Password (Test, US)
-	 *
-	 * @var string
-	 */
-	public $api_us_test_password = '';
-
-	/**
-	 * Setting: Payment Type
-	 *
-	 * @var string [authorize, purchase]
-	 */
-	public $paymentType = 'authorize';
-
-	/**
-	 * Setting: Checkout Page
-	 *
-	 * @var string
-	 */
-	public $checkout = 'shop/checkout';
-
-	/**
-	 * Setting: Order Complete Page
-	 *
-	 * @var string
-	 */
-	public $push = 'shop/customer/order';
+    /**
+     * Setting: Success Page
+     *
+     * @var string
+     */
+    public $success = 'shop/success';
 
 	/**
 	 * @inheritdoc
