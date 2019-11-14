@@ -172,8 +172,8 @@ class KlarnaHPP extends BaseGateway
 
         try {
             $transaction->note = 'Created Klarna HPP';
-            $transaction->order->returnUrl = $transaction->gateway->push.'?number='.$transaction->order->number;
-            $transaction->order->cancelUrl = $transaction->gateway->checkout;
+            $transaction->order->returnUrl = $transaction->gateway->success.'?number='.$transaction->order->number;
+            $transaction->order->cancelUrl = $transaction->gateway->cancel;
 
             $hpp = new HPPSession($connector);
             return new KlarnaHPPResponse($transaction, $form, $session, $hpp);
@@ -274,6 +274,11 @@ class KlarnaHPP extends BaseGateway
             $this->methods->setOptions($options);
         }
         return parent::getSettingsHtml();
+    }
+
+    public function getAvailablePaymentMethods()
+    {
+        return $this->available_methods;
     }
 
 	/**
@@ -377,9 +382,13 @@ class KlarnaHPP extends BaseGateway
 					'api_us_password',
 					'api_us_test_uid',
 					'api_us_test_password',
-					'checkout',
-					'push',
-					'terms'
+					'error',
+					'failure',
+					'privacy',
+                    'terms',
+                    'error',
+                    'cancel',
+                    'back'
 				],
 				'string'
 			],
@@ -423,8 +432,7 @@ class KlarnaHPP extends BaseGateway
 			'mandatory_national_identification_number' => 'Mandatory National Identification Number',
 			'api_eu_title_mandatory' => 'Title mandatory (GB)',
 			'api_eu_consent_notice' => 'Show prefill consent notice',
-			'checkout' => 'Checkout Page',
-			'push' => 'Order Complete Page',
+			'methods' => 'Payment Methods',
 			'terms' => 'Store Terms Page'
 		];
 	}

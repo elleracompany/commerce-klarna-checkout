@@ -39,25 +39,18 @@
     instructions: 'Log debug messages' | t('klarna-checkout'),
     errors: gateway.getErrors('log_debug_messages')
 }) }}
-{% set field = craft.app.fields.getFieldByHandle('gateway.methods') %}
 
-{# Include a hidden input first so Craft knows to update the
-   existing value, if no options are selected. #}
-{{ hiddenInput('fields[gateway.methods]', '') }}
-
-<select multiple name="fields[gateway.methods][]">
-    {% for option in gateway.methods.options %}
-
-        {% set selected = entry is defined
-            ? gateway.methods.contains(option.value)
-            : true %}
-
-        <option value="{{ option.value }}"
-                {% if selected %}selected{% endif %}>
-            {{ option.label }}
-        </option>
-    {% endfor %}
-</select>
+<div>
+    {{ forms.checkboxSelectField({
+        label: gateway.getAttributeLabel('methods'),
+        instructions: "Select what payment methods you customer are offered"|t('klarna-checkout'),
+        name: 'methods',
+        options: gateway.getAvailablePaymentMethods(),
+        values: gateway.methods,
+        warning: false,
+        errors: gateway.getErrors("methods"),
+    }) }}
+</div>
 
 {{ forms.lightswitchField({
     label: gateway.getAttributeLabel('test_mode'),
