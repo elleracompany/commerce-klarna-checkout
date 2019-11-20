@@ -60,7 +60,7 @@ class KlarnaHPPResponse implements RequestResponseInterface
      */
     protected $transaction;
 
-    public function __construct(Transaction $transaction, KlarnaPaymentForm $form, Sessions $session, HPPSession $hpp)
+    public function __construct(Transaction $transaction, KlarnaBasePaymentForm $form, Sessions $session, HPPSession $hpp)
     {
         $this->hpp_session = $hpp;
         $this->session = $session;

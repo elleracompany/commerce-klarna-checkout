@@ -371,12 +371,13 @@ class BaseGateway extends Gateway
 
     /**
      * @param Transaction $transaction
-     * @return KlarnaResponse
+     * @return KlarnaOrderResponse
+     * @throws BadRequestHttpException
      * @throws \GuzzleHttp\Exception\GuzzleException
      * @throws \craft\commerce\errors\TransactionException
      * @throws \yii\base\ErrorException
      */
-    protected function captureKlarnaOrder(Transaction $transaction) : KlarnaResponse
+    protected function captureKlarnaOrder(Transaction $transaction) : KlarnaOrderResponse
     {
         $plugin = \craft\commerce\Plugin::getInstance();
         $body = [

@@ -8,9 +8,10 @@ use craft\commerce\base\RequestResponseInterface;
 use craft\commerce\elements\Order;
 use craft\commerce\models\payments\BasePaymentForm;
 use craft\commerce\models\Transaction;
+use ellera\commerce\klarna\models\KlarnaCheckoutPaymentForm;
 use ellera\commerce\klarna\models\KlarnaOrder;
 use ellera\commerce\klarna\models\KlarnaOrderResponse;
-use ellera\commerce\klarna\models\KlarnaPaymentForm;
+use ellera\commerce\klarna\models\KlarnaBasePaymentForm;
 use ellera\commerce\klarna\models\KlarnaResponse;
 use yii\base\InvalidConfigException;
 use yii\web\BadRequestHttpException;
@@ -74,7 +75,7 @@ class KlarnaCheckout extends BaseGateway
 	 */
 	public function authorize(Transaction $transaction, BasePaymentForm $form): RequestResponseInterface
 	{
-		if(!$form instanceof KlarnaPaymentForm) throw new BadRequestHttpException('Klarna authorize only accepts KlarnaPaymentForm');
+		if(!$form instanceof KlarnaBasePaymentForm) throw new BadRequestHttpException('Klarna authorize only accepts KlarnaPaymentForm');
 		//die(json_encode($form->getRequestBody()));
 		/** @var KlarnaOrderResponse $response */
 		try {
@@ -134,7 +135,7 @@ class KlarnaCheckout extends BaseGateway
 	 */
 	public function getPaymentFormModel(): BasePaymentForm
 	{
-		return new KlarnaPaymentForm();
+		return new KlarnaBasePaymentForm();
 	}
 
 	/**
@@ -288,7 +289,7 @@ class KlarnaCheckout extends BaseGateway
 
 		$transaction = $commerce->getTransactions()->createTransaction($cart, null, 'authorize');
 
-		$form = new KlarnaPaymentForm();
+		$form = new KlarnaCheckoutPaymentForm();
 		$form->populate($transaction, $this);
 
 		/** @var $response KlarnaOrderResponse */
@@ -401,124 +402,3 @@ class KlarnaCheckout extends BaseGateway
 		];
 	}
 }
-
-/*
-
-{
-    "acquiring_channel": "in_store",
-    "attachment": {
-        "body": "{\"marketplace_seller_info\":[{\"product_category\":\"Women's Fashion\",\"product_name\":\"Women Sweatshirt\"}]}",
-        "content_type": "application/vnd.klarna.internal.emd-v2+json"
-    },
-    "authorization_token": "string",
-    "billing_address": {
-        "attention": "string",
-        "city": "Beverly Hills",
-        "country": "US",
-        "email": "john@doe.com",
-        "family_name": "Doe",
-        "given_name": "John",
-        "organization_name": "string",
-        "phone": "333444555",
-        "postal_code": "90210",
-        "region": "CA",
-        "street_address": "Lombard St 10",
-        "street_address2": "Apt 214",
-        "title": "Mr"
-    },
-    "client_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.ewogICJzZXNzaW9uX2lkIiA6ICIw",
-    "custom_payment_method_ids": [
-        "string"
-    ],
-    "customer": {
-        "date_of_birth": "string",
-        "gender": "string",
-        "last_four_ssn": "string",
-        "national_identification_number": "string",
-        "organization_entity_type": "LIMITED_COMPANY",
-        "organization_registration_id": "string",
-        "title": "string",
-        "type": "string",
-        "vat_id": "string"
-    },
-    "design": "string",
-    "expires_at": "2038-01-19T03:14:07.000Z",
-    "locale": "en-US",
-    "merchant_data": "{\"order_speicif\":[{\"substore\":\"Women's Fashion\",\"product_name\":\"Women Sweatshirt\"}]}",
-    "merchant_reference1": "45aa52f387871e3a210645d4",
-    "merchant_reference2": "45aa52f387871e3a210645d4",
-    "merchant_urls": {
-        "confirmation": "string",
-        "notification": "string",
-        "push": "string"
-    },
-    "options": {
-        "color_border": "#FF9900",
-        "color_border_selected": "#FF9900",
-        "color_button": "#FF9900",
-        "color_button_text": "#FF9900",
-        "color_checkbox": "#FF9900",
-        "color_checkbox_checkmark": "#FF9900",
-        "color_details": "#FF9900",
-        "color_header": "#FF9900",
-        "color_link": "#FF9900",
-        "color_text": "#FF9900",
-        "color_text_secondary": "#FF9900",
-        "radius_border": "5px"
-    },
-    "order_amount": 0,
-    "order_lines": [
-        {
-            "image_url": "https://www.exampleobjects.com/logo.png",
-            "merchant_data": "{\"marketplace_seller_info\":[{\"product_category\":\"Women's Fashion\",\"product_name\":\"Women Sweatshirt\"}]}",
-            "name": "Battery Power Pack",
-            "product_identifiers": {
-                "brand": "Intel",
-                "category_path": "Electronics Store > Computers & Tablets > Desktops",
-                "global_trade_item_number": "735858293167",
-                "manufacturer_part_number": "BOXNUC5CPYH"
-            },
-            "product_url": "https://www.estore.com/products/f2a8d7e34",
-            "quantity": 0,
-            "quantity_unit": "kg",
-            "reference": "19-402-USA",
-            "tax_rate": 0,
-            "total_amount": 0,
-            "total_discount_amount": 0,
-            "total_tax_amount": 0,
-            "type": "physical",
-            "unit_price": 0
-        }
-    ],
-    "order_tax_amount": 0,
-    "payment_method_categories": [
-        {
-            "asset_urls": {
-                "descriptive": "https://x.klarnacdn.net/payment-method/assets/badges/generic/klarna.svg",
-                "standard": "https://x.klarnacdn.net/payment-method/assets/badges/generic/klarna.svg"
-            },
-            "identifier": "pay_later",
-            "name": "Pay Later"
-        }
-    ],
-    "purchase_country": "US",
-    "purchase_currency": "USD",
-    "shipping_address": {
-        "attention": "string",
-        "city": "Beverly Hills",
-        "country": "US",
-        "email": "john@doe.com",
-        "family_name": "Doe",
-        "given_name": "John",
-        "organization_name": "string",
-        "phone": "333444555",
-        "postal_code": "90210",
-        "region": "CA",
-        "street_address": "Lombard St 10",
-        "street_address2": "Apt 214",
-        "title": "Mr"
-    },
-    "status": "complete"
-}
-
- */

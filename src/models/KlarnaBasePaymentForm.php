@@ -4,6 +4,7 @@ namespace ellera\commerce\klarna\models;
 
 use Craft;
 use craft\commerce\elements\Order;
+use craft\commerce\models\Country;
 use craft\commerce\models\payments\BasePaymentForm;
 use craft\commerce\models\Transaction;
 use ellera\commerce\klarna\gateways\BaseGateway;
@@ -14,7 +15,7 @@ use craft\helpers\UrlHelper;
 use craft\commerce\Plugin as Commerce;
 use craft\commerce\models\Address;
 
-class KlarnaPaymentForm extends BasePaymentForm
+class KlarnaBasePaymentForm extends BasePaymentForm
 {
 	/**
 	 * Country Short Code
@@ -98,8 +99,7 @@ class KlarnaPaymentForm extends BasePaymentForm
 	public $options;
 
 	/**
-	 * Merchant URLs
-	 * Redirect URLs passed to Klarna
+	 * Request Body
 	 *
 	 * @var array
 	 */
@@ -112,22 +112,29 @@ class KlarnaPaymentForm extends BasePaymentForm
 	public $merchant_urls = [];
 
     /**
-     * HPP Session Request Body
-     * @var array
+     * Craft Commerce Object
+     *
+     * @var Commerce
      */
-    public $hpp_session_request_body = [];
+    public $commerce;
+
+    /**
+     * Craft Commerce Country
+     *
+     * @var Country
+     */
+    public $country;
 
 	/**
 	 * @param Transaction    $transaction
 	 * @param BaseGateway $gateway
 	 *
 	 * @throws InvalidConfigException
-	 * @throws \craft\errors\SiteNotFoundException
 	 */
 	public function populate(Transaction $transaction, BaseGateway $gateway) : void
 	{
-		$commerce = Commerce::getInstance();
-		$country = $commerce->getAddresses()->getStoreLocationAddress()->getCountry();
+		$this->commerce = Commerce::getInstance();
+		$country = $this->commerce->getAddresses()->getStoreLocationAddress()->getCountry();
 		if(!isset($country->iso) || $country->iso == null) throw new InvalidConfigException('Klarna requires Store Location Country to be set. Please visit Commerce -> Store Settings -> Store Location and update the information.');
 
 		if(Craft::$app->plugins->getPlugin('commerce')->is(Commerce::EDITION_LITE)) $order_lines = $this->getOrderLinesLite($transaction->order, $gateway);
@@ -148,47 +155,6 @@ class KlarnaPaymentForm extends BasePaymentForm
 			'title_mandatory' => $gateway->api_eu_title_mandatory == '1',
 			'show_subtotal_detail' => true
 		];
-
-		if($gateway instanceof KlarnaCheckout)
-        {
-            /** @var $gateway KlarnaCheckout */
-            $this->merchant_urls = [
-                'terms' => $this->getStoreUrl().$gateway->terms,
-                'confirmation' => $this->getStoreUrl().'actions/commerce-klarna-checkout/klarna/confirmation?hash='.$transaction->hash,
-                'checkout' => $this->getStoreUrl().$gateway->checkout,
-                'push' => $this->getStoreUrl().$gateway->push.'?number='.$transaction->order->number
-            ];
-        }
-		elseif($gateway instanceof KlarnaHPP)
-        {
-            /** @var $gateway KlarnaHPP */
-            $this->hpp_session_request_body = [
-                'merchant_urls' => [
-                    'back' => $this->getStoreUrl().'back?hppId={{session_id}}',
-                    'cancel' => $this->getStoreUrl().'cancel?hppId={{session_id}}',
-                    'error' => $this->getStoreUrl().'error?hppId={{session_id}}',
-                    'failure' => $this->getStoreUrl().'failure?hppId={{session_id}}',
-                    'privacy_policy' => $this->getStoreUrl().'privacy_policy?hppId={{session_id}}',
-                    'status_update' => $this->getStoreUrl().'status_update?hppId={{session_id}}',
-                    'success' => $this->getStoreUrl().'success?hppId={{session_id}}&token={{authorization_token}}',
-                    'terms' => $this->getStoreUrl().$gateway->terms,
-                ],
-                'options' => [
-                    'background_images' => [
-                        [
-                            'url' => 'https://ellera.no/images/mustbereplaced-main.jpg',
-                            'width' => 1440
-                        ]
-                    ],
-                    'logo_url' => 'https://ellera.no/images/ellera_black_transp.png',
-                    'page_title' => 'Complete your purchase',
-                    'payment_fallback' => true,
-                    'payment_method_category' => 'pay_later',
-                    'purchase_type' => 'buy'
-                ],
-                'payment_session_url' => null
-            ];
-        }
 	}
 
 	/**
@@ -241,7 +207,6 @@ class KlarnaPaymentForm extends BasePaymentForm
 
 	private function getOrderLinesLite(Order $order, KlarnaCheckout $gateway)
 	{
-		$line_tax = 0;
 		$tax_included = false;
 		$shipping = 0;
 		$order_lines = [];
@@ -303,67 +268,6 @@ class KlarnaPaymentForm extends BasePaymentForm
 
 	public function getOrderRequestBody() : array
 	{
-		$body = [
-			'purchase_country' => $this->purchase_country,
-			'purchase_currency' => $this->purchase_currency,
-			'locale' => $this->locale,
-			'order_amount' => $this->order_amount,
-			'order_tax_amount' => $this->order_tax_amount,
-			'order_lines' => [],
-			'merchant_reference1' => $this->merchant_reference1,
-			'merchant_reference2' => $this->merchant_reference2,
-			'options' => $this->options,
-			'merchant_urls' => $this->merchant_urls
-		];
-
-		if($this->billing_address) $body['billing_address'] = $this->billing_address;
-		if($this->shipping_address) $body['shipping_address'] = $this->shipping_address;
-
-		foreach ($this->order_lines as $order_line) $body['order_lines'][] = [
-			'name' => $order_line->name,
-			'quantity' => $order_line->quantity,
-			'unit_price' => $order_line->unit_price,
-			'tax_rate' => $order_line->tax_rate,
-			'total_amount' => $order_line->total_amount,
-			'total_tax_amount' => $order_line->total_tax_amount,
-		];
-
-		return $body;
+        return $this->request_body;
 	}
-
-    public function getSessionRequestBody() : array
-    {
-        $body = [
-            'purchase_country' => $this->purchase_country,
-            'purchase_currency' => $this->purchase_currency,
-            'locale' => $this->locale,
-            'order_amount' => $this->order_amount,
-            'order_tax_amount' => $this->order_tax_amount,
-            'order_lines' => [],
-            'merchant_reference1' => $this->merchant_reference1,
-            'merchant_reference2' => $this->merchant_reference2,
-            'options' => $this->options,
-            'merchant_urls' => $this->merchant_urls
-        ];
-
-        if($this->billing_address) $body['billing_address'] = $this->billing_address;
-        if($this->shipping_address) $body['shipping_address'] = $this->shipping_address;
-
-        foreach ($this->order_lines as $order_line) $body['order_lines'][] = [
-            'name' => $order_line->name,
-            'quantity' => $order_line->quantity,
-            'unit_price' => $order_line->unit_price,
-            'tax_rate' => $order_line->tax_rate,
-            'total_amount' => $order_line->total_amount,
-            'total_tax_amount' => $order_line->total_tax_amount,
-        ];
-
-        return $body;
-    }
-
-    public function getHppSessionRequestBody(string $url) : array
-    {
-        $this->hpp_session_request_body['payment_session_url'] = $url;
-        return $this->hpp_session_request_body;
-    }
 }

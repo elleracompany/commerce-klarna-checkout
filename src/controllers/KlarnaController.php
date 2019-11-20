@@ -6,7 +6,7 @@ use Craft;
 use craft\commerce\controllers\BaseFrontEndController;
 use craft\commerce\Plugin;
 use ellera\commerce\klarna\gateways\KlarnaCheckout;
-use ellera\commerce\klarna\models\KlarnaPaymentForm;
+use ellera\commerce\klarna\models\KlarnaBasePaymentForm;
 use yii\web\BadRequestHttpException;
 
 /**
@@ -78,7 +78,7 @@ class KlarnaController extends BaseFrontEndController
 			// Get the gateway's payment form
 			$paymentForm = $gateway->getPaymentFormModel();
 
-			if(!$paymentForm instanceof KlarnaPaymentForm) throw new BadRequestHttpException('Klarna authorize only accepts KlarnaPaymentForm');
+			if(!$paymentForm instanceof KlarnaBasePaymentForm) throw new BadRequestHttpException('Klarna authorize only accepts KlarnaPaymentForm');
 			$paymentForm->populate($transaction, $gateway);
 			$gateway->purchase($transaction, $paymentForm);
 		}

@@ -10,7 +10,7 @@ use craft\commerce\models\Transaction;
 use craft\fields\data\MultiOptionsFieldData;
 use craft\fields\data\OptionData;
 use ellera\commerce\klarna\models\KlarnaHPPResponse;
-use ellera\commerce\klarna\models\KlarnaPaymentForm;
+use ellera\commerce\klarna\models\KlarnaBasePaymentForm;
 use Klarna\Rest\HostedPaymentPage\Sessions as HPPSession;
 use Klarna\Rest\Payments\Sessions;
 use Klarna\Rest\Transport\GuzzleConnector;
@@ -152,8 +152,8 @@ class KlarnaHPP extends BaseGateway
      */
 	public function authorize(Transaction $transaction, BasePaymentForm $form): RequestResponseInterface
 	{
-        /** @var $form KlarnaPaymentForm */
-        if(!$form instanceof KlarnaPaymentForm) throw new BadRequestHttpException('Klarna authorize only accepts KlarnaPaymentForm');
+        /** @var $form KlarnaBasePaymentForm */
+        if(!$form instanceof KlarnaBasePaymentForm) throw new BadRequestHttpException('Klarna authorize only accepts KlarnaPaymentForm');
         $form->populate($transaction, $this);
 
         $connector = GuzzleConnector::create(
@@ -163,6 +163,7 @@ class KlarnaHPP extends BaseGateway
         );
 
         try {
+            die(json_encode($form->getSessionRequestBody()));
             $session = new Sessions($connector);
             $session->create($form->getSessionRequestBody());
         } catch (\Exception $e) {
@@ -219,7 +220,7 @@ class KlarnaHPP extends BaseGateway
 	 */
 	public function getPaymentFormModel(): BasePaymentForm
 	{
-		return new KlarnaPaymentForm();
+		return new KlarnaBasePaymentForm();
 	}
 
 	/**
