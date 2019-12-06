@@ -96,7 +96,7 @@
     label: gateway.getAttributeLabel('back'),
     name: 'back',
     value: gateway.back,
-    instructions: 'Return page when the customer clicks "back" in HPP' | t('klarna-checkout'),
+    instructions: 'Return page when the customer clicks "Go Back" in HPP' | t('klarna-checkout'),
     errors: gateway.getErrors('back')
 }) }}
 {{ forms.textField({
@@ -137,7 +137,7 @@
     label: gateway.getAttributeLabel('success'),
     name: 'success',
     value: gateway.status,
-    instructions: 'Order success page' | t('klarna-checkout'),
+    instructions: 'Order success page. Passes order number as parameter \'number\'' | t('klarna-checkout'),
     errors: gateway.getErrors('success')
 }) }}
 <h2>API Credentials Europe</h2>

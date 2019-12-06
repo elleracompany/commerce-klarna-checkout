@@ -207,6 +207,7 @@ class KlarnaBasePaymentForm extends BasePaymentForm
 
 	private function getOrderLinesLite(Order $order, KlarnaCheckout $gateway)
 	{
+		$line_tax = 0;
 		$tax_included = false;
 		$shipping = 0;
 		$order_lines = [];
