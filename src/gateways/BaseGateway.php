@@ -297,7 +297,7 @@ class BaseGateway extends Gateway
     public function updateOrder(Order $order)
     {
         try {
-            $response = $this->getKlarnaOrderResponse('GET', '/checkout/v3/orders/' . $order->getLastTransaction()->reference);
+            $response = $this->getKlarnaOrderResponse('GET', '/ordermanagement/v1/orders/' . $order->getLastTransaction()->reference);
         } catch (\GuzzleHttp\Exception\ClientException $e) {
             $this->log($e->getCode() . ': ' . $e->getMessage());
             throw new InvalidConfigException('Klarna responded with an error: '.$e->getMessage());

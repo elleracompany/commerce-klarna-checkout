@@ -5,9 +5,12 @@ namespace ellera\commerce\klarna\controllers;
 use Craft;
 use craft\commerce\controllers\BaseFrontEndController;
 use craft\commerce\Plugin;
+use ellera\commerce\klarna\gateways\BaseGateway;
 use ellera\commerce\klarna\gateways\KlarnaCheckout;
+use ellera\commerce\klarna\gateways\KlarnaHPP;
 use ellera\commerce\klarna\models\KlarnaBasePaymentForm;
 use yii\web\BadRequestHttpException;
+use yii\web\NotFoundHttpException;
 
 /**
  * Class Checkout Controller
@@ -19,20 +22,21 @@ class KlarnaController extends BaseFrontEndController
 {
 	protected $allowAnonymous = true;
 
-	/**
-	 * @param $hash
-	 *
-	 * @return \yii\web\Response
-	 * @throws BadRequestHttpException
-	 * @throws \GuzzleHttp\Exception\GuzzleException
-	 * @throws \Throwable
-	 * @throws \craft\commerce\errors\TransactionException
-	 * @throws \craft\errors\MissingComponentException
-	 * @throws \yii\base\Exception
-	 */
-	public function actionConfirmation($hash)
+    /**
+     * @param $hash
+     * @param null|string $hppId
+     *
+     * @return \yii\web\Response|null
+     * @throws BadRequestHttpException
+     * @throws NotFoundHttpException
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws \craft\commerce\errors\TransactionException
+     * @throws \craft\errors\MissingComponentException
+     * @throws \yii\base\ErrorException
+     * @throws \yii\base\InvalidConfigException
+     */
+	public function actionConfirmation($hash, $hppId = null)
 	{
-
 		$plugin = Plugin::getInstance();
 
 		$request = Craft::$app->getRequest();
@@ -40,7 +44,7 @@ class KlarnaController extends BaseFrontEndController
 
 		$last_transaction = $plugin->getTransactions()->getTransactionByHash($hash);
 
-		/** @var $gateway KlarnaCheckout */
+		/** @var $gateway BaseGateway */
 		$gateway = $plugin->getGateways()->getGatewayById($last_transaction->gatewayId);
 
 		if (!$last_transaction || !$gateway) {
@@ -64,7 +68,19 @@ class KlarnaController extends BaseFrontEndController
 
 		Craft::$app->session->set('klarna_order_id', $klarna_order_id);
 
-		$gateway->updateOrder($order);
+		if($gateway instanceof KlarnaCheckout)
+        {
+            /** @var $gateway KlarnaCheckout */
+            $gateway->updateOrder($order);
+        }
+		elseif($gateway instanceof KlarnaHPP && $hppId)
+        {
+            /** @var $gateway KlarnaHPP */
+            // TODO: Create an order with https://developers.klarna.com/api/#payments-api-create-a-new-order
+            $gateway->updateOrder($order);
+        }
+		else throw new NotFoundHttpException();
+
 
 		if(isset($gateway->paymentTypeOptions[$gateway->paymentType])) $paymentType = $gateway->paymentType;
 		else $paymentType = 'authorize';

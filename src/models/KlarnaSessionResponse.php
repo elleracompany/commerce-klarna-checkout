@@ -55,4 +55,16 @@ class KlarnaSessionResponse extends KlarnaBaseResponse
         return $this->response->session_id;
     }
 
+    /**
+     * Return Auth Token if exists
+     *
+     * @return string|null
+     */
+    public function getAuthToken()
+    {
+        die(var_dump($this->response));
+        if(!isset($this->response->authorization_token)) return null;
+        return $this->response->authorization_token;
+    }
+
 }

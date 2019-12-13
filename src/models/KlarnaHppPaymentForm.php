@@ -27,7 +27,7 @@ class KlarnaHppPaymentForm extends KlarnaBasePaymentForm
             'error' => $this->getStoreUrl().$gateway->error.'?hppId={{session_id}}',
             'failure' => $this->getStoreUrl().$gateway->failure.'?hppId={{session_id}}',
             'privacy_policy' => $this->getStoreUrl().$gateway->privacy.'?hppId={{session_id}}',
-            'success' => $this->getStoreUrl().$gateway->success.'?hppId={{session_id}}&auth_token={{authorization_token}}',
+            'success' => $this->getStoreUrl().'actions/commerce-klarna-checkout/klarna/confirmation?hash='.$transaction->hash.'&hppId={{session_id}}&auth_token={{authorization_token}}',
             'terms' => $this->getStoreUrl().$gateway->terms,
         ];
         $this->request_body = [
