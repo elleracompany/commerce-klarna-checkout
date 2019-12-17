@@ -7,8 +7,9 @@ namespace ellera\commerce\klarna\models;
 use craft\commerce\models\Transaction;
 use ellera\commerce\klarna\gateways\BaseGateway;
 use ellera\commerce\klarna\gateways\KlarnaCheckout;
+use ellera\commerce\klarna\models\forms\BasePaymentForm;
 
-class KlarnaCheckoutPaymentForm extends KlarnaBasePaymentForm
+class KlarnaCheckoutPaymentForm extends BasePaymentForm
 {
     /**
      * @param Transaction $transaction
