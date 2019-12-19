@@ -3,7 +3,9 @@
 
 namespace ellera\commerce\klarna\models;
 
-class KlarnaOrder
+use ellera\commerce\klarna\models\responses\BaseResponse;
+
+class Order
 {
 	/**
 	 * API Response
@@ -17,7 +19,7 @@ class KlarnaOrder
 	 *
 	 * @param KlarnaBaseResponse $response
 	 */
-	public function __construct(KlarnaBaseResponse $response)
+	public function __construct(BaseResponse $response)
 	{
 		$this->response = $response;
 	}

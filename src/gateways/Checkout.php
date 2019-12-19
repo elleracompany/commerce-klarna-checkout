@@ -4,14 +4,15 @@
 namespace ellera\commerce\klarna\gateways;
 
 use Craft;
-use Exception;
+use ellera\commerce\klarna\models\Order;
+use craft\commerce\elements\Order as CraftOrder;
+use ellera\commerce\klarna\models\responses\OrderResponse;
 use craft\commerce\base\RequestResponseInterface;
 use craft\commerce\models\payments\BasePaymentForm;
 use craft\commerce\models\Transaction;
 use ellera\commerce\klarna\models\forms\CheckoutFrom;
-use ellera\commerce\klarna\models\KlarnaBasePaymentForm;
-use ellera\commerce\klarna\models\KlarnaOrder;
-use ellera\commerce\klarna\models\KlarnaOrderResponse;
+use GuzzleHttp\Exception\ClientException;
+use yii\base\InvalidConfigException;
 use yii\web\BadRequestHttpException;
 
 /**
@@ -64,8 +65,64 @@ class Checkout extends Base
     }
 
     /**
-     * @inheritdoc
-     * @throws Exception When shit goes south
+     * @param \craft\commerce\elements\Order $order
+     * @throws InvalidConfigException
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws \yii\base\ErrorException
+     */
+    public function updateOrder(CraftOrder $order)
+    {
+        try {
+            $response = $this->getKlarnaOrderResponse('/ordermanagement/v1/orders/' . $order->getLastTransaction()->reference);
+        } catch (ClientException $e) {
+            $this->log($e->getCode() . ': ' . $e->getMessage());
+            throw new InvalidConfigException('Klarna responded with an error: '.$e->getMessage());
+        }
+        if($response->getData()->shipping_address) {
+            $order->setShippingAddress($this->createAddressFromResponse($response->getData()->shipping_address));
+            if($response->getData()->shipping_address->email) $order->setEmail($response->getData()->shipping_address->email);
+        }
+        if($response->getData()->billing_address) {
+            $order->setBillingAddress($this->createAddressFromResponse($response->getData()->billing_address));
+            if($response->getData()->billing_address->email) $order->setEmail($response->getData()->billing_address->email);
+        }
+    }
+
+    /**
+     * Get the response from Order Status
+     *
+     * @param string $endpoint
+     * @return OrderResponse
+     * @throws InvalidConfigException
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws \yii\base\ErrorException
+     */
+    public function getKlarnaOrderResponse(string $endpoint) : OrderResponse
+    {
+        try {
+            $response = new OrderResponse(
+                'GET',
+                $this->getApiUrl(),
+                $endpoint,
+                $this->getApiId(),
+                $this->getApiPassword()
+            );
+        } catch (ClientException $e) {
+            $this->log($e->getCode() . ': ' . $e->getMessage());
+            throw new InvalidConfigException('Klarna is expecting other values, make sure you\'ve added taxes as described in the documentation for the Klarna Checkout Plugin, and that you\'ve correctly set the Site Base URL. Klarna Response: '.$e->getMessage());
+        }
+        return $response;
+    }
+
+    /**
+     * @param Transaction $transaction
+     * @param BasePaymentForm $form
+     * @return RequestResponseInterface
+     * @throws BadRequestHttpException
+     * @throws InvalidConfigException
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws \craft\errors\SiteNotFoundException
+     * @throws \yii\base\ErrorException
      */
     public function authorize(Transaction $transaction, BasePaymentForm $form): RequestResponseInterface
     {
@@ -73,38 +130,161 @@ class Checkout extends Base
         if(!$form instanceof CheckoutFrom)
             throw new BadRequestHttpException('Klarna Checkout only accepts CheckoutForm');
 
+        // Populate the form
+        $form->populate($transaction, $this);
         // Create the order
-        $order = $form->createOrder($this, $transaction);
+        return $form->getKlarnaOrderResponse();
+    }
 
+    /**
+     * @param Transaction $transaction
+     * @param string $reference
+     * @return RequestResponseInterface
+     * @throws InvalidConfigException
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws \yii\base\ErrorException
+     */
+    public function capture(Transaction $transaction, string $reference): RequestResponseInterface
+    {
+        $body = [
+            'captured_amount' => (int)$transaction->paymentAmount * 100,
+            'description' => $transaction->hash
+        ];
 
-        /** @var KlarnaOrderResponse $response */
         try {
-            $response = $this->getKlarnaOrderResponse('POST', '/checkout/v3/orders', $form->getOrderRequestBody());
-        } catch (\GuzzleHttp\Exception\ClientException $e) {
+            $response = new OrderResponse(
+                'POST',
+                $this->getApiUrl(),
+                "/ordermanagement/v1/orders/{$transaction->reference}/captures",
+                $this->getApiId(),
+                $this->getApiPassword(),
+                $body
+            );
+        } catch (ClientException $e) {
             $this->log($e->getCode() . ': ' . $e->getMessage());
-            throw new InvalidConfigException('Klarna is expecting other values, make sure you\'ve added taxes as described in the documentation for the Klarna Checkout Plugin, and that you\'ve correctly set the Site Base URL. Klarna Response: '.$e->getMessage());
+            throw new InvalidConfigException('Something went wrong. Klarna Response: '.$e->getMessage());
         }
-        $order = new KlarnaOrder($response);
 
-        $transaction->note = 'Created Klarna Order';
-        $transaction->response = $response->get();
-        $transaction->order->returnUrl = $transaction->gateway->push.'?number='.$transaction->order->number;
-        $transaction->order->cancelUrl = $transaction->gateway->checkout;
-
-        $order->getOrderId() ? $transaction->status = 'redirect' : $transaction->status = 'failed';
-
-        if($response->isSuccessful()) $this->log('Authorized order '.$transaction->order->number.' ('.$transaction->order->id.')');
-        else $this->log('Failed to Authorize order '.$transaction->order->id.'. Klarna responded with '.$response->getCode().': '.$response->getMessage());
+        $response->setTransactionReference($reference);
+        if($response->isSuccessful()) $this->log('Captured order '.$transaction->order->number.' ('.$transaction->order->id.')');
+        else $this->log('Failed to capture order '.$transaction->order->id.'. Klarna responded with '.$response->getCode().': '.$response->getMessage());
 
         return $response;
     }
 
     /**
-     * @inheritdoc
+     * @param Transaction $transaction
+     * @param BasePaymentForm $form
+     * @return RequestResponseInterface
+     * @throws BadRequestHttpException
+     * @throws InvalidConfigException
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws \craft\commerce\errors\TransactionException
+     * @throws \yii\base\ErrorException
+     */
+    public function purchase(Transaction $transaction, BasePaymentForm $form): RequestResponseInterface
+    {
+        $response = $this->captureKlarnaOrder($transaction);
+        $transaction->order->updateOrderPaidInformation();
+        return $response;
+    }
+
+    /**
+     * @param Transaction $transaction
+     * @return OrderResponse
+     * @throws BadRequestHttpException
+     * @throws InvalidConfigException
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws \craft\commerce\errors\TransactionException
+     * @throws \yii\base\ErrorException
+     */
+    protected function captureKlarnaOrder(Transaction $transaction) : OrderResponse
+    {
+        $plugin = \craft\commerce\Plugin::getInstance();
+        $body = [
+            'captured_amount' => (int)$transaction->paymentAmount * 100,
+            'description' => $transaction->hash
+        ];
+
+        try {
+            $response = new OrderResponse(
+                'POST',
+                $this->getApiUrl(),
+                "/ordermanagement/v1/orders/{$transaction->reference}/captures",
+                $this->getApiId(),
+                $this->getApiPassword(),
+                $body
+            );
+        } catch (ClientException $e) {
+            $this->log($e->getCode() . ': ' . $e->getMessage());
+            throw new InvalidConfigException('Something went wrong. Klarna Response: '.$e->getMessage());
+        }
+
+        $transaction->status = $response->isSuccessful() ? 'success' : 'failed';
+        $transaction->code = $response->getCode();
+        $transaction->message = $response->getMessage();
+        $transaction->note = 'Automatic capture';
+        $transaction->response = $response->get();
+
+        if(!$plugin->getTransactions()->saveTransaction($transaction)) throw new BadRequestHttpException('Could not save capture transaction');
+
+        if($response->isSuccessful()) $this->log('Captured order '.$transaction->order->number.' ('.$transaction->order->id.')');
+        else $this->log('Failed to capture order '.$transaction->order->id.'. Klarna responded with '.$response->getCode().': '.$response->getMessage());
+
+        return $response;
+    }
+
+    /**
+     * @param array $params
+     *
+     * @return null|string
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws \Throwable
+     * @throws \craft\errors\ElementNotFoundException
+     * @throws \yii\base\Exception
+     */
+    public function getPaymentFormHtml(array $params)
+    {
+        $order = $this->createCheckoutOrder();
+        return $order->getHtmlSnippet();
+    }
+
+    /**
+     * @return BasePaymentForm
      */
     public function getPaymentFormModel(): BasePaymentForm
     {
         return new CheckoutFrom();
+    }
+
+    /**
+     * @return Order
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws \Throwable
+     * @throws \craft\errors\ElementNotFoundException
+     * @throws \yii\base\Exception
+     */
+    private function createCheckoutOrder() : Order
+    {
+        $commerce = craft\commerce\Plugin::getInstance();
+        $cart = $commerce->getCarts()->getCart();
+
+        $transaction = $commerce->getTransactions()->createTransaction($cart, null, 'authorize');
+
+        $form = new CheckoutFrom();
+        $form->populate($transaction, $this);
+
+        /** @var $response OrderResponse */
+        $response = $this->authorize($transaction, $form);
+        $transaction->reference = $response->getTransactionReference();
+        $transaction->code = $response->getCode();
+        $transaction->message = $response->getMessage();
+        $commerce->getTransactions()->saveTransaction($transaction);
+
+        if($response->isSuccessful()) $this->log('Created order '.$transaction->order->number.' ('.$transaction->order->id.')');
+        else $this->log('Failed to create order '.$transaction->order->id.'. Klarna responded with '.$response->getCode().': '.$response->getMessage());
+
+        return new Order($response);
     }
 
     /**

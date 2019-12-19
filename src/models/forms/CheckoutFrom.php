@@ -3,54 +3,64 @@
 
 namespace ellera\commerce\klarna\models\forms;
 
+use craft\commerce\models\Transaction;
 use ellera\commerce\klarna\gateways\Base;
-use ellera\commerce\klarna\models\KlarnaOrder;
 use ellera\commerce\klarna\models\responses\OrderResponse;
 use yii\base\InvalidConfigException;
 use GuzzleHttp\Exception\ClientException;
-use craft\commerce\models\Transaction;
 
 class CheckoutFrom extends BasePaymentForm
 {
     /**
-     * Create a new Klarna Order
-     *
-     * @param Base $gateway
      * @param Transaction $transaction
-     * @return KlarnaOrder
+     * @param Base $gateway
      * @throws InvalidConfigException
-     * @throws \GuzzleHttp\Exception\GuzzleException
      * @throws \craft\errors\SiteNotFoundException
-     * @throws \yii\base\ErrorException
      */
-    public function createOrder(Base $gateway, Transaction $transaction): KlarnaOrder
+    public function populate(Transaction $transaction, Base $gateway)
     {
-        try {
-            $response = $this->getKlarnaOrderResponse($gateway);
-        } catch (ClientException $e) {
-            $gateway->log($e->getCode() . ': ' . $e->getMessage());
-            throw new InvalidConfigException('Klarna is expecting other values, make sure you\'ve added taxes as described in the documentation for the Klarna Checkout Plugin, and that you\'ve correctly set the Site Base URL. Klarna Response: '.$e->getMessage());
-        }
+        parent::populate($transaction, $gateway);
+
+        $this->merchant_urls = [
+            'terms' => $this->getStoreUrl().$gateway->terms,
+            'confirmation' => $this->getStoreUrl().'actions/commerce-klarna-checkout/klarna/confirmation?hash='.$transaction->hash,
+            'checkout' => $this->getStoreUrl().$gateway->checkout,
+            'push' => $this->getStoreUrl().$gateway->push.'?number='.$transaction->order->number
+        ];
+    }
+
+    /**
+     * Create a new Klarna Order
+     */
+    public function createOrder()
+    {
+        // Todo
     }
 
     /**
      * Get the response from Create Order
      *
-     * @param Base $gateway
      * @return OrderResponse
+     * @throws InvalidConfigException
      * @throws \GuzzleHttp\Exception\GuzzleException
-     * @throws \craft\errors\SiteNotFoundException
+     * @throws \yii\base\ErrorException
      */
-    private function getKlarnaOrderResponse(Base $gateway) : OrderResponse
+    public function getKlarnaOrderResponse() : OrderResponse
     {
-        return new OrderResponse(
-            'POST',
-            $this->getStoreUrl(),
-            '',
-            $gateway->test_mode !== '1' ? $gateway->api_eu_uid : $gateway->api_eu_test_uid,
-            $gateway->test_mode !== '1' ? $gateway->api_eu_password : $gateway->api_eu_test_password,
-            $this->generateCreateOrderRequestBody()
-        );
+        try {
+            $response = new OrderResponse(
+                'POST',
+                $this->gateway->getApiUrl(),
+                '/checkout/v3/orders',
+                $this->gateway->getApiId(),
+                $this->gateway->getApiPassword(),
+                $this->generateCreateOrderRequestBody()
+            );
+        } catch (ClientException $e) {
+            $this->gateway->log($e->getCode() . ': ' . $e->getMessage());
+            throw new InvalidConfigException('Klarna is expecting other values, make sure you\'ve added taxes as described in the documentation for the Klarna Checkout Plugin, and that you\'ve correctly set the Site Base URL. Klarna Response: '.$e->getMessage());
+        }
+        return $response;
     }
 
     /**
@@ -66,7 +76,7 @@ class CheckoutFrom extends BasePaymentForm
             'locale' => $this->locale,
             'order_amount' => $this->order_amount,
             'order_tax_amount' => $this->order_tax_amount,
-            'order_lines' => [],
+            'order_lines' => $this->order_lines,
             'merchant_reference1' => $this->merchant_reference1,
             'merchant_reference2' => $this->merchant_reference2,
             'options' => $this->options,

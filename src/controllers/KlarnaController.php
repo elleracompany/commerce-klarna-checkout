@@ -6,8 +6,10 @@ use Craft;
 use craft\commerce\controllers\BaseFrontEndController;
 use craft\commerce\Plugin;
 use ellera\commerce\klarna\gateways\BaseGateway;
+use ellera\commerce\klarna\gateways\Checkout;
 use ellera\commerce\klarna\gateways\KlarnaCheckout;
 use ellera\commerce\klarna\gateways\KlarnaHPP;
+use ellera\commerce\klarna\models\forms\BasePaymentForm;
 use ellera\commerce\klarna\models\KlarnaBasePaymentForm;
 use yii\web\BadRequestHttpException;
 use yii\web\NotFoundHttpException;
@@ -68,9 +70,9 @@ class KlarnaController extends BaseFrontEndController
 
 		Craft::$app->session->set('klarna_order_id', $klarna_order_id);
 
-		if($gateway instanceof KlarnaCheckout)
+		if($gateway instanceof Checkout)
         {
-            /** @var $gateway KlarnaCheckout */
+            /** @var $gateway Checkout */
             $gateway->updateOrder($order);
         }
 		elseif($gateway instanceof KlarnaHPP && $hppId)
@@ -94,13 +96,13 @@ class KlarnaController extends BaseFrontEndController
 			// Get the gateway's payment form
 			$paymentForm = $gateway->getPaymentFormModel();
 
-			if(!$paymentForm instanceof KlarnaBasePaymentForm) throw new BadRequestHttpException('Klarna authorize only accepts KlarnaPaymentForm');
+			if(!$paymentForm instanceof BasePaymentForm) throw new BadRequestHttpException('Klarna authorize only accepts KlarnaPaymentForm');
 			$paymentForm->populate($transaction, $gateway);
 			$gateway->purchase($transaction, $paymentForm);
 		}
 		else {
 			// Acknowledge the order
-			$response = $gateway->getKlarnaResponse('POST', "/ordermanagement/v1/orders/{$klarna_order_id}/acknowledge");
+			$response = $gateway->acknowledgeOrder($klarna_order_id);
 
 			// Create Acknowledge Transaction
 			$transaction->status = 'success';

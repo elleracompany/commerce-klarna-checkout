@@ -10,8 +10,13 @@ use craft\commerce\models\Address;
 use craft\commerce\models\payments\BasePaymentForm;
 use craft\commerce\models\PaymentSource;
 use craft\commerce\models\Transaction;
+use craft\commerce\records\Country;
 use craft\web\Response as WebResponse;
+use ellera\commerce\klarna\models\responses\OrderAcknowledgeResponse;
+use ellera\commerce\klarna\models\responses\OrderResponse;
+use GuzzleHttp\Exception\ClientException;
 use Throwable;
+use yii\base\InvalidConfigException;
 
 /**
  * Class Base
@@ -247,14 +252,43 @@ class Base extends Gateway
     }
 
     /**
-     * Makes an refund request.
-     *
-     * @param Transaction $transaction The refund transaction
+     * @param Transaction $transaction
      * @return RequestResponseInterface
+     * @throws InvalidConfigException
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws \yii\base\ErrorException
      */
     public function refund(Transaction $transaction): RequestResponseInterface
     {
-        // TODO: Implement refund() method.
+        $amount = Craft::$app->request->getBodyParam('amount');
+        $note = Craft::$app->request->getBodyParam('note');
+
+        if($amount == '') $amount = $transaction->order->totalPaid;
+
+        $body = [
+            'refunded_amount' => (int)$amount*100,
+            'description' => $note
+        ];
+
+        try {
+            $response = new OrderResponse(
+                'POST',
+                $this->getApiUrl(),
+                "/ordermanagement/v1/orders/{$transaction->reference}/refunds",
+                $this->getApiId(),
+                $this->getApiPassword(),
+                $body
+            );
+        } catch (ClientException $e) {
+            $this->log($e->getCode() . ': ' . $e->getMessage());
+            throw new InvalidConfigException('Something went wrong. Klarna Response: '.$e->getMessage());
+        }
+
+        $response->setTransactionReference($transaction->reference);
+        if($response->isSuccessful()) $this->log('Refunded '.$amount.' from order '.$transaction->order->number.' ('.$transaction->order->id.')');
+        else $this->log('Failed to refund order '.$transaction->order->id.'. Klarna responded with '.$response->getCode().': '.$response->getMessage());
+
+        return $response;
     }
 
     /**
@@ -343,6 +377,97 @@ class Base extends Gateway
             "phone" => $address->phone,
             "country" => $address->country->iso,
         ];
+    }
+
+    /**
+     * @param Object $addr
+     *
+     * @return Address
+     */
+    protected function createAddressFromResponse(Object $addr)
+    {
+        $address = new Address();
+        $country = Country::findOne(['iso' => strtoupper($addr->country)]);
+        $address->firstName = $addr->given_name;
+        $address->lastName = $addr->family_name;
+        $address->address1 = $addr->street_address;
+        $address->zipCode = $addr->postal_code;
+        $address->city = $addr->city;
+        $address->phone = $addr->phone;
+        if($country) $address->countryId = $country->id;
+
+        return $address;
+    }
+
+    public function getApiUrl()
+    {
+        return $this->test_mode !== '1' ? $this->prod_url : $this->test_url;
+    }
+
+    public function getApiId()
+    {
+        return $this->test_mode !== '1' ? $this->api_eu_uid : $this->api_eu_test_uid;
+    }
+
+    public function getApiPassword()
+    {
+        return $this->test_mode !== '1' ? $this->api_eu_password : $this->api_eu_test_password;
+    }
+
+    /**
+     * @return bool
+     */
+    public function hasHtml()
+    {
+        if(!Craft::$app->session->get('klarna_order_id') || strlen(Craft::$app->session->get('klarna_order_id')) < 20) return false;
+        return true;
+    }
+
+    /**
+     * @return mixed
+     * @throws InvalidConfigException
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws \yii\base\ErrorException
+     */
+    public function getHtml()
+    {
+        try {
+            $response = new OrderResponse(
+                'GET',
+                $this->getApiUrl(),
+                '/checkout/v3/orders/' . Craft::$app->session->get('klarna_order_id'),
+                $this->getApiId(),
+                $this->getApiPassword()
+            );
+        } catch (\GuzzleHttp\Exception\ClientException $e) {
+            $this->log($$e->getCode() . ': ' . $e->getMessage());
+            throw new InvalidConfigException('Klarna responded with an error: '.$e->getMessage());
+        }
+        return $response->getData()->html_snippet;
+    }
+
+    /**
+     * @param string $orderId
+     * @return OrderAcknowledgeResponse
+     * @throws InvalidConfigException
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws \yii\base\ErrorException
+     */
+    public function acknowledgeOrder(string $orderId)
+    {
+        try {
+            $response = new OrderAcknowledgeResponse(
+                'POST',
+                $this->getApiUrl(),
+                '/ordermanagement/v1/orders/'.$orderId.'/acknowledge',
+                $this->getApiId(),
+                $this->getApiPassword()
+            );
+        } catch (ClientException $e) {
+            $this->log($e->getCode() . ': ' . $e->getMessage());
+            throw new InvalidConfigException('Something went wrong. Klarna Response: '.$e->getMessage());
+        }
+        return $response;
     }
 
     /**
