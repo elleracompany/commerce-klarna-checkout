@@ -8,7 +8,7 @@ use GuzzleHttp\Client;
 class OrderAcknowledgeResponse extends BaseResponse
 {
 	/**
-	 * KlarnaResponse constructor.
+	 * OrderAcknowledgeResponse constructor.
 	 *
 	 * @param string $method
 	 * @param string $url

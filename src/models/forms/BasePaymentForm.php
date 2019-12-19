@@ -12,7 +12,7 @@ use craft\commerce\Plugin as Commerce;
 use craft\commerce\models\payments\BasePaymentForm as CommerceBasePaymentForm;
 use ellera\commerce\klarna\gateways\Base;
 use ellera\commerce\klarna\gateways\Checkout;
-use ellera\commerce\klarna\models\KlarnaOrderLine;
+use ellera\commerce\klarna\models\OrderLine;
 use craft\commerce\models\Transaction;
 use yii\base\InvalidConfigException;
 
@@ -73,7 +73,7 @@ class BasePaymentForm extends CommerceBasePaymentForm
 	/**
 	 * Array of Order Lines
 	 *
-	 * @var KlarnaOrderLine[]
+	 * @var OrderLine[]
 	 */
 	public $order_lines;
 
@@ -182,13 +182,19 @@ class BasePaymentForm extends CommerceBasePaymentForm
 		return $siteUrl;
 	}
 
-    private function getOrderLines(Order $order, Base $gateway)
+    /**
+     * Returns an array of order lines for Klarna
+     * @param Order $order
+     * @param Base $gateway
+     * @return array
+     */
+    private function getOrderLines(Order $order, Base $gateway): array
     {
         $total_tax = 0;
         $order_lines = [];
 
         foreach ($order->lineItems as $line) {
-            $order_line = new KlarnaOrderLine();
+            $order_line = new OrderLine();
             $order_line->populate($line);
 
             if($gateway->send_product_urls == '1') {
@@ -201,7 +207,7 @@ class BasePaymentForm extends CommerceBasePaymentForm
         $shipping_method = $order->shippingMethod;
         if($shipping_method && $shipping_method->getPriceForOrder($order) > 0) {
 
-            $order_line = new KlarnaOrderLine();
+            $order_line = new OrderLine();
             $order_line->shipping($shipping_method, $order);
             $total_tax += $order_line->getLineTax();
 
@@ -211,7 +217,13 @@ class BasePaymentForm extends CommerceBasePaymentForm
         return $order_lines;
     }
 
-    private function getOrderLinesLite(Order $order, Checkout $gateway)
+    /**
+     * Returns order lines for Commerce Lite
+     * @param Order $order
+     * @param Checkout $gateway
+     * @return array
+     */
+    private function getOrderLinesLite(Order $order, Checkout $gateway): array
     {
         $tax_included = false;
         $shipping = 0;
@@ -238,7 +250,7 @@ class BasePaymentForm extends CommerceBasePaymentForm
             else {
                 $shipping_tax = ($shipping/($order->totalPrice-$order_tax_amount))*$order_tax_amount;
             }
-            $order_line = new KlarnaOrderLine();
+            $order_line = new OrderLine();
 
             $order_line->name = 'Shipping';
             $order_line->quantity = 1;
@@ -253,7 +265,7 @@ class BasePaymentForm extends CommerceBasePaymentForm
 
         foreach ($order->lineItems as $line) {
             $line_tax = $order_tax_amount-$shipping_tax;
-            $order_line = new KlarnaOrderLine();
+            $order_line = new OrderLine();
 
             $order_line->name = $line->purchasable->title;
             $order_line->quantity = $line->qty;
