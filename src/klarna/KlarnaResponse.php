@@ -33,11 +33,18 @@ class KlarnaResponse implements RequestResponseInterface
     public $headers = [];
 
     /**
-     * Stores the JSON Decoded Response Object
+     * Stores the JSON Response
      *
      * @var object
      */
     protected $response;
+
+    /**
+     * Stores the JSON Decoded Response Object
+     *
+     * @var object
+     */
+    protected $decoded_response;
 
     /**
      * Transaction reference
@@ -223,7 +230,8 @@ class KlarnaResponse implements RequestResponseInterface
 
     public function getDecodedResponse()
     {
-        return json_decode($this->raw_response->getBody());
+        if(!$this->decoded_response) $this->decoded_response = json_decode($this->response->getBody());
+        return $this->decoded_response;
     }
 
     /**

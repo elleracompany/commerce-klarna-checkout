@@ -5,7 +5,7 @@ namespace ellera\commerce\klarna\models\forms;
 
 use craft\commerce\models\Transaction;
 use ellera\commerce\klarna\gateways\Base;
-use ellera\commerce\klarna\klarna\Create;
+use ellera\commerce\klarna\klarna\order\Create;
 use ellera\commerce\klarna\models\responses\OrderResponse;
 use yii\base\InvalidConfigException;
 use GuzzleHttp\Exception\ClientException;

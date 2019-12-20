@@ -1,9 +1,10 @@
 <?php
 
 
-namespace ellera\commerce\klarna\klarna;
+namespace ellera\commerce\klarna\klarna\order;
 
 use ellera\commerce\klarna\gateways\Base;
+use ellera\commerce\klarna\klarna\KlarnaResponse;
 
 class Acknowledge extends KlarnaResponse
 {
@@ -20,7 +21,7 @@ class Acknowledge extends KlarnaResponse
 
 		$this->endpoint = "/ordermanagement/v1/orders/{$klarnaId}/acknowledge";
 
-		$this->get();
+		$this->post();
 
 		if(isset($this->response->order_id)) $this->setTransactionReference($this->response->order_id);
 	}

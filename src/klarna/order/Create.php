@@ -1,10 +1,10 @@
 <?php
 
 
-namespace ellera\commerce\klarna\klarna;
+namespace ellera\commerce\klarna\klarna\order;
 
 use ellera\commerce\klarna\gateways\Base;
-use craft\commerce\elements\Order;
+use ellera\commerce\klarna\klarna\KlarnaResponse;
 use ellera\commerce\klarna\models\forms\BasePaymentForm;
 
 class Create extends KlarnaResponse
@@ -28,4 +28,5 @@ class Create extends KlarnaResponse
 
         if(isset($this->response->order_id)) $this->setTransactionReference($this->response->order_id);
     }
+
 }

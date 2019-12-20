@@ -4,11 +4,11 @@
 namespace ellera\commerce\klarna\gateways;
 
 use Craft;
-use ellera\commerce\klarna\klarna\Capture;
-use ellera\commerce\klarna\klarna\Update;
+use ellera\commerce\klarna\klarna\order\Capture;
+use ellera\commerce\klarna\klarna\order\Create;
+use ellera\commerce\klarna\klarna\order\Update;
 use ellera\commerce\klarna\models\Order;
 use craft\commerce\elements\Order as CraftOrder;
-use ellera\commerce\klarna\models\responses\OrderResponse;
 use craft\commerce\base\RequestResponseInterface;
 use craft\commerce\models\payments\BasePaymentForm;
 use craft\commerce\models\Transaction;
@@ -221,9 +221,9 @@ class Checkout extends Base
         $form = new CheckoutFrom();
         $form->populate($transaction, $this);
 
-        /** @var $response OrderResponse */
+        /** @var $response Create */
         $response = $this->authorize($transaction, $form);
-        $transaction->reference = $response->getTransactionReference();
+        $transaction->reference = $response->getDecodedResponse()->order_id;
         $transaction->code = $response->getCode();
         $transaction->message = $response->getMessage();
         $commerce->getTransactions()->saveTransaction($transaction);

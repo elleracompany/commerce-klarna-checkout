@@ -1,10 +1,11 @@
 <?php
 
 
-namespace ellera\commerce\klarna\klarna;
+namespace ellera\commerce\klarna\klarna\order;
 
 use ellera\commerce\klarna\gateways\Base;
 use craft\commerce\elements\Order;
+use ellera\commerce\klarna\klarna\KlarnaResponse;
 
 class Update extends KlarnaResponse
 {

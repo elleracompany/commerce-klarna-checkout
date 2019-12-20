@@ -5,13 +5,10 @@ namespace ellera\commerce\klarna\controllers;
 use Craft;
 use craft\commerce\controllers\BaseFrontEndController;
 use craft\commerce\Plugin;
-use ellera\commerce\klarna\gateways\BaseGateway;
 use ellera\commerce\klarna\gateways\Checkout;
-use ellera\commerce\klarna\gateways\KlarnaCheckout;
 use ellera\commerce\klarna\gateways\KlarnaHPP;
-use ellera\commerce\klarna\klarna\Acknowledge;
+use ellera\commerce\klarna\klarna\order\Acknowledge;
 use ellera\commerce\klarna\models\forms\BasePaymentForm;
-use ellera\commerce\klarna\models\KlarnaBasePaymentForm;
 use yii\web\BadRequestHttpException;
 use yii\web\NotFoundHttpException;
 

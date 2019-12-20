@@ -1,10 +1,11 @@
 <?php
 
 
-namespace ellera\commerce\klarna\klarna;
+namespace ellera\commerce\klarna\klarna\order;
 
 use ellera\commerce\klarna\gateways\Base;
 use craft\commerce\models\Transaction;
+use ellera\commerce\klarna\klarna\KlarnaResponse;
 
 class Capture extends KlarnaResponse
 {
