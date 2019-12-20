@@ -228,6 +228,11 @@ class KlarnaResponse implements RequestResponseInterface
         return ArrayHelper::merge($default_headers, $this->headers);
     }
 
+    /**
+     * Returns the decoded response as a PHP Object
+     *
+     * @return object
+     */
     public function getDecodedResponse()
     {
         if(!$this->decoded_response) $this->decoded_response = json_decode($this->response->getBody());
