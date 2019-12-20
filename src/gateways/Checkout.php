@@ -4,6 +4,7 @@
 namespace ellera\commerce\klarna\gateways;
 
 use Craft;
+use ellera\commerce\klarna\klarna\Update;
 use ellera\commerce\klarna\models\Order;
 use craft\commerce\elements\Order as CraftOrder;
 use ellera\commerce\klarna\models\responses\OrderResponse;
@@ -72,12 +73,8 @@ class Checkout extends Base
      */
     public function updateOrder(CraftOrder $order)
     {
-        try {
-            $response = $this->getKlarnaOrderResponse('/ordermanagement/v1/orders/' . $order->getLastTransaction()->reference);
-        } catch (ClientException $e) {
-            $this->log($e->getCode() . ': ' . $e->getMessage());
-            throw new InvalidConfigException('Klarna responded with an error: '.$e->getMessage());
-        }
+        $response = new Update($this, $order);
+
         if($response->getData()->shipping_address) {
             $order->setShippingAddress($this->createAddressFromResponse($response->getData()->shipping_address));
             if($response->getData()->shipping_address->email) $order->setEmail($response->getData()->shipping_address->email);
@@ -86,32 +83,6 @@ class Checkout extends Base
             $order->setBillingAddress($this->createAddressFromResponse($response->getData()->billing_address));
             if($response->getData()->billing_address->email) $order->setEmail($response->getData()->billing_address->email);
         }
-    }
-
-    /**
-     * Get the response from Order Status
-     *
-     * @param string $endpoint
-     * @return OrderResponse
-     * @throws InvalidConfigException
-     * @throws \GuzzleHttp\Exception\GuzzleException
-     * @throws \yii\base\ErrorException
-     */
-    public function getKlarnaOrderResponse(string $endpoint) : OrderResponse
-    {
-        try {
-            $response = new OrderResponse(
-                'GET',
-                $this->getApiUrl(),
-                $endpoint,
-                $this->getApiId(),
-                $this->getApiPassword()
-            );
-        } catch (ClientException $e) {
-            $this->log($e->getCode() . ': ' . $e->getMessage());
-            throw new InvalidConfigException('Klarna is expecting other values, make sure you\'ve added taxes as described in the documentation for the Klarna Checkout Plugin, and that you\'ve correctly set the Site Base URL. Klarna Response: '.$e->getMessage());
-        }
-        return $response;
     }
 
     /**
@@ -132,8 +103,9 @@ class Checkout extends Base
 
         // Populate the form
         $form->populate($transaction, $this);
+
         // Create the order
-        return $form->getKlarnaOrderResponse();
+        return $form->createOrder();
     }
 
     /**

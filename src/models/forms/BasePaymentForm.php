@@ -283,4 +283,25 @@ class BasePaymentForm extends CommerceBasePaymentForm
         $this->order_tax_amount = $order_tax_amount*100;
         return $order_lines;
     }
+
+    /**
+     * Returns a Order Create Request Body
+     *
+     * @return array
+     */
+    public function generateCreateOrderRequestBody(): array
+    {
+        return [
+            'purchase_country' => $this->purchase_country,
+            'purchase_currency' => $this->purchase_currency,
+            'locale' => $this->locale,
+            'order_amount' => $this->order_amount,
+            'order_tax_amount' => $this->order_tax_amount,
+            'order_lines' => $this->order_lines,
+            'merchant_reference1' => $this->merchant_reference1,
+            'merchant_reference2' => $this->merchant_reference2,
+            'options' => $this->options,
+            'merchant_urls' => $this->merchant_urls
+        ];
+    }
 }

@@ -5,6 +5,7 @@ namespace ellera\commerce\klarna\models\forms;
 
 use craft\commerce\models\Transaction;
 use ellera\commerce\klarna\gateways\Base;
+use ellera\commerce\klarna\klarna\Create;
 use ellera\commerce\klarna\models\responses\OrderResponse;
 use yii\base\InvalidConfigException;
 use GuzzleHttp\Exception\ClientException;
@@ -31,10 +32,14 @@ class CheckoutFrom extends BasePaymentForm
 
     /**
      * Create a new Klarna Order
+     *
+     * @return Create
+     * @throws InvalidConfigException
+     * @throws \yii\base\ErrorException
      */
     public function createOrder()
     {
-        // Todo
+        return new Create($this->gateway, $this);
     }
 
     /**
@@ -61,26 +66,5 @@ class CheckoutFrom extends BasePaymentForm
             throw new InvalidConfigException('Klarna is expecting other values, make sure you\'ve added taxes as described in the documentation for the Klarna Checkout Plugin, and that you\'ve correctly set the Site Base URL. Klarna Response: '.$e->getMessage());
         }
         return $response;
-    }
-
-    /**
-     * Returns a Order Create Request Body
-     *
-     * @return array
-     */
-    private function generateCreateOrderRequestBody(): array
-    {
-        return [
-            'purchase_country' => $this->purchase_country,
-            'purchase_currency' => $this->purchase_currency,
-            'locale' => $this->locale,
-            'order_amount' => $this->order_amount,
-            'order_tax_amount' => $this->order_tax_amount,
-            'order_lines' => $this->order_lines,
-            'merchant_reference1' => $this->merchant_reference1,
-            'merchant_reference2' => $this->merchant_reference2,
-            'options' => $this->options,
-            'merchant_urls' => $this->merchant_urls
-        ];
     }
 }

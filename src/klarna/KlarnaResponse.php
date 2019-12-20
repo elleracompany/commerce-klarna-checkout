@@ -175,7 +175,7 @@ class KlarnaResponse implements RequestResponseInterface
     }
 
     /**
-     * @return array
+     * @return object
      */
     public function getData()
     {
