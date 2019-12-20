@@ -4,6 +4,7 @@
 namespace ellera\commerce\klarna\gateways;
 
 use Craft;
+use ellera\commerce\klarna\klarna\Capture;
 use ellera\commerce\klarna\klarna\Update;
 use ellera\commerce\klarna\models\Order;
 use craft\commerce\elements\Order as CraftOrder;
@@ -12,7 +13,6 @@ use craft\commerce\base\RequestResponseInterface;
 use craft\commerce\models\payments\BasePaymentForm;
 use craft\commerce\models\Transaction;
 use ellera\commerce\klarna\models\forms\CheckoutFrom;
-use GuzzleHttp\Exception\ClientException;
 use yii\base\InvalidConfigException;
 use yii\web\BadRequestHttpException;
 
@@ -75,6 +75,8 @@ class Checkout extends Base
     {
         $response = new Update($this, $order);
 
+        if($response->isSuccessful()) $this->log('Updated order '.$order->number.' ('.$order->id.')');
+
         if($response->getData()->shipping_address) {
             $order->setShippingAddress($this->createAddressFromResponse($response->getData()->shipping_address));
             if($response->getData()->shipping_address->email) $order->setEmail($response->getData()->shipping_address->email);
@@ -104,8 +106,11 @@ class Checkout extends Base
         // Populate the form
         $form->populate($transaction, $this);
 
-        // Create the order
-        return $form->createOrder();
+        $response = $form->createOrder();
+
+        if($response->isSuccessful()) $this->log('Authorized order '.$transaction->order->number.' ('.$transaction->order->id.')');
+
+        return $response;
     }
 
     /**
@@ -118,27 +123,12 @@ class Checkout extends Base
      */
     public function capture(Transaction $transaction, string $reference): RequestResponseInterface
     {
-        $body = [
-            'captured_amount' => (int)$transaction->paymentAmount * 100,
-            'description' => $transaction->hash
-        ];
-
-        try {
-            $response = new OrderResponse(
-                'POST',
-                $this->getApiUrl(),
-                "/ordermanagement/v1/orders/{$transaction->reference}/captures",
-                $this->getApiId(),
-                $this->getApiPassword(),
-                $body
-            );
-        } catch (ClientException $e) {
-            $this->log($e->getCode() . ': ' . $e->getMessage());
-            throw new InvalidConfigException('Something went wrong. Klarna Response: '.$e->getMessage());
-        }
+        $response = new Capture($this, $transaction);
 
         $response->setTransactionReference($reference);
+
         if($response->isSuccessful()) $this->log('Captured order '.$transaction->order->number.' ('.$transaction->order->id.')');
+
         else $this->log('Failed to capture order '.$transaction->order->id.'. Klarna responded with '.$response->getCode().': '.$response->getMessage());
 
         return $response;
@@ -157,51 +147,36 @@ class Checkout extends Base
     public function purchase(Transaction $transaction, BasePaymentForm $form): RequestResponseInterface
     {
         $response = $this->captureKlarnaOrder($transaction);
+
+        if($response->isSuccessful()) $this->log('Purchased order '.$transaction->order->number.' ('.$transaction->order->id.')');
+
         $transaction->order->updateOrderPaidInformation();
         return $response;
     }
 
     /**
      * @param Transaction $transaction
-     * @return OrderResponse
+     * @return Capture
      * @throws BadRequestHttpException
      * @throws InvalidConfigException
-     * @throws \GuzzleHttp\Exception\GuzzleException
      * @throws \craft\commerce\errors\TransactionException
      * @throws \yii\base\ErrorException
      */
-    protected function captureKlarnaOrder(Transaction $transaction) : OrderResponse
+    protected function captureKlarnaOrder(Transaction $transaction) : Capture
     {
         $plugin = \craft\commerce\Plugin::getInstance();
-        $body = [
-            'captured_amount' => (int)$transaction->paymentAmount * 100,
-            'description' => $transaction->hash
-        ];
 
-        try {
-            $response = new OrderResponse(
-                'POST',
-                $this->getApiUrl(),
-                "/ordermanagement/v1/orders/{$transaction->reference}/captures",
-                $this->getApiId(),
-                $this->getApiPassword(),
-                $body
-            );
-        } catch (ClientException $e) {
-            $this->log($e->getCode() . ': ' . $e->getMessage());
-            throw new InvalidConfigException('Something went wrong. Klarna Response: '.$e->getMessage());
-        }
+        $response = new Capture($this, $transaction);
 
         $transaction->status = $response->isSuccessful() ? 'success' : 'failed';
         $transaction->code = $response->getCode();
         $transaction->message = $response->getMessage();
         $transaction->note = 'Automatic capture';
-        $transaction->response = $response->get();
+        $transaction->response = $response->getDecodedResponse();
 
         if(!$plugin->getTransactions()->saveTransaction($transaction)) throw new BadRequestHttpException('Could not save capture transaction');
 
         if($response->isSuccessful()) $this->log('Captured order '.$transaction->order->number.' ('.$transaction->order->id.')');
-        else $this->log('Failed to capture order '.$transaction->order->id.'. Klarna responded with '.$response->getCode().': '.$response->getMessage());
 
         return $response;
     }

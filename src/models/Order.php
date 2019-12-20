@@ -3,6 +3,7 @@
 
 namespace ellera\commerce\klarna\models;
 
+use ellera\commerce\klarna\klarna\KlarnaResponse;
 use ellera\commerce\klarna\models\responses\BaseResponse;
 
 class Order
@@ -10,65 +11,75 @@ class Order
 	/**
 	 * API Response
 	 *
-	 * @var KlarnaBaseResponse
+	 * @var KlarnaResponse
 	 */
 	public $response;
 
 	/**
 	 * KlarnaOrder constructor.
 	 *
-	 * @param KlarnaBaseResponse $response
+	 * @param KlarnaResponse $response
 	 */
 	public function __construct(BaseResponse $response)
 	{
 		$this->response = $response;
 	}
 
-	/**
-	 * Returns iFrame HTML markup from Klarna
-	 *
-	 * @return string
-	 */
+    /**
+     * Returns iFrame HTML markup from Klarna
+     *
+     * @return string
+     * @throws \yii\base\ErrorException
+     * @throws \yii\base\InvalidConfigException
+     */
 	public function getHtmlSnippet() : string
 	{
 		return $this->response->get()->html_snippet;
 	}
 
-	/**
-	 * Returns the Klarna Internal Order ID
-	 *
-	 * @return string
-	 */
+    /**
+     * Returns the Klarna Internal Order ID
+     *
+     * @return string
+     * @throws \yii\base\ErrorException
+     * @throws \yii\base\InvalidConfigException
+     */
 	public function getOrderId() : string
 	{
 		return isset($this->response->get()->order_id) ? $this->response->get()->order_id : false;
 	}
 
-	/**
-	 * Returns the Klarna order Currency
-	 *
-	 * @return string
-	 */
+    /**
+     * Returns the Klarna order Currency
+     *
+     * @return string
+     * @throws \yii\base\ErrorException
+     * @throws \yii\base\InvalidConfigException
+     */
 	public function getCurrency() : string
 	{
 		return $this->response->get()->purchase_currency;
 	}
 
-	/**
-	 * Returns the e-mail from billing address
-	 *
-	 * @return string
-	 */
+    /**
+     * Returns the e-mail from billing address
+     *
+     * @return string
+     * @throws \yii\base\ErrorException
+     * @throws \yii\base\InvalidConfigException
+     */
 	public function getEmail() : string
 	{
 		return $this->response->get()->billing_address->email;
 	}
 
-	/**
-	 * Returns the Order Total in fractional denomination
-	 *
-	 * @return float
-	 */
+    /**
+     * Returns the Order Total in fractional denomination
+     *
+     * @return float
+     * @throws \yii\base\ErrorException
+     * @throws \yii\base\InvalidConfigException
+     */
 	public function getOrderAmount() : float
 	{
 		return $this->response->get()->order_amount/100;
