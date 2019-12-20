@@ -9,6 +9,7 @@ use ellera\commerce\klarna\gateways\BaseGateway;
 use ellera\commerce\klarna\gateways\Checkout;
 use ellera\commerce\klarna\gateways\KlarnaCheckout;
 use ellera\commerce\klarna\gateways\KlarnaHPP;
+use ellera\commerce\klarna\klarna\Acknowledge;
 use ellera\commerce\klarna\models\forms\BasePaymentForm;
 use ellera\commerce\klarna\models\KlarnaBasePaymentForm;
 use yii\web\BadRequestHttpException;
@@ -102,17 +103,17 @@ class KlarnaController extends BaseFrontEndController
 		}
 		else {
 			// Acknowledge the order
-			$response = $gateway->acknowledgeOrder($klarna_order_id);
+            $acknowledgement = new Acknowledge($gateway, $klarna_order_id);
 
 			// Create Acknowledge Transaction
 			$transaction->status = 'success';
-			$transaction->code = $response->getCode();
-			$transaction->message = $response->getMessage();
+			$transaction->code = $acknowledgement->getCode();
+			$transaction->message = $acknowledgement->getMessage();
 			$transaction->note = 'Order Acknowledged';
 			if(!$plugin->getTransactions()->saveTransaction($transaction)) throw new BadRequestHttpException('Could not save acknowledge transaction');
 
 			// Check status code
-			if($response->getCode() !== '204') throw new BadRequestHttpException('Could not acknowledge order');
+			if($acknowledgement->getCode() !== '204') throw new BadRequestHttpException('Could not acknowledge order');
 		}
 
 		return $this->redirect('/'.$transaction->gateway->push.'?number='.$transaction->order->number);
