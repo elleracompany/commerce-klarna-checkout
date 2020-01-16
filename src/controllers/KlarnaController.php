@@ -6,7 +6,6 @@ use Craft;
 use craft\commerce\controllers\BaseFrontEndController;
 use craft\commerce\Plugin;
 use ellera\commerce\klarna\gateways\Checkout;
-use ellera\commerce\klarna\gateways\KlarnaHPP;
 use ellera\commerce\klarna\klarna\order\Acknowledge;
 use ellera\commerce\klarna\models\forms\BasePaymentForm;
 use yii\web\BadRequestHttpException;
@@ -44,7 +43,7 @@ class KlarnaController extends BaseFrontEndController
 
 		$last_transaction = $plugin->getTransactions()->getTransactionByHash($hash);
 
-		/** @var $gateway BaseGateway */
+        /** @var $gateway Checkout */
 		$gateway = $plugin->getGateways()->getGatewayById($last_transaction->gatewayId);
 
 		if (!$last_transaction || !$gateway) {
@@ -68,18 +67,15 @@ class KlarnaController extends BaseFrontEndController
 
 		Craft::$app->session->set('klarna_order_id', $klarna_order_id);
 
-		if($gateway instanceof Checkout)
-        {
-            /** @var $gateway Checkout */
+
             $gateway->updateOrder($order);
-        }
-		elseif($gateway instanceof KlarnaHPP && $hppId)
-        {
-            /** @var $gateway KlarnaHPP */
-            // TODO: Create an order with https://developers.klarna.com/api/#payments-api-create-a-new-order
-            $gateway->updateOrder($order);
-        }
-		else throw new NotFoundHttpException();
+        /*
+                elseif($gateway instanceof KlarnaHPP && $hppId)
+                {
+                    // TODO: Create an order with https://developers.klarna.com/api/#payments-api-create-a-new-order
+                    $gateway->updateOrder($order);
+                }
+        */
 
 
 		if(isset($gateway->paymentTypeOptions[$gateway->paymentType])) $paymentType = $gateway->paymentType;

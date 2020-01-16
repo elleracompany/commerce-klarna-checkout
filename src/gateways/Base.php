@@ -170,6 +170,13 @@ class Base extends Gateway
     public $terms = 'shop/terms';
 
     /**
+     * Setting: Terms Page
+     *
+     * @var string
+     */
+    public $push = 'shop/customer/order';
+
+    /**
      * Setting: Send Product Urls
      *
      * @var string

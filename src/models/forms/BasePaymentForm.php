@@ -3,7 +3,6 @@
 namespace ellera\commerce\klarna\models\forms;
 
 use Craft;
-use craft\commerce\base\Gateway;
 use craft\commerce\elements\Order;
 use craft\commerce\models\Address;
 use craft\commerce\models\Country;
@@ -11,7 +10,6 @@ use craft\helpers\UrlHelper;
 use craft\commerce\Plugin as Commerce;
 use craft\commerce\models\payments\BasePaymentForm as CommerceBasePaymentForm;
 use ellera\commerce\klarna\gateways\Base;
-use ellera\commerce\klarna\gateways\Checkout;
 use ellera\commerce\klarna\models\OrderLine;
 use craft\commerce\models\Transaction;
 use yii\base\InvalidConfigException;
@@ -220,10 +218,10 @@ class BasePaymentForm extends CommerceBasePaymentForm
     /**
      * Returns order lines for Commerce Lite
      * @param Order $order
-     * @param Checkout $gateway
+     * @param Base $gateway
      * @return array
      */
-    private function getOrderLinesLite(Order $order, Checkout $gateway): array
+    private function getOrderLinesLite(Order $order, Base $gateway): array
     {
         $tax_included = false;
         $shipping = 0;
