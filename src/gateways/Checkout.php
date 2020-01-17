@@ -12,7 +12,7 @@ use craft\commerce\elements\Order as CraftOrder;
 use craft\commerce\base\RequestResponseInterface;
 use craft\commerce\models\payments\BasePaymentForm;
 use craft\commerce\models\Transaction;
-use ellera\commerce\klarna\models\forms\CheckoutFrom;
+use ellera\commerce\klarna\models\forms\CheckoutForm;
 use yii\base\InvalidConfigException;
 use yii\web\BadRequestHttpException;
 
@@ -100,7 +100,7 @@ class Checkout extends Base
     public function authorize(Transaction $transaction, BasePaymentForm $form): RequestResponseInterface
     {
         // Check if the received form is of the right type
-        if(!$form instanceof CheckoutFrom)
+        if(!$form instanceof CheckoutForm)
             throw new BadRequestHttpException('Klarna Checkout only accepts CheckoutForm');
 
         // Populate the form
@@ -201,7 +201,7 @@ class Checkout extends Base
      */
     public function getPaymentFormModel(): BasePaymentForm
     {
-        return new CheckoutFrom();
+        return new CheckoutForm();
     }
 
     /**
@@ -218,7 +218,7 @@ class Checkout extends Base
 
         $transaction = $commerce->getTransactions()->createTransaction($cart, null, 'authorize');
 
-        $form = new CheckoutFrom();
+        $form = new CheckoutForm();
         $form->populate($transaction, $this);
 
         /** @var $response Create */
@@ -232,79 +232,6 @@ class Checkout extends Base
         else $this->log('Failed to create order '.$transaction->order->id.'. Klarna responded with '.$response->getCode().': '.$response->getMessage());
 
         return new Order($response);
-    }
-
-    /**
-     * Settings validation rules
-     *
-     * @return array
-     */
-    public function rules()
-    {
-        return [
-            [['title'], 'required'],
-            [
-                [
-                    'title',
-                    'description',
-                    'api_eu_uid',
-                    'api_eu_password',
-                    'api_eu_test_uid',
-                    'api_eu_test_password',
-                    'api_us_uid',
-                    'api_us_password',
-                    'api_us_test_uid',
-                    'api_us_test_password',
-                    'checkout',
-                    'push',
-                    'terms'
-                ],
-                'string'
-            ],
-            [
-                [
-                    'send_product_urls',
-                    'log_debug_messages',
-                    'test_mode',
-                    'mandatory_date_of_birth',
-                    'api_eu_title_mandatory',
-                    'api_eu_consent_notice',
-                    'mandatory_national_identification_number'
-                ],
-                'boolean'
-            ]
-        ];
-    }
-
-    /**
-     * Settings Attribute Labels
-     *
-     * @return array
-     */
-    public function attributeLabels()
-    {
-        return [
-            'title' => 'Title',
-            'description' => 'Description',
-            'api_eu_uid' => 'Production Username (UID)',
-            'api_eu_password' => 'Production Password',
-            'api_eu_test_uid' => 'Test Username (UID)',
-            'api_eu_test_password' => 'Test Password',
-            'api_us_uid' => 'Production Username (UID)',
-            'api_us_password' => 'Production Password',
-            'api_us_test_uid' => 'Test Username (UID)',
-            'api_us_test_password' => 'Test Password',
-            'send_product_urls' => 'Send Product URLs',
-            'log_debug_messages' => 'Logging',
-            'test_mode' => 'Test Mode',
-            'mandatory_date_of_birth' => 'Mandatory Date of Birth',
-            'mandatory_national_identification_number' => 'Mandatory National Identification Number',
-            'api_eu_title_mandatory' => 'Title mandatory (GB)',
-            'api_eu_consent_notice' => 'Show prefill consent notice',
-            'checkout' => 'Checkout Page',
-            'push' => 'Order Complete Page',
-            'terms' => 'Store Terms Page'
-        ];
     }
 
     /**

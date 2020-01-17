@@ -4,10 +4,18 @@
 namespace ellera\commerce\klarna\gateways;
 
 use Craft;
+use craft\commerce\base\RequestResponseInterface;
 use craft\commerce\models\payments\BasePaymentForm;
+use craft\commerce\models\Transaction;
+use craft\elements\Asset;
 use ellera\commerce\klarna\gateways\Base;
-use ellera\commerce\klarna\models\forms\HostedFrom;
+use ellera\commerce\klarna\models\forms\HostedForm;
 use craft\fields\data\MultiOptionsFieldData;
+use ellera\commerce\klarna\models\forms\HostedFrom;
+use Klarna\Rest\HostedPaymentPage\Sessions as HPPSession;
+use Klarna\Rest\Payments\Sessions;
+use Klarna\Rest\Transport\GuzzleConnector;
+use yii\web\BadRequestHttpException;
 
 /**
  * Class Hosted
@@ -66,6 +74,34 @@ class Hosted extends Base
     public $back = 'shop';
 
     /**
+     * Setting: Logo Asset ID
+     *
+     * @var array
+     */
+    public $logo_id = null;
+
+    /**
+     * Setting: Logo Asset
+     *
+     * @var Asset|null
+     */
+    public $logo_asset = null;
+
+    /**
+     * Setting: Background Asset ID
+     *
+     * @var array
+     */
+    public $background_id = null;
+
+    /**
+     * Setting: Background Asset
+     *
+     * @var Asset|null
+     */
+    public $background_asset = null;
+
+    /**
      * Setting: Cancel Page
      *
      * @var string
@@ -102,12 +138,75 @@ class Hosted extends Base
     public $status = 'shop/status';
 
     /**
+     * @param Transaction $transaction
+     * @param BasePaymentForm $form
+     * @return RequestResponseInterface
+     * @throws BadRequestHttpException
+     * @throws \craft\errors\SiteNotFoundException
+     * @throws \yii\base\ErrorException
+     * @throws \yii\base\InvalidConfigException
+     */
+    public function authorize(Transaction $transaction, BasePaymentForm $form): RequestResponseInterface
+    {
+        /** @var $form HostedFrom */
+        if(!$form instanceof HostedFrom) throw new BadRequestHttpException('Klarna HPP authorize only accepts HostedFrom');
+        $form->populate($transaction, $this);
+
+        // TODO: Continue here
+        $connector = GuzzleConnector::create(
+            $this->getClientId(),
+            $this->getClientSecret(),
+            $this->getEndpoint()
+        );
+
+        try {
+            $session = new Sessions($connector);
+            $session->create($form->getSessionRequestBody());
+        } catch (\Exception $e) {
+            $this->log($e->getCode() . ': ' . ($e instanceof \GuzzleHttp\Exception\ClientException ? $e->getResponse()->getBody()->getContents() : $e->getMessage()));
+            throw new \Exception('Session Error from Klarna. See log for more info');
+        }
+
+        try {
+            $transaction->note = 'Created Klarna HPP';
+            $transaction->order->returnUrl = $transaction->gateway->success.'?number='.$transaction->order->number;
+            $transaction->order->cancelUrl = $transaction->gateway->cancel;
+
+            $hpp = new HPPSession($connector);
+            return new KlarnaHPPResponse($transaction, $form, $session, $hpp);
+        } catch (\Exception $e) {
+            $this->log($e->getCode() . ': ' . ($e instanceof \GuzzleHttp\Exception\ClientException ? $e->getResponse()->getBody()->getContents() : $e->getMessage()));
+            throw new \Exception('HPP Error from Klarna. See log for more info');
+        }
+    }
+
+    /**
      * Returns a list of the available payment methods
      * @return array
      */
     public function getAvailablePaymentMethods()
     {
         return $this->available_methods;
+    }
+
+    /**
+     * Return the Logo Asset
+     * @return Asset|null
+     */
+    public function getLogoAsset()
+    {
+        if (!$this->logo_asset && is_array($this->logo_id) && is_numeric($this->logo_id[0])) $this->logo_asset = Craft::$app->assets->getAssetById($this->logo_id[0]);
+        return $this->logo_asset;
+    }
+
+    /**
+     * Return the Background Asset
+     * @return Asset|null
+     */
+    public function getBackgroundAsset()
+    {
+        if (!$this->background_asset && is_array($this->background_id) && is_numeric($this->background_id[0])) $this->background_asset = Craft::$app->assets->getAssetById($this->background_id[0]);
+        return $this->background_asset;
     }
 
     /**
@@ -123,7 +222,7 @@ class Hosted extends Base
      */
     public function getPaymentFormModel(): BasePaymentForm
     {
-        return new HostedFrom();
+        return new HostedForm();
     }
 
     /**
@@ -196,5 +295,18 @@ class Hosted extends Base
     public function supportsWebhooks(): bool
     {
         return false;
+    }
+
+    /**
+     * Settings Attribute Labels
+     *
+     * @return array
+     */
+    public function attributeLabels()
+    {
+        return array_merge(parent::attributeLabels(), [
+            'logo_id' => 'Logo Image',
+            'background_id' => 'Background Image'
+        ]);
     }
 }

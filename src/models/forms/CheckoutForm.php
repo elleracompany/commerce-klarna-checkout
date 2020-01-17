@@ -10,7 +10,7 @@ use ellera\commerce\klarna\models\responses\OrderResponse;
 use yii\base\InvalidConfigException;
 use GuzzleHttp\Exception\ClientException;
 
-class CheckoutFrom extends BasePaymentForm
+class CheckoutForm extends BasePaymentForm
 {
     /**
      * @param Transaction $transaction
