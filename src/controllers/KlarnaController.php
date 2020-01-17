@@ -109,6 +109,6 @@ class KlarnaController extends BaseFrontEndController
 			if($acknowledgement->getCode() !== '204') throw new BadRequestHttpException('Could not acknowledge order');
 		}
 
-		return $this->redirect('/'.$transaction->gateway->push.'?number='.$transaction->order->number);
+		return $this->redirect('/'.$transaction->gateway->success.'?number='.$transaction->order->number);
 	}
 }

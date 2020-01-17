@@ -73,11 +73,11 @@
     errors: gateway.getErrors('terms')
 }) }}
 {{ forms.textField({
-    label: gateway.getAttributeLabel('push'),
-    name: 'push',
-    value: gateway.push,
-    instructions: 'Order number is passed as parameter <code>number</code>' | t('klarna-checkout'),
-    errors: gateway.getErrors('push')
+    label: gateway.getAttributeLabel('success'),
+    name: 'success',
+    value: gateway.status,
+    instructions: 'Order success page. Passes order number as parameter \'number\'' | t('klarna-checkout'),
+    errors: gateway.getErrors('success')
 }) }}
 {{ forms.textField({
     label: gateway.getAttributeLabel('checkout'),

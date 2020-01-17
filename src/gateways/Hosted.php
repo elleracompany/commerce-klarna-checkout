@@ -12,6 +12,8 @@ use ellera\commerce\klarna\gateways\Base;
  * https://developers.klarna.com/documentation/klarna-payments/
  *
  * @package ellera\commerce\klarna\gateways
+ * @author Ellera AS <support@ellera.no>
+ * @since  2.0
  */
 class Hosted extends Base
 {
@@ -24,4 +26,11 @@ class Hosted extends Base
      * @var string
      */
     public $gateway_handle = 'klarna-hpp';
+
+    /**
+     * Setting: Title
+     *
+     * @var string
+     */
+    public $title = 'Klarna Hosted Payment Page';
 }

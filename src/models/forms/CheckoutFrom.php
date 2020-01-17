@@ -26,7 +26,7 @@ class CheckoutFrom extends BasePaymentForm
             'terms' => $this->getStoreUrl().$gateway->terms,
             'confirmation' => $this->getStoreUrl().'actions/commerce-klarna-checkout/klarna/confirmation?hash='.$transaction->hash,
             'checkout' => $this->getStoreUrl().$gateway->checkout,
-            'push' => $this->getStoreUrl().$gateway->push.'?number='.$transaction->order->number
+            'push' => $this->getStoreUrl().$gateway->success.'?number='.$transaction->order->number
         ];
     }
 
