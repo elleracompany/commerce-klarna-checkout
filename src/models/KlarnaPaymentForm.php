@@ -270,6 +270,7 @@ class KlarnaPaymentForm extends BasePaymentForm
 
 		foreach ($this->order_lines as $order_line) $body['order_lines'][] = [
 			'name' => $order_line->name,
+            'reference' => $order_line->product_id,
 			'quantity' => $order_line->quantity,
 			'unit_price' => $order_line->unit_price,
 			'tax_rate' => $order_line->tax_rate,

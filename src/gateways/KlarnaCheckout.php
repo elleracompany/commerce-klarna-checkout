@@ -717,8 +717,6 @@ class KlarnaCheckout extends BaseGateway
 
         $body = [
             'order_amount' => $order->getTotal()*100,
-            'tax_rate' => 2500,
-            'tax_amount' => $order_lines[0],
             'captured_amount' => (int)$transaction->paymentAmount * 100,
             'description' => $transaction->hash,
         ];
@@ -727,6 +725,7 @@ class KlarnaCheckout extends BaseGateway
 
         foreach ($order_lines[1] as $order_line) $body['order_lines'][] = [
             'name' => $order_line->name.' (Capture)',
+            'reference' => $order_line->product_id,
             'quantity' => (int)$order_line->quantity,
             'unit_price' => $order_line->unit_price,
             'tax_rate' => $order_line->tax_rate,
