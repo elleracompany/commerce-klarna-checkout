@@ -7,12 +7,14 @@ use craft\commerce\base\Gateway as BaseGateway;
 use craft\commerce\models\Address;
 use craft\commerce\base\RequestResponseInterface;
 use craft\commerce\elements\Order;
+use craft\commerce\models\LineItem;
 use craft\commerce\models\payments\BasePaymentForm;
 use craft\commerce\models\PaymentSource;
 use craft\commerce\models\Transaction;
 use craft\commerce\records\Country;
 use craft\web\Response as WebResponse;
 use ellera\commerce\klarna\models\KlarnaOrder;
+use ellera\commerce\klarna\models\KlarnaOrderLine;
 use ellera\commerce\klarna\models\KlarnaPaymentForm;
 use ellera\commerce\klarna\models\KlarnaResponse;
 use yii\base\InvalidConfigException;
@@ -323,10 +325,7 @@ class KlarnaCheckout extends BaseGateway
 	 */
 	public function capture(Transaction $transaction, string $reference): RequestResponseInterface
 	{
-		$body = [
-			'captured_amount' => (int)$transaction->paymentAmount * 100,
-			'description' => $transaction->hash
-		];
+        $body = $this->getCaptureBody($transaction, $reference);
 
 		$response = $this->getKlarnaResponse('POST', "/ordermanagement/v1/orders/{$transaction->reference}/captures", $body);
 		$response->setTransactionReference($reference);
@@ -692,10 +691,7 @@ class KlarnaCheckout extends BaseGateway
 	private function captureKlarnaOrder(Transaction $transaction) : KlarnaResponse
 	{
 		$plugin = \craft\commerce\Plugin::getInstance();
-		$body = [
-			'captured_amount' => (int)$transaction->paymentAmount * 100,
-			'description' => $transaction->hash
-		];
+		$body = $this->getCaptureBody($transaction);
 
 		$response = $this->getKlarnaResponse('POST', "/ordermanagement/v1/orders/{$transaction->reference}/captures", $body);
 
@@ -712,4 +708,59 @@ class KlarnaCheckout extends BaseGateway
 
 		return $response;
 	}
+
+    public function getCaptureBody(Transaction $transaction, $reference = null) : array
+    {
+        $order = $transaction->getOrder();
+
+        $order_lines = $this->getOrderLines($order, $transaction->gateway);
+
+        $body = [
+            'order_amount' => $order->getTotal()*100,
+            'captured_amount' => (int)$transaction->paymentAmount * 100,
+            'description' => $transaction->hash,
+        ];
+
+        if($reference) $body['reference'] = $reference;
+
+        foreach ($order_lines[1] as $order_line) $body['order_lines'][] = [
+            'name' => $order_line->name.' (Capture)',
+            'reference' => $order_line->product_id,
+            'quantity' => (int)$order_line->quantity,
+            'unit_price' => $order_line->unit_price,
+            'tax_rate' => $order_line->tax_rate,
+            'total_amount' => $order_line->total_amount,
+            'total_tax_amount' => $order_line->total_tax_amount,
+        ];
+
+        //die(json_encode($body));
+        return $body;
+    }
+
+    private function getOrderLines(Order $order, KlarnaCheckout $gateway)
+    {
+        $total_tax = 0;
+        $order_lines = [];
+        foreach ($order->lineItems as $line) {
+            $order_line = new KlarnaOrderLine();
+            $order_line->populate($line);
+
+            if($gateway->send_product_urls == '1') {
+                $order_line->product_url = $line->purchasable->getUrl();
+            }
+
+            $order_lines[] = $order_line;
+            $total_tax += $order_line->getLineTax();
+        }
+        $shipping_method = $order->shippingMethod;
+        if($shipping_method && $shipping_method->getPriceForOrder($order) > 0) {
+
+            $order_line = new KlarnaOrderLine();
+            $order_line->shipping($shipping_method, $order);
+            $total_tax += $order_line->getLineTax();
+
+            $order_lines[] = $order_line;
+        }
+        return [$total_tax, $order_lines];
+    }
 }
