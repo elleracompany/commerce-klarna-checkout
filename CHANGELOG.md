@@ -1,5 +1,21 @@
 # Release Notes for Klarna Checkout for Craft Commerce
 
+## 2.0.0 - XXXXXXXX
+
+> {warning} Caution! This update makes several major changes to the plugin. Test the update in a local environment before updating production.
+
+> {info} Read UPDATE_v2.md when upgrading from 1.x versions to 2.x versions.  
+
+## 1.1.6 - 2020-01-31
+
+### Fixed
+- Added TAX to the capture request so settlements will have the correct values.
+
+## 1.1.5 - 2019-10-07
+
+### Fixed
+- License and composer type fixed
+
 ## 1.1.4 - 2019-10-04
 
 ### Fixed

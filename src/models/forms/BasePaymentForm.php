@@ -142,8 +142,8 @@ class BasePaymentForm extends CommerceBasePaymentForm
         $country = $this->commerce->getAddresses()->getStoreLocationAddress()->getCountry();
         if(!isset($country->iso) || $country->iso == null) throw new InvalidConfigException('Klarna requires Store Location Country to be set. Please visit Commerce -> Store Settings -> Store Location and update the information.');
 
-        if(Craft::$app->plugins->getPlugin('commerce')->is(Commerce::EDITION_LITE)) $order_lines = $this->getOrderLinesLite($transaction->order, $gateway);
-        else $order_lines = $this->getOrderLines($transaction->order, $gateway);
+        if(Craft::$app->plugins->getPlugin('commerce')->is(Commerce::EDITION_LITE)) $order_lines = $gateway->getOrderLinesLite($transaction->order, $gateway);
+        else $order_lines = $gateway->getOrderLines($transaction->order, $gateway);
 
         $this->purchase_country = $country->iso;
         $this->purchase_currency = $transaction->order->currency;
@@ -179,108 +179,6 @@ class BasePaymentForm extends CommerceBasePaymentForm
 
 		return $siteUrl;
 	}
-
-    /**
-     * Returns an array of order lines for Klarna
-     * @param Order $order
-     * @param Base $gateway
-     * @return array
-     */
-    private function getOrderLines(Order $order, Base $gateway): array
-    {
-        $total_tax = 0;
-        $order_lines = [];
-
-        foreach ($order->lineItems as $line) {
-            $order_line = new OrderLine();
-            $order_line->populate($line);
-
-            if($gateway->send_product_urls == '1') {
-                $order_line->product_url = $line->purchasable->getUrl();
-            }
-
-            $order_lines[] = $order_line;
-            $total_tax += $order_line->getLineTax();
-        }
-        $shipping_method = $order->shippingMethod;
-        if($shipping_method && $shipping_method->getPriceForOrder($order) > 0) {
-
-            $order_line = new OrderLine();
-            $order_line->shipping($shipping_method, $order);
-            $total_tax += $order_line->getLineTax();
-
-            $order_lines[] = $order_line;
-        }
-        $this->order_tax_amount = $total_tax;
-        return $order_lines;
-    }
-
-    /**
-     * Returns order lines for Commerce Lite
-     * @param Order $order
-     * @param Base $gateway
-     * @return array
-     */
-    private function getOrderLinesLite(Order $order, Base $gateway): array
-    {
-        $tax_included = false;
-        $shipping = 0;
-        $order_lines = [];
-        $order_tax_amount = 0;
-
-        foreach ($order->getAdjustments() as $adjustment)
-        {
-            if($adjustment->type == 'tax')
-            {
-                $order_tax_amount += $adjustment->amount;
-                $tax_included = $adjustment->included == 1;
-            }
-            elseif($adjustment->type == 'shipping')
-            {
-                $shipping+= $adjustment->amount;
-            }
-        }
-        if($shipping > 0)
-        {
-            if($tax_included) {
-                $shipping_tax = ($shipping/$order->totalPrice)*$order_tax_amount;
-            }
-            else {
-                $shipping_tax = ($shipping/($order->totalPrice-$order_tax_amount))*$order_tax_amount;
-            }
-            $order_line = new OrderLine();
-
-            $order_line->name = 'Shipping';
-            $order_line->quantity = 1;
-            $order_line->unit_price = $tax_included ? (int)($shipping*100) : (int)(($shipping+$shipping_tax)*100);
-            $order_line->tax_rate = $tax_included ? round(($shipping_tax/($shipping-$shipping_tax))*10000) : round(($shipping_tax/$shipping)*10000);
-            $order_line->total_amount = $tax_included ? (int)($shipping*100*$order_line->quantity) : (int)(($shipping+$shipping_tax)*100*$order_line->quantity);
-            $order_line->total_tax_amount = (int)($shipping_tax*100);
-
-            $order_lines[] = $order_line;
-        }
-        else $shipping_tax = 0;
-
-        foreach ($order->lineItems as $line) {
-            $line_tax = $order_tax_amount-$shipping_tax;
-            $order_line = new OrderLine();
-
-            $order_line->name = $line->purchasable->title;
-            $order_line->quantity = $line->qty;
-            $order_line->unit_price = $tax_included ? (int)(($line->price)*100) : (int)(($line->price+($line_tax/$line->qty))*100);
-            $order_line->tax_rate = $tax_included ? round((($line_tax/$line->qty)/($line->price-($line_tax/$line->qty)))*10000) : round((($line_tax/$line->qty)/$line->price)*10000);
-            $order_line->total_amount = $tax_included ? (int)(($line->price)*100*$line->qty) : (int)((($line->price*$line->qty)+$line_tax)*100);
-            $order_line->total_tax_amount = (int)($line_tax*100);
-
-            if($gateway->send_product_urls == '1') {
-                $order_line->product_url = $line->purchasable->getUrl();
-            }
-
-            $order_lines[] = $order_line;
-        }
-        $this->order_tax_amount = $order_tax_amount*100;
-        return $order_lines;
-    }
 
     /**
      * Returns a Order Create Request Body

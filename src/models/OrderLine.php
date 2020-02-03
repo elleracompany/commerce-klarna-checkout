@@ -24,6 +24,13 @@ class OrderLine extends Model
 	 */
 	public $quantity;
 
+    /**
+     * Order Line Product ID
+     *
+     * @var integer
+     */
+    public $product_id;
+
 	/**
 	 * Product Unit Price in fractional denomination
 	 *
@@ -68,6 +75,7 @@ class OrderLine extends Model
 	{
 		$tax = new TaxExtractor($line);
 		$this->name = $line->purchasable->title;
+        $this->product_id = $line->purchasable->id;
 		$this->quantity = $line->qty;
 		$this->unit_price = $tax->getUnitGross();
 		$this->tax_rate = $tax->getTaxRate();
