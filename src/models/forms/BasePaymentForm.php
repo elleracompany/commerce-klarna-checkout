@@ -47,14 +47,6 @@ class BasePaymentForm extends CommerceBasePaymentForm
 	public $order_amount;
 
 	/**
-	 * Value Added Tax of order in $purchase_currency
-	 * fractional denomination
-	 *
-	 * @var int
-	 */
-	public $order_tax_amount;
-
-	/**
 	 * Klarna Formatted Address array
 	 *
 	 * @var array
@@ -192,8 +184,8 @@ class BasePaymentForm extends CommerceBasePaymentForm
             'purchase_currency' => $this->purchase_currency,
             'locale' => $this->locale,
             'order_amount' => $this->order_amount,
-            'order_tax_amount' => $this->order_tax_amount,
-            'order_lines' => $this->order_lines,
+            'order_tax_amount' => $this->order_lines[0],
+            'order_lines' => $this->order_lines[1],
             'merchant_reference1' => $this->merchant_reference1,
             'merchant_reference2' => $this->merchant_reference2,
             'options' => $this->options,

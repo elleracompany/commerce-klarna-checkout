@@ -30,7 +30,7 @@ class Capture extends KlarnaResponse
         $this->body = [
             'captured_amount' => (int)$transaction->paymentAmount * 100,
             'description' => $transaction->hash,
-            'order_lines' => $order_lines
+            'order_lines' => $order_lines[1]
         ];
 
         $this->post();

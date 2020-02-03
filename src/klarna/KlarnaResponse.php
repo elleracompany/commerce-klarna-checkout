@@ -258,7 +258,7 @@ class KlarnaResponse implements RequestResponseInterface
                 $request
             );
         } catch (ClientException $e) {
-            $this->gateway->log($e->getCode() . ': ' . $e->getMessage());
+            $this->gateway->log($e->getCode() . ': ' . $e->getResponse()->getBody()->getContents());
             throw new InvalidConfigException('Something went wrong when communicating with Klarna. See logs for more information.');
         }
 
@@ -284,7 +284,7 @@ class KlarnaResponse implements RequestResponseInterface
                 $request
             );
         } catch (ClientException $e) {
-            $this->gateway->log($e->getCode() . ': ' . $e->getMessage());
+            $this->gateway->log($e->getCode() . ': ' . $e->getResponse()->getBody()->getContents());
             throw new InvalidConfigException('Something went wrong when communicating with Klarna. See logs for more information.');
         }
 
