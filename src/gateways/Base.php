@@ -678,7 +678,7 @@ class Base extends Gateway
             $order_lines[] = $order_line;
         }
 
-        return [$total_tax*100, $order_lines];
+        return [$total_tax, $order_lines];
     }
 
     /**
