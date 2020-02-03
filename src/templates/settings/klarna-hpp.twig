@@ -157,6 +157,12 @@
     errors: gateway.getErrors('privacy')
 }) }}
 {{ forms.textField({
+    label: gateway.getAttributeLabel('checkout'),
+    name: 'checkout',
+    value: gateway.checkout,
+    errors: gateway.getErrors('checkout')
+}) }}
+{{ forms.textField({
     label: gateway.getAttributeLabel('status'),
     name: 'status',
     value: gateway.status,

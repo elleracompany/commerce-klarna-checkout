@@ -44,13 +44,6 @@ class Checkout extends Base
     public $title = 'Klarna Checkout';
 
     /**
-     * Setting: Checkout Page
-     *
-     * @var string
-     */
-    public $checkout = 'shop/checkout';
-
-    /**
      * Setting: Order Complete Page
      *
      * @var string

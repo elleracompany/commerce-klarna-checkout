@@ -62,7 +62,7 @@ class HostedForm extends BasePaymentForm
                 $this->generateCreateOrderRequestBody()
             );
         } catch (ClientException $e) {
-            $this->gateway->log($e->getCode() . ': ' . $e->getMessage());
+            $this->gateway->log($e->getCode() . ': ' . $e->getResponse()->getBody()->getContents());
             throw new InvalidConfigException('Klarna is expecting other values, make sure you\'ve added taxes as described in the documentation for the Klarna Checkout Plugin, and that you\'ve correctly set the Site Base URL. Klarna Response: '.$e->getMessage());
         }
         return $response;

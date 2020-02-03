@@ -179,6 +179,13 @@ class Base extends Gateway
     public $success = 'shop/customer/order';
 
     /**
+     * Setting: Checkout Page
+     *
+     * @var string
+     */
+    public $checkout = 'shop/checkout';
+
+    /**
      * Setting: Send Product Urls
      *
      * @var string
@@ -290,7 +297,7 @@ class Base extends Gateway
             );
         } catch (ClientException $e) {
             $this->log($e->getCode() . ': ' . $e->getMessage());
-            throw new InvalidConfigException('Something went wrong. Klarna Response: '.$e->getMessage());
+            throw new InvalidConfigException('Something went wrong. Klarna Response: '.$e->getResponse()->getBody()->getContents());
         }
 
         $response->setTransactionReference($transaction->reference);

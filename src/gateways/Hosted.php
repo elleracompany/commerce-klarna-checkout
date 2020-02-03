@@ -138,6 +138,8 @@ class Hosted extends Base
     public $status = 'shop/status';
 
     /**
+     * Makes an authorize request.
+     *
      * @param Transaction $transaction
      * @param BasePaymentForm $form
      * @return RequestResponseInterface
@@ -148,36 +150,39 @@ class Hosted extends Base
      */
     public function authorize(Transaction $transaction, BasePaymentForm $form): RequestResponseInterface
     {
-        /** @var $form HostedFrom */
-        if(!$form instanceof HostedFrom) throw new BadRequestHttpException('Klarna HPP authorize only accepts HostedFrom');
+        /** @var $form HostedForm */
+        if(!$form instanceof HostedForm) throw new BadRequestHttpException('Klarna HPP authorize only accepts HostedForm');
         $form->populate($transaction, $this);
 
-        // TODO: Continue here
-        $connector = GuzzleConnector::create(
-            $this->getClientId(),
-            $this->getClientSecret(),
-            $this->getEndpoint()
-        );
+        $response = $form->createOrder();
 
-        try {
-            $session = new Sessions($connector);
-            $session->create($form->getSessionRequestBody());
-        } catch (\Exception $e) {
-            $this->log($e->getCode() . ': ' . ($e instanceof \GuzzleHttp\Exception\ClientException ? $e->getResponse()->getBody()->getContents() : $e->getMessage()));
-            throw new \Exception('Session Error from Klarna. See log for more info');
-        }
+        if($response->isSuccessful()) $this->log('Authorized order '.$transaction->order->number.' ('.$transaction->order->id.')');
 
-        try {
-            $transaction->note = 'Created Klarna HPP';
-            $transaction->order->returnUrl = $transaction->gateway->success.'?number='.$transaction->order->number;
-            $transaction->order->cancelUrl = $transaction->gateway->cancel;
+        return $response;
+    }
 
-            $hpp = new HPPSession($connector);
-            return new KlarnaHPPResponse($transaction, $form, $session, $hpp);
-        } catch (\Exception $e) {
-            $this->log($e->getCode() . ': ' . ($e instanceof \GuzzleHttp\Exception\ClientException ? $e->getResponse()->getBody()->getContents() : $e->getMessage()));
-            throw new \Exception('HPP Error from Klarna. See log for more info');
-        }
+    /**
+     * Makes a capture request.
+     *
+     * @param Transaction $transaction The capture transaction
+     * @param string $reference Reference for the transaction being captured.
+     * @return RequestResponseInterface
+     */
+    public function capture(Transaction $transaction, string $reference): RequestResponseInterface
+    {
+        // TODO: Implement capture() method.
+    }
+
+    /**
+     * Makes a purchase request.
+     *
+     * @param Transaction $transaction The purchase transaction
+     * @param BasePaymentForm $form A form filled with payment info
+     * @return RequestResponseInterface
+     */
+    public function purchase(Transaction $transaction, BasePaymentForm $form): RequestResponseInterface
+    {
+        // TODO: Implement purchase() method.
     }
 
     /**
