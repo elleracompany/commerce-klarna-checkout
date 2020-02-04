@@ -5,13 +5,20 @@ namespace ellera\commerce\klarna\models\forms;
 
 use craft\commerce\models\Transaction;
 use ellera\commerce\klarna\gateways\Base;
-use ellera\commerce\klarna\klarna\order\Create;
+use ellera\commerce\klarna\gateways\Hosted;
+use ellera\commerce\klarna\klarna\order\Create as CreateOrder;
+use ellera\commerce\klarna\klarna\session\Create;
 use ellera\commerce\klarna\models\responses\OrderResponse;
 use yii\base\InvalidConfigException;
 use GuzzleHttp\Exception\ClientException;
 
 class HostedForm extends BasePaymentForm
 {
+    /**
+     * @var array
+     */
+    public $merchant_session_urls;
+
     /**
      * @param Transaction $transaction
      * @param Base $gateway
@@ -21,12 +28,20 @@ class HostedForm extends BasePaymentForm
     public function populate(Transaction $transaction, Base $gateway)
     {
         parent::populate($transaction, $gateway);
-
+        /** @var $gateway Hosted */
         $this->merchant_urls = [
             'terms' => $this->getStoreUrl().$gateway->terms,
             'confirmation' => $this->getStoreUrl().'actions/commerce-klarna-checkout/klarna/confirmation?hash='.$transaction->hash,
             'checkout' => $this->getStoreUrl().$gateway->checkout,
             'push' => $this->getStoreUrl().$gateway->success.'?number='.$transaction->order->number
+        ];
+
+        $this->merchant_session_urls = [
+            'success' => $this->getStoreUrl().$gateway->success.'?token='.$transaction->hash.'&sid={{session_id}}',
+            'cancel' => $this->getStoreUrl().$gateway->cancel.'?token='.$transaction->hash.'&sid={{session_id}}',
+            'back' => $this->getStoreUrl().$gateway->back.'?token='.$transaction->hash.'&sid={{session_id}}',
+            'failure' => $this->getStoreUrl().$gateway->failure.'?token='.$transaction->hash.'&sid={{session_id}}',
+            'error' => $this->getStoreUrl().$gateway->error.'?token='.$transaction->hash.'&sid={{session_id}}'
         ];
     }
 
@@ -39,7 +54,9 @@ class HostedForm extends BasePaymentForm
      */
     public function createOrder()
     {
-        return new Create($this->gateway, $this);
+        $order = new CreateOrder($this->gateway, $this);
+        $payment_session_url = $this->gateway->getApiUrl().'/checkout/v3/orders/'.$order->getData()->order_id;
+        return new Create($this->gateway, $this, $payment_session_url);
     }
 
     /**
@@ -76,6 +93,15 @@ class HostedForm extends BasePaymentForm
      */
     public function generateCreateSessionRequestBody(string $payment_session_url)
     {
-        return [];
+        $body = [
+            'payment_session_url' => $payment_session_url,
+            'merchant_urls' => $this->merchant_session_urls,
+        ];
+        /** @var $this->gateway Hosted */
+        // TODO: Klarna reacts to the url format of the transform
+        if($this->gateway->getLogoUrl()) $body['options']['logo'] = $this->gateway->getLogoUrl();
+        if($this->gateway->getBackgroundUrl()) $body['options']['background_images'] = $this->gateway->getBackgroundUrl();
+        die(json_encode($body));
+        return $body;
     }
 }

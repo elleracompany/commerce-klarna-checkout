@@ -8,13 +8,8 @@ use craft\commerce\base\RequestResponseInterface;
 use craft\commerce\models\payments\BasePaymentForm;
 use craft\commerce\models\Transaction;
 use craft\elements\Asset;
-use ellera\commerce\klarna\gateways\Base;
 use ellera\commerce\klarna\models\forms\HostedForm;
 use craft\fields\data\MultiOptionsFieldData;
-use ellera\commerce\klarna\models\forms\HostedFrom;
-use Klarna\Rest\HostedPaymentPage\Sessions as HPPSession;
-use Klarna\Rest\Payments\Sessions;
-use Klarna\Rest\Transport\GuzzleConnector;
 use yii\web\BadRequestHttpException;
 
 /**
@@ -313,5 +308,49 @@ class Hosted extends Base
             'logo_id' => 'Logo Image',
             'background_id' => 'Background Image'
         ]);
+    }
+
+    public function getLogoUrl()
+    {
+        $logo = $this->getLogoAsset();
+        if($logo instanceof Asset) return $logo->url;
+        return false;
+    }
+
+    public function getBackgroundUrl()
+    {
+        $background = $this->getBackgroundAsset();
+        if($background instanceof Asset) {
+            $small = [
+                'mode' => 'fit',
+                'name' => 'klarna_hpp_small',
+                'width' => 400
+            ];
+            $medium = [
+                'mode' => 'fit',
+                'name' => 'klarna_hpp_small',
+                'width' => 900
+            ];
+            $large = [
+                'mode' => 'fit',
+                'name' => 'klarna_hpp_small',
+                'width' => 1600
+            ];
+            return [
+                [
+                    'url' => $background->getUrl($small),
+                    'width' => $background->getWidth($small)
+                ],
+                [
+                    'url' => $background->getUrl($medium),
+                    'width' => $background->getWidth($medium)
+                ],
+                [
+                    'url' => $background->getUrl($large),
+                    'width' => $background->getWidth($large)
+                ]
+            ];
+        }
+        return false;
     }
 }
