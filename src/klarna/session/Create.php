@@ -1,7 +1,7 @@
 <?php
 
 
-namespace ellera\commerce\klarna\klarna\order;
+namespace ellera\commerce\klarna\klarna\session;
 
 use ellera\commerce\klarna\gateways\Base;
 use ellera\commerce\klarna\klarna\KlarnaResponse;
@@ -13,20 +13,22 @@ class Create extends KlarnaResponse
      * Create constructor.
      * @param Base $gateway
      * @param BasePaymentForm $form
+     * @param string $payment_session_url
      * @throws \yii\base\ErrorException
      * @throws \yii\base\InvalidConfigException
      */
-    public function __construct(Base $gateway, BasePaymentForm $form)
+    public function __construct(Base $gateway, BasePaymentForm $form, string $payment_session_url)
     {
         parent::__construct($gateway);
 
-        $this->endpoint = '/checkout/v3/orders';
+        $this->endpoint = '/hpp/v1/sessions';
 
-        $this->body = $form->generateCreateOrderRequestBody();
+        // TODO: Make this function
+        $this->body = $form->generateCreateSessionRequestBody();
 
         $this->post();
 
-        if(isset($this->response->order_id)) $this->setTransactionReference($this->response->order_id);
+        if(isset($this->response->session_id)) $this->setTransactionReference($this->response->session_id);
         else $this->setTransactionReference('!No Ref');
     }
 }
