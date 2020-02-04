@@ -165,7 +165,7 @@ class Checkout extends Base
         $transaction->code = $response->getCode();
         $transaction->message = $response->getMessage();
         $transaction->note = 'Automatic capture';
-        $transaction->response = $response->getDecodedResponse();
+        $transaction->response = $response->getData();
 
         if(!$plugin->getTransactions()->saveTransaction($transaction)) throw new BadRequestHttpException('Could not save capture transaction');
 
@@ -216,7 +216,7 @@ class Checkout extends Base
 
         /** @var $response Create */
         $response = $this->authorize($transaction, $form);
-        $transaction->reference = $response->getDecodedResponse()->order_id;
+        $transaction->reference = $response->getData()->order_id;
         $transaction->code = $response->getCode();
         $transaction->message = $response->getMessage();
         $commerce->getTransactions()->saveTransaction($transaction);

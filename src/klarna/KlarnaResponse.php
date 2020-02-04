@@ -9,6 +9,7 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
 use craft\helpers\ArrayHelper;
 use yii\base\InvalidConfigException;
+use Psr\Http\Message\ResponseInterface;
 
 class KlarnaResponse implements RequestResponseInterface
 {
@@ -35,16 +36,16 @@ class KlarnaResponse implements RequestResponseInterface
     /**
      * Stores the JSON Response
      *
-     * @var object
+     * @var ResponseInterface
      */
-    protected $response;
+    protected $raw_response;
 
     /**
      * Stores the JSON Decoded Response Object
      *
      * @var object
      */
-    protected $decoded_response;
+    protected $response;
 
     /**
      * Transaction reference
@@ -87,7 +88,7 @@ class KlarnaResponse implements RequestResponseInterface
      */
     public function isSuccessful(): bool
     {
-        return 200 <= $this->response->getStatusCode() && $this->response->getStatusCode() < 300;
+        return 200 <= $this->raw_response->getStatusCode() && $this->raw_response->getStatusCode() < 300;
     }
 
     /**
@@ -168,7 +169,7 @@ class KlarnaResponse implements RequestResponseInterface
      */
     public function getCode(): string
     {
-        return $this->response->getStatusCode();
+        return $this->raw_response->getStatusCode();
     }
 
     /**
@@ -178,7 +179,7 @@ class KlarnaResponse implements RequestResponseInterface
      */
     public function getRawResponse()
     {
-        return $this->response;
+        return $this->raw_response;
     }
 
     /**
@@ -186,7 +187,7 @@ class KlarnaResponse implements RequestResponseInterface
      */
     public function getData()
     {
-        return $this->getDecodedResponse();
+        return $this->response;
     }
 
     /**
@@ -196,7 +197,7 @@ class KlarnaResponse implements RequestResponseInterface
      */
     public function getMessage(): string
     {
-        return $this->response->getReasonPhrase();
+        return $this->raw_response->getReasonPhrase();
     }
 
     /**
@@ -229,17 +230,6 @@ class KlarnaResponse implements RequestResponseInterface
     }
 
     /**
-     * Returns the decoded response as a PHP Object
-     *
-     * @return object
-     */
-    public function getDecodedResponse()
-    {
-        if(!$this->decoded_response) $this->decoded_response = json_decode($this->response->getBody());
-        return $this->decoded_response;
-    }
-
-    /**
      * Execute a GET request to Klarna
      *
      * @throws InvalidConfigException
@@ -262,7 +252,8 @@ class KlarnaResponse implements RequestResponseInterface
             throw new InvalidConfigException('Something went wrong when communicating with Klarna. See logs for more information.');
         }
 
-        $this->response = $response;
+        $this->raw_response = $response;
+        $this->response = json_decode($response->getBody()->getContents());
     }
 
     /**
@@ -288,6 +279,7 @@ class KlarnaResponse implements RequestResponseInterface
             throw new InvalidConfigException('Something went wrong when communicating with Klarna. See logs for more information.');
         }
 
-        $this->response = $response;
+        $this->raw_response = $response;
+        $this->response = json_decode($response->getBody()->getContents());
     }
 }

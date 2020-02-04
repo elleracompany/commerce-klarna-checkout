@@ -33,7 +33,7 @@ class Order
      */
 	public function getHtmlSnippet() : string
 	{
-		return $this->response->getDecodedResponse()->html_snippet;
+		return $this->response->getData()->html_snippet;
 	}
 
     /**
@@ -45,7 +45,7 @@ class Order
      */
 	public function getOrderId() : string
 	{
-		return isset($this->response->getDecodedResponse()->order_id) ? $this->response->getDecodedResponse()->order_id : false;
+		return isset($this->response->getData()->order_id) ? $this->response->getData()->order_id : false;
 	}
 
     /**
@@ -57,7 +57,7 @@ class Order
      */
 	public function getCurrency() : string
 	{
-		return $this->response->getDecodedResponse()->purchase_currency;
+		return $this->response->getData()->purchase_currency;
 	}
 
     /**
@@ -69,7 +69,7 @@ class Order
      */
 	public function getEmail() : string
 	{
-		return $this->response->getDecodedResponse()->billing_address->email;
+		return $this->response->getData()->billing_address->email;
 	}
 
     /**
@@ -81,6 +81,6 @@ class Order
      */
 	public function getOrderAmount() : float
 	{
-		return $this->response->getDecodedResponse()->order_amount/100;
+		return $this->response->getData()->order_amount/100;
 	}
 }
