@@ -5,26 +5,25 @@ namespace ellera\commerce\klarna\klarna\session;
 
 use ellera\commerce\klarna\gateways\Base;
 use ellera\commerce\klarna\klarna\KlarnaResponse;
-use ellera\commerce\klarna\models\forms\BasePaymentForm;
+use ellera\commerce\klarna\models\forms\HostedForm;
 
 class Create extends KlarnaResponse
 {
     /**
      * Create constructor.
      * @param Base $gateway
-     * @param BasePaymentForm $form
+     * @param HostedForm $form
      * @param string $payment_session_url
      * @throws \yii\base\ErrorException
      * @throws \yii\base\InvalidConfigException
      */
-    public function __construct(Base $gateway, BasePaymentForm $form, string $payment_session_url)
+    public function __construct(Base $gateway, HostedForm $form, string $payment_session_url)
     {
         parent::__construct($gateway);
 
         $this->endpoint = '/hpp/v1/sessions';
 
-        // TODO: Make this function
-        $this->body = $form->generateCreateSessionRequestBody();
+        $this->body = $form->generateCreateSessionRequestBody($payment_session_url);
 
         $this->post();
 

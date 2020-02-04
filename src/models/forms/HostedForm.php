@@ -67,4 +67,15 @@ class HostedForm extends BasePaymentForm
         }
         return $response;
     }
+
+    /**
+     * Generate Create Session Body
+     *
+     * @param string $payment_session_url
+     * @return array
+     */
+    public function generateCreateSessionRequestBody(string $payment_session_url)
+    {
+        return [];
+    }
 }
