@@ -1,9 +1,5 @@
 # Release Notes for Klarna Checkout for Craft Commerce
 
-## 2.0.1 - 2020-05-02
-
-- Added deprecated version of Klarna Checkout to enable capture and refunding of orders made with v1.x
-
 ## 2.0.0 - 2020-05-02
 
 > {warning} Caution! This update makes several major changes to the plugin. Test the update in a local environment before updating production.
