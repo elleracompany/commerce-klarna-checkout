@@ -36,6 +36,13 @@ class Base extends Gateway
     // =========================================================================
 
     /**
+     * Setting: Title
+     *
+     * @var string
+     */
+    public $title = null;
+
+    /**
      * Setting: Logging
      *
      * @var bool
@@ -674,13 +681,9 @@ class Base extends Gateway
                     'api_us_password',
                     'api_us_test_uid',
                     'api_us_test_password',
-                    'error',
-                    'failure',
-                    'privacy',
                     'terms',
-                    'error',
-                    'cancel',
-                    'back'
+                    'success',
+                    'checkout'
                 ],
                 'string'
             ],

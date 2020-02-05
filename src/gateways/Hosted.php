@@ -334,6 +334,27 @@ class Hosted extends Base
         }
 
         return false;
+    }
 
+    /**
+     * Settings validation rules
+     *
+     * @return array
+     */
+    public function rules()
+    {
+        $rules = [
+            [
+                [
+                    'cancel',
+                    'error',
+                    'failure',
+                    'privacy',
+                    'status'
+                ],
+                'string'
+            ],
+        ];
+        return array_merge(parent::rules(), $rules);
     }
 }

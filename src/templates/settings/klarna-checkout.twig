@@ -13,7 +13,7 @@
     label: gateway.getAttributeLabel('title'),
     name: 'title',
     value: gateway.title,
-    errors: gateway.getErrors('title')
+    errors: gateway.getFirstError('title')
 }) }}
 
 {{ forms.textAreaField({
@@ -21,7 +21,7 @@
     name: 'description',
     value: gateway.description,
     rows: 4,
-    errors: gateway.getErrors('description')
+    errors: gateway.getFirstError('description')
 }) }}
 
 {{ forms.lightswitchField({
@@ -29,7 +29,7 @@
     name: 'send_product_urls',
     on: gateway.send_product_urls,
     instructions: 'Send product and product image URLs to Klarna' | t('klarna-checkout'),
-    errors: gateway.getErrors('send_product_urls')
+    errors: gateway.getFirstError('send_product_urls')
 }) }}
 
 {{ forms.lightswitchField({
@@ -37,7 +37,7 @@
     name: 'log_debug_messages',
     on: gateway.log_debug_messages,
     instructions: 'Log debug messages' | t('klarna-checkout'),
-    errors: gateway.getErrors('log_debug_messages')
+    errors: gateway.getFirstError('log_debug_messages')
 }) }}
 
 {{ forms.lightswitchField({
@@ -45,7 +45,7 @@
     name: 'test_mode',
     on: gateway.test_mode,
     instructions: 'Enable Test Mode' | t('klarna-checkout'),
-    errors: gateway.getErrors('test_mode')
+    errors: gateway.getFirstError('test_mode')
 }) }}
 
 {{ forms.lightswitchField({
@@ -53,7 +53,7 @@
     name: 'mandatory_date_of_birth',
     on: gateway.mandatory_date_of_birth,
     instructions: 'Make customer date of birth mandatory' | t('klarna-checkout'),
-    errors: gateway.getErrors('mandatory_date_of_birth')
+    errors: gateway.getFirstError('mandatory_date_of_birth')
 }) }}
 
 {{ forms.lightswitchField({
@@ -61,7 +61,7 @@
     name: 'mandatory_national_identification_number',
     on: gateway.mandatory_national_identification_number,
     instructions: 'Make national identification number mandatory' | t('klarna-checkout'),
-    errors: gateway.getErrors('mandatory_national_identification_number')
+    errors: gateway.getFirstError('mandatory_national_identification_number')
 }) }}
 
 {{ forms.lightswitchField({
@@ -69,7 +69,7 @@
     name: 'api_eu_title_mandatory',
     on: gateway.api_eu_title_mandatory,
     instructions: 'Make customer title mandatory' | t('klarna-checkout'),
-    errors: gateway.getErrors('api_eu_title_mandatory')
+    errors: gateway.getFirstError('api_eu_title_mandatory')
 }) }}
 
 <h2>Merchant URLs</h2>
@@ -78,20 +78,20 @@
     label: gateway.getAttributeLabel('terms'),
     name: 'terms',
     value: gateway.terms,
-    errors: gateway.getErrors('terms')
+    errors: gateway.getFirstError('terms')
 }) }}
 {{ forms.textField({
     label: gateway.getAttributeLabel('success'),
     name: 'success',
     value: gateway.success,
     instructions: 'Order success page. Passes order number as parameter \'number\'' | t('klarna-checkout'),
-    errors: gateway.getErrors('success')
+    errors: gateway.getFirstError('success')
 }) }}
 {{ forms.textField({
     label: gateway.getAttributeLabel('checkout'),
     name: 'checkout',
     value: gateway.checkout,
-    errors: gateway.getErrors('checkout')
+    errors: gateway.getFirstError('checkout')
 }) }}
 
 {% include 'commerce-klarna-checkout/settings/includes/_credentials.twig' %}

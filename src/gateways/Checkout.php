@@ -229,4 +229,22 @@ class Checkout extends Base
     {
         return false;
     }
+
+    /**
+     * Settings validation rules
+     *
+     * @return array
+     */
+    public function rules()
+    {
+        $rules = [
+            [
+                [
+                    'push'
+                ],
+                'string'
+            ],
+        ];
+        return array_merge(parent::rules(), $rules);
+    }
 }

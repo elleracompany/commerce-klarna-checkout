@@ -13,7 +13,7 @@
     label: gateway.getAttributeLabel('title'),
     name: 'title',
     value: gateway.title,
-    errors: gateway.getErrors('title')
+    errors: gateway.getFirstError('title')
 }) }}
 
 {{ forms.textAreaField({
@@ -21,7 +21,7 @@
     name: 'description',
     value: gateway.description,
     rows: 4,
-    errors: gateway.getErrors('description')
+    errors: gateway.getFirstError('description')
 }) }}
 
 {{ forms.lightswitchField({
@@ -29,7 +29,7 @@
     name: 'send_product_urls',
     on: gateway.send_product_urls,
     instructions: 'Send product and product image URLs to Klarna' | t('klarna-checkout'),
-    errors: gateway.getErrors('send_product_urls')
+    errors: gateway.getFirstError('send_product_urls')
 }) }}
 
 {{ forms.lightswitchField({
@@ -37,7 +37,7 @@
     name: 'log_debug_messages',
     on: gateway.log_debug_messages,
     instructions: 'Log debug messages' | t('klarna-checkout'),
-    errors: gateway.getErrors('log_debug_messages')
+    errors: gateway.getFirstError('log_debug_messages')
 }) }}
 
 {{ forms.elementSelectField({
@@ -48,7 +48,7 @@
     elementType: 'craft\\elements\\Asset',
     selectionLabel: "Choose"|t('app'),
     limit: 1,
-    errors: gateway.getErrors('logo_id')
+    errors: gateway.getFirstError('logo_id')
 }) }}
 
 {{ forms.elementSelectField({
@@ -59,7 +59,7 @@
     elementType: 'craft\\elements\\Asset',
     selectionLabel: "Choose"|t('app'),
     limit: 1,
-    errors: gateway.getErrors('background_id')
+    errors: gateway.getFirstError('background_id')
 }) }}
 
 <div>
@@ -70,7 +70,7 @@
         options: gateway.getAvailablePaymentMethods(),
         values: gateway.methods,
         warning: false,
-        errors: gateway.getErrors("methods"),
+        errors: gateway.getFirstError("methods"),
     }) }}
 </div>
 
@@ -79,7 +79,7 @@
     name: 'test_mode',
     on: gateway.test_mode,
     instructions: 'Enable Test Mode' | t('klarna-checkout'),
-    errors: gateway.getErrors('test_mode')
+    errors: gateway.getFirstError('test_mode')
 }) }}
 
 {{ forms.lightswitchField({
@@ -87,7 +87,7 @@
     name: 'test_mode',
     on: gateway.test_mode,
     instructions: 'Enable Test Mode' | t('klarna-checkout'),
-    errors: gateway.getErrors('test_mode')
+    errors: gateway.getFirstError('test_mode')
 }) }}
 
 {{ forms.lightswitchField({
@@ -95,7 +95,7 @@
     name: 'mandatory_date_of_birth',
     on: gateway.mandatory_date_of_birth,
     instructions: 'Make customer date of birth mandatory' | t('klarna-checkout'),
-    errors: gateway.getErrors('mandatory_date_of_birth')
+    errors: gateway.getFirstError('mandatory_date_of_birth')
 }) }}
 
 {{ forms.lightswitchField({
@@ -103,7 +103,7 @@
     name: 'mandatory_national_identification_number',
     on: gateway.mandatory_national_identification_number,
     instructions: 'Make national identification number mandatory' | t('klarna-checkout'),
-    errors: gateway.getErrors('mandatory_national_identification_number')
+    errors: gateway.getFirstError('mandatory_national_identification_number')
 }) }}
 
 {{ forms.lightswitchField({
@@ -111,7 +111,7 @@
     name: 'api_eu_title_mandatory',
     on: gateway.api_eu_title_mandatory,
     instructions: 'Make customer title mandatory' | t('klarna-checkout'),
-    errors: gateway.getErrors('api_eu_title_mandatory')
+    errors: gateway.getFirstError('api_eu_title_mandatory')
 }) }}
 
 <h2>Merchant URLs</h2>
@@ -120,60 +120,60 @@
     label: gateway.getAttributeLabel('terms'),
     name: 'terms',
     value: gateway.terms,
-    errors: gateway.getErrors('terms')
+    errors: gateway.getFirstError('terms')
 }) }}
 {{ forms.textField({
     label: gateway.getAttributeLabel('back'),
     name: 'back',
     value: gateway.back,
     instructions: 'Return page when the customer clicks "Go Back" in HPP' | t('klarna-checkout'),
-    errors: gateway.getErrors('back')
+    errors: gateway.getFirstError('back')
 }) }}
 {{ forms.textField({
     label: gateway.getAttributeLabel('cancel'),
     name: 'cancel',
     value: gateway.cancel,
     instructions: 'Return page when the customer cancels the payment' | t('klarna-checkout'),
-    errors: gateway.getErrors('cancel')
+    errors: gateway.getFirstError('cancel')
 }) }}
 {{ forms.textField({
     label: gateway.getAttributeLabel('error'),
     name: 'error',
     value: gateway.error,
     instructions: 'Return page when the payment has an error' | t('klarna-checkout'),
-    errors: gateway.getErrors('error')
+    errors: gateway.getFirstError('error')
 }) }}
 {{ forms.textField({
     label: gateway.getAttributeLabel('failure'),
     name: 'failure',
     value: gateway.failure,
     instructions: 'Return page when the payment fails' | t('klarna-checkout'),
-    errors: gateway.getErrors('failure')
+    errors: gateway.getFirstError('failure')
 }) }}
 {{ forms.textField({
     label: gateway.getAttributeLabel('privacy'),
     name: 'privacy',
     value: gateway.privacy,
-    errors: gateway.getErrors('privacy')
+    errors: gateway.getFirstError('privacy')
 }) }}
 {{ forms.textField({
     label: gateway.getAttributeLabel('checkout'),
     name: 'checkout',
     value: gateway.checkout,
-    errors: gateway.getErrors('checkout')
+    errors: gateway.getFirstError('checkout')
 }) }}
 {{ forms.textField({
     label: gateway.getAttributeLabel('status'),
     name: 'status',
     value: gateway.status,
     instructions: 'Order status page (?)' | t('klarna-checkout'),
-    errors: gateway.getErrors('status')
+    errors: gateway.getFirstError('status')
 }) }}
 {{ forms.textField({
     label: gateway.getAttributeLabel('success'),
     name: 'success',
     value: gateway.success,
     instructions: 'Order success page. Passes order number as parameter \'number\'' | t('klarna-checkout'),
-    errors: gateway.getErrors('success')
+    errors: gateway.getFirstError('success')
 }) }}
 {% include 'commerce-klarna-checkout/settings/includes/_credentials.twig' %}
