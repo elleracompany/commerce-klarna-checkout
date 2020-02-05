@@ -14,10 +14,11 @@ class Create extends KlarnaResponse
      * @param Base $gateway
      * @param HostedForm $form
      * @param string $payment_session_url
+     * @param string $reference
      * @throws \yii\base\ErrorException
      * @throws \yii\base\InvalidConfigException
      */
-    public function __construct(Base $gateway, HostedForm $form, string $payment_session_url)
+    public function __construct(Base $gateway, HostedForm $form, string $payment_session_url, string $reference)
     {
         parent::__construct($gateway);
 
@@ -25,9 +26,9 @@ class Create extends KlarnaResponse
 
         $this->body = $form->generateCreateSessionRequestBody($payment_session_url);
 
-        $this->post();
-
-        if(isset($this->response->session_id)) $this->setTransactionReference($this->response->session_id);
+        if(isset($reference)) $this->setTransactionReference($reference);
         else $this->setTransactionReference('!No Ref');
+
+        $this->post();
     }
 }

@@ -4,7 +4,6 @@
 namespace ellera\commerce\klarna\gateways;
 
 use Craft;
-use ellera\commerce\klarna\klarna\order\Capture;
 use ellera\commerce\klarna\klarna\order\Create;
 use ellera\commerce\klarna\klarna\order\Update;
 use ellera\commerce\klarna\models\Order;
@@ -102,74 +101,6 @@ class Checkout extends Base
         $response = $form->createOrder();
 
         if($response->isSuccessful()) $this->log('Authorized order '.$transaction->order->number.' ('.$transaction->order->id.')');
-
-        return $response;
-    }
-
-    /**
-     * @param Transaction $transaction
-     * @param string $reference
-     * @return RequestResponseInterface
-     * @throws InvalidConfigException
-     * @throws \GuzzleHttp\Exception\GuzzleException
-     * @throws \yii\base\ErrorException
-     */
-    public function capture(Transaction $transaction, string $reference): RequestResponseInterface
-    {
-        $response = new Capture($this, $transaction);
-
-        $response->setTransactionReference($reference);
-
-        if($response->isSuccessful()) $this->log('Captured order '.$transaction->order->number.' ('.$transaction->order->id.')');
-
-        else $this->log('Failed to capture order '.$transaction->order->id.'. Klarna responded with '.$response->getCode().': '.$response->getMessage());
-
-        return $response;
-    }
-
-    /**
-     * @param Transaction $transaction
-     * @param BasePaymentForm $form
-     * @return RequestResponseInterface
-     * @throws BadRequestHttpException
-     * @throws InvalidConfigException
-     * @throws \GuzzleHttp\Exception\GuzzleException
-     * @throws \craft\commerce\errors\TransactionException
-     * @throws \yii\base\ErrorException
-     */
-    public function purchase(Transaction $transaction, BasePaymentForm $form): RequestResponseInterface
-    {
-        $response = $this->captureKlarnaOrder($transaction);
-
-        if($response->isSuccessful()) $this->log('Purchased order '.$transaction->order->number.' ('.$transaction->order->id.')');
-
-        $transaction->order->updateOrderPaidInformation();
-        return $response;
-    }
-
-    /**
-     * @param Transaction $transaction
-     * @return Capture
-     * @throws BadRequestHttpException
-     * @throws InvalidConfigException
-     * @throws \craft\commerce\errors\TransactionException
-     * @throws \yii\base\ErrorException
-     */
-    protected function captureKlarnaOrder(Transaction $transaction) : Capture
-    {
-        $plugin = \craft\commerce\Plugin::getInstance();
-
-        $response = new Capture($this, $transaction);
-
-        $transaction->status = $response->isSuccessful() ? 'success' : 'failed';
-        $transaction->code = $response->getCode();
-        $transaction->message = $response->getMessage();
-        $transaction->note = 'Automatic capture';
-        $transaction->response = $response->getData();
-
-        if(!$plugin->getTransactions()->saveTransaction($transaction)) throw new BadRequestHttpException('Could not save capture transaction');
-
-        if($response->isSuccessful()) $this->log('Captured order '.$transaction->order->number.' ('.$transaction->order->id.')');
 
         return $response;
     }

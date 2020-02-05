@@ -157,30 +157,6 @@ class Hosted extends Base
     }
 
     /**
-     * Makes a capture request.
-     *
-     * @param Transaction $transaction The capture transaction
-     * @param string $reference Reference for the transaction being captured.
-     * @return RequestResponseInterface
-     */
-    public function capture(Transaction $transaction, string $reference): RequestResponseInterface
-    {
-        // TODO: Implement capture() method.
-    }
-
-    /**
-     * Makes a purchase request.
-     *
-     * @param Transaction $transaction The purchase transaction
-     * @param BasePaymentForm $form A form filled with payment info
-     * @return RequestResponseInterface
-     */
-    public function purchase(Transaction $transaction, BasePaymentForm $form): RequestResponseInterface
-    {
-        // TODO: Implement purchase() method.
-    }
-
-    /**
      * Returns a list of the available payment methods
      * @return array
      */

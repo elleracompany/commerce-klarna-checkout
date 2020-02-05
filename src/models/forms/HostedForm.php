@@ -56,7 +56,7 @@ class HostedForm extends BasePaymentForm
     {
         $order = new CreateOrder($this->gateway, $this);
         $payment_session_url = $this->gateway->getApiUrl().'/checkout/v3/orders/'.$order->getData()->order_id;
-        return new Create($this->gateway, $this, $payment_session_url);
+        return new Create($this->gateway, $this, $payment_session_url, $order->getTransactionReference());
     }
 
     /**
@@ -100,7 +100,7 @@ class HostedForm extends BasePaymentForm
         /** @var $this->gateway Hosted */
         if($this->gateway->getLogoUrl()) $body['options']['logo'] = $this->gateway->getLogoUrl();
         if($this->gateway->getBackgroundUrl()) $body['options']['background_images'] = $this->gateway->getBackgroundUrl();
-        
+
         return $body;
     }
 }

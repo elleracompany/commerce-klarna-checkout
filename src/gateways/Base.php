@@ -13,12 +13,14 @@ use craft\commerce\models\PaymentSource;
 use craft\commerce\models\Transaction;
 use craft\commerce\records\Country;
 use craft\web\Response as WebResponse;
+use ellera\commerce\klarna\klarna\order\Capture;
 use ellera\commerce\klarna\models\OrderLine;
 use ellera\commerce\klarna\models\responses\OrderAcknowledgeResponse;
 use ellera\commerce\klarna\models\responses\OrderResponse;
 use GuzzleHttp\Exception\ClientException;
 use Throwable;
 use yii\base\InvalidConfigException;
+use yii\web\BadRequestHttpException;
 
 /**
  * Class Base
@@ -222,27 +224,44 @@ class Base extends Gateway
     }
 
     /**
-     * Makes a capture request.
-     *
-     * @param Transaction $transaction The capture transaction
-     * @param string $reference Reference for the transaction being captured.
+     * @param Transaction $transaction
+     * @param string $reference
      * @return RequestResponseInterface
+     * @throws InvalidConfigException
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws \yii\base\ErrorException
      */
     public function capture(Transaction $transaction, string $reference): RequestResponseInterface
     {
-        // TODO: Implement capture() method.
+        $response = new Capture($this, $transaction);
+
+        $response->setTransactionReference($reference);
+
+        if($response->isSuccessful()) $this->log('Captured order '.$transaction->order->number.' ('.$transaction->order->id.')');
+
+        else $this->log('Failed to capture order '.$transaction->order->id.'. Klarna responded with '.$response->getCode().': '.$response->getMessage());
+
+        return $response;
     }
 
     /**
-     * Makes a purchase request.
-     *
-     * @param Transaction $transaction The purchase transaction
-     * @param BasePaymentForm $form A form filled with payment info
+     * @param Transaction $transaction
+     * @param BasePaymentForm $form
      * @return RequestResponseInterface
+     * @throws BadRequestHttpException
+     * @throws InvalidConfigException
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws \craft\commerce\errors\TransactionException
+     * @throws \yii\base\ErrorException
      */
     public function purchase(Transaction $transaction, BasePaymentForm $form): RequestResponseInterface
     {
-        // TODO: Implement purchase() method.
+        $response = $this->captureKlarnaOrder($transaction);
+
+        if($response->isSuccessful()) $this->log('Purchased order '.$transaction->order->number.' ('.$transaction->order->id.')');
+
+        $transaction->order->updateOrderPaidInformation();
+        return $response;
     }
 
     /**
@@ -303,6 +322,33 @@ class Base extends Gateway
         $response->setTransactionReference($transaction->reference);
         if($response->isSuccessful()) $this->log('Refunded '.$amount.' from order '.$transaction->order->number.' ('.$transaction->order->id.')');
         else $this->log('Failed to refund order '.$transaction->order->id.'. Klarna responded with '.$response->getCode().': '.$response->getMessage());
+
+        return $response;
+    }
+
+    /**
+     * @param Transaction $transaction
+     * @return Capture
+     * @throws BadRequestHttpException
+     * @throws InvalidConfigException
+     * @throws \craft\commerce\errors\TransactionException
+     * @throws \yii\base\ErrorException
+     */
+    protected function captureKlarnaOrder(Transaction $transaction) : Capture
+    {
+        $plugin = \craft\commerce\Plugin::getInstance();
+
+        $response = new Capture($this, $transaction);
+
+        $transaction->status = $response->isSuccessful() ? 'success' : 'failed';
+        $transaction->code = $response->getCode();
+        $transaction->message = $response->getMessage();
+        $transaction->note = 'Automatic capture';
+        $transaction->response = $response->getData();
+
+        if(!$plugin->getTransactions()->saveTransaction($transaction)) throw new BadRequestHttpException('Could not save capture transaction');
+
+        if($response->isSuccessful()) $this->log('Captured order '.$transaction->order->number.' ('.$transaction->order->id.')');
 
         return $response;
     }
