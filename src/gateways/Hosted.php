@@ -320,7 +320,12 @@ class Hosted extends Base
     public function getBackgroundUrl()
     {
         $background = $this->getBackgroundAsset();
+
         if($background instanceof Asset) {
+            // Background URLs does not work unless its on HTTPS
+            $parsed = parse_url($background->getUrl(), PHP_URL_SCHEME);
+            if($parsed !== 'https') return false;
+
             $small = [
                 'mode' => 'fit',
                 'name' => 'klarna_hpp_small',
@@ -351,6 +356,8 @@ class Hosted extends Base
                 ]
             ];
         }
+
         return false;
+
     }
 }

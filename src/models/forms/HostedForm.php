@@ -98,10 +98,9 @@ class HostedForm extends BasePaymentForm
             'merchant_urls' => $this->merchant_session_urls,
         ];
         /** @var $this->gateway Hosted */
-        // TODO: Klarna reacts to the url format of the transform
         if($this->gateway->getLogoUrl()) $body['options']['logo'] = $this->gateway->getLogoUrl();
         if($this->gateway->getBackgroundUrl()) $body['options']['background_images'] = $this->gateway->getBackgroundUrl();
-        die(json_encode($body));
+        
         return $body;
     }
 }
