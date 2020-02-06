@@ -163,11 +163,11 @@
     errors: gateway.getFirstError('checkout')
 }) }}
 {{ forms.textField({
-    label: gateway.getAttributeLabel('status'),
-    name: 'status',
-    value: gateway.status,
+    label: gateway.getAttributeLabel('status_page'),
+    name: 'status_page',
+    value: gateway.status_page,
     instructions: 'Order status page (?)' | t('klarna-checkout'),
-    errors: gateway.getFirstError('status')
+    errors: gateway.getFirstError('status_page')
 }) }}
 {{ forms.textField({
     label: gateway.getAttributeLabel('success'),

@@ -37,7 +37,7 @@ class HostedForm extends BasePaymentForm
         ];
 
         $this->merchant_session_urls = [
-            'success' => $this->getStoreUrl().$gateway->success.'?token='.$transaction->hash.'&sid={{session_id}}',
+            'success' => $this->getStoreUrl().'actions/commerce-klarna-checkout/klarna/confirmation?hash='.$transaction->hash,
             'cancel' => $this->getStoreUrl().$gateway->cancel.'?token='.$transaction->hash.'&sid={{session_id}}',
             'back' => $this->getStoreUrl().$gateway->back.'?token='.$transaction->hash.'&sid={{session_id}}',
             'failure' => $this->getStoreUrl().$gateway->failure.'?token='.$transaction->hash.'&sid={{session_id}}',

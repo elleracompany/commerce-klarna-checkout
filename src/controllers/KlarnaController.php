@@ -23,11 +23,9 @@ class KlarnaController extends BaseFrontEndController
 
     /**
      * @param $hash
-     * @param null|string $hppId
-     *
+     * @param null $hppId
      * @return \yii\web\Response|null
      * @throws BadRequestHttpException
-     * @throws NotFoundHttpException
      * @throws \GuzzleHttp\Exception\GuzzleException
      * @throws \craft\commerce\errors\TransactionException
      * @throws \craft\errors\MissingComponentException
@@ -67,16 +65,7 @@ class KlarnaController extends BaseFrontEndController
 
 		Craft::$app->session->set('klarna_order_id', $klarna_order_id);
 
-
-            $gateway->updateOrder($order);
-        /*
-                elseif($gateway instanceof KlarnaHPP && $hppId)
-                {
-                    // TODO: Create an order with https://developers.klarna.com/api/#payments-api-create-a-new-order
-                    $gateway->updateOrder($order);
-                }
-        */
-
+        $gateway->updateOrder($order);
 
 		if(isset($gateway->paymentTypeOptions[$gateway->paymentType])) $paymentType = $gateway->paymentType;
 		else $paymentType = 'authorize';
@@ -86,13 +75,7 @@ class KlarnaController extends BaseFrontEndController
 		$transaction->paymentAmount = $last_transaction->paymentAmount;
 
 		if($paymentType == 'purchase') {
-
-			// Get the gateway's payment form
-			$paymentForm = $gateway->getPaymentFormModel();
-
-			if(!$paymentForm instanceof BasePaymentForm) throw new BadRequestHttpException('Klarna authorize only accepts KlarnaPaymentForm');
-			$paymentForm->populate($transaction, $gateway);
-			$gateway->purchase($transaction, $paymentForm);
+			$gateway->capture($transaction, 'automatic_capture');
 		}
 		else {
 			// Acknowledge the order

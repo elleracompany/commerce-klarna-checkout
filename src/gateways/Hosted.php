@@ -130,7 +130,7 @@ class Hosted extends Base
      *
      * @var string
      */
-    public $status = 'shop/status';
+    public $status_page = 'shop/status';
 
     /**
      * Makes an authorize request.
@@ -145,6 +145,8 @@ class Hosted extends Base
      */
     public function authorize(Transaction $transaction, BasePaymentForm $form): RequestResponseInterface
     {
+        $transaction->status = 'pending';
+
         /** @var $form HostedForm */
         if(!$form instanceof HostedForm) throw new BadRequestHttpException('Klarna HPP authorize only accepts HostedForm');
         $form->populate($transaction, $this);
@@ -154,6 +156,20 @@ class Hosted extends Base
         if($response->isSuccessful()) $this->log('Authorized order '.$transaction->order->number.' ('.$transaction->order->id.')');
 
         return $response;
+    }
+
+    /**
+     * @param Transaction $transaction
+     * @param BasePaymentForm $form
+     * @return RequestResponseInterface
+     * @throws BadRequestHttpException
+     * @throws \craft\errors\SiteNotFoundException
+     * @throws \yii\base\ErrorException
+     * @throws \yii\base\InvalidConfigException
+     */
+    public function purchase(Transaction $transaction, BasePaymentForm $form): RequestResponseInterface
+    {
+        return $this->authorize($transaction, $form);
     }
 
     /**
@@ -350,7 +366,7 @@ class Hosted extends Base
                     'error',
                     'failure',
                     'privacy',
-                    'status'
+                    'status_page'
                 ],
                 'string'
             ],

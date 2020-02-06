@@ -5,9 +5,7 @@ namespace ellera\commerce\klarna\gateways;
 
 use Craft;
 use ellera\commerce\klarna\klarna\order\Create;
-use ellera\commerce\klarna\klarna\order\Update;
 use ellera\commerce\klarna\models\Order;
-use craft\commerce\elements\Order as CraftOrder;
 use craft\commerce\base\RequestResponseInterface;
 use craft\commerce\models\payments\BasePaymentForm;
 use craft\commerce\models\Transaction;
@@ -55,28 +53,6 @@ class Checkout extends Base
     public static function displayName(): string
     {
         return Craft::t('commerce', 'Klarna Checkout');
-    }
-
-    /**
-     * @param \craft\commerce\elements\Order $order
-     * @throws InvalidConfigException
-     * @throws \GuzzleHttp\Exception\GuzzleException
-     * @throws \yii\base\ErrorException
-     */
-    public function updateOrder(CraftOrder $order)
-    {
-        $response = new Update($this, $order);
-
-        if($response->isSuccessful()) $this->log('Updated order '.$order->number.' ('.$order->id.')');
-
-        if($response->getData()->shipping_address) {
-            $order->setShippingAddress($this->createAddressFromResponse($response->getData()->shipping_address));
-            if($response->getData()->shipping_address->email) $order->setEmail($response->getData()->shipping_address->email);
-        }
-        if($response->getData()->billing_address) {
-            $order->setBillingAddress($this->createAddressFromResponse($response->getData()->billing_address));
-            if($response->getData()->billing_address->email) $order->setEmail($response->getData()->billing_address->email);
-        }
     }
 
     /**

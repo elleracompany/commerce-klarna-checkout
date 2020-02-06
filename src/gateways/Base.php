@@ -11,6 +11,8 @@ use craft\commerce\models\Address;
 use craft\commerce\models\payments\BasePaymentForm;
 use craft\commerce\models\PaymentSource;
 use craft\commerce\models\Transaction;
+use ellera\commerce\klarna\klarna\order\Update;
+use craft\commerce\elements\Order as CraftOrder;
 use craft\commerce\records\Country;
 use craft\web\Response as WebResponse;
 use ellera\commerce\klarna\klarna\order\Capture;
@@ -537,6 +539,28 @@ class Base extends Gateway
             throw new InvalidConfigException('Something went wrong. Klarna Response: '.$e->getMessage());
         }
         return $response;
+    }
+
+    /**
+     * @param \craft\commerce\elements\Order $order
+     * @throws InvalidConfigException
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws \yii\base\ErrorException
+     */
+    public function updateOrder(CraftOrder $order)
+    {
+        $response = new Update($this, $order);
+
+        if($response->isSuccessful()) $this->log('Updated order '.$order->number.' ('.$order->id.')');
+
+        if($response->getData()->shipping_address) {
+            $order->setShippingAddress($this->createAddressFromResponse($response->getData()->shipping_address));
+            if($response->getData()->shipping_address->email) $order->setEmail($response->getData()->shipping_address->email);
+        }
+        if($response->getData()->billing_address) {
+            $order->setBillingAddress($this->createAddressFromResponse($response->getData()->billing_address));
+            if($response->getData()->billing_address->email) $order->setEmail($response->getData()->billing_address->email);
+        }
     }
 
     /**
