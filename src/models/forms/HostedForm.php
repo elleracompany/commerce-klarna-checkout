@@ -101,6 +101,10 @@ class HostedForm extends BasePaymentForm
         if($this->gateway->getLogoUrl()) $body['options']['logo'] = $this->gateway->getLogoUrl();
         if($this->gateway->getBackgroundUrl()) $body['options']['background_images'] = $this->gateway->getBackgroundUrl();
 
+        //TODO: Add available payment methods
+        // Several: "payment_method_categories": ["pay_later"],
+        // Single: "payment_method_category": "pay_later",
+
         return $body;
     }
 }
