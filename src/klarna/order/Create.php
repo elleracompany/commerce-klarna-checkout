@@ -9,6 +9,21 @@ use ellera\commerce\klarna\models\forms\BasePaymentForm;
 
 class Create extends KlarnaResponse
 {
+    public function isSuccessful(): bool
+    {
+        return false;
+    }
+
+    public function isProcessing(): bool
+    {
+        return true;
+    }
+
+    public function isRedirect(): bool
+    {
+        return false;
+    }
+
     /**
      * Create constructor.
      * @param Base $gateway

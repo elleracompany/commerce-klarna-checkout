@@ -145,7 +145,7 @@ class Hosted extends Base
      */
     public function authorize(Transaction $transaction, BasePaymentForm $form): RequestResponseInterface
     {
-        $transaction->status = 'pending';
+        $transaction->note = 'Created Klarna Order and HPP Session';
 
         /** @var $form HostedForm */
         if(!$form instanceof HostedForm) throw new BadRequestHttpException('Klarna HPP authorize only accepts HostedForm');

@@ -74,6 +74,8 @@ class Checkout extends Base
         // Populate the form
         $form->populate($transaction, $this);
 
+        $transaction->note = 'Created Klarna Order';
+
         $response = $form->createOrder();
 
         if($response->isSuccessful()) $this->log('Authorized order '.$transaction->order->number.' ('.$transaction->order->id.')');

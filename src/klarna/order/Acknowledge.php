@@ -8,6 +8,11 @@ use ellera\commerce\klarna\klarna\KlarnaResponse;
 
 class Acknowledge extends KlarnaResponse
 {
+    public function isSuccessful(): bool
+    {
+        return true;
+    }
+
     /**
      * Acknowledge constructor.
      * @param Base $gateway
