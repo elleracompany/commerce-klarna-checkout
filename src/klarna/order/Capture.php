@@ -28,7 +28,7 @@ class Capture extends KlarnaResponse
         else $order_lines = $gateway->getOrderLines($transaction->order, $gateway);
 
         $this->body = [
-            'captured_amount' => (int)$transaction->paymentAmount * 100,
+            'captured_amount' => (int)($transaction->paymentAmount * 100),
             'description' => $transaction->hash,
             'order_lines' => $order_lines[1]
         ];

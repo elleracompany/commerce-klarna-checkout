@@ -11,6 +11,7 @@ use craft\commerce\models\Address;
 use craft\commerce\models\payments\BasePaymentForm;
 use craft\commerce\models\PaymentSource;
 use craft\commerce\models\Transaction;
+use ellera\commerce\klarna\klarna\order\Refund;
 use ellera\commerce\klarna\klarna\order\Update;
 use craft\commerce\elements\Order as CraftOrder;
 use craft\commerce\records\Country;
@@ -307,26 +308,7 @@ class Base extends Gateway
         $amount = Craft::$app->request->getBodyParam('amount');
         $note = Craft::$app->request->getBodyParam('note');
 
-        if($amount == '') $amount = $transaction->order->totalPaid;
-
-        $body = [
-            'refunded_amount' => (int)$amount*100,
-            'description' => $note
-        ];
-
-        try {
-            $response = new OrderResponse(
-                'POST',
-                $this->getApiUrl(),
-                "/ordermanagement/v1/orders/{$transaction->reference}/refunds",
-                $this->getApiId(),
-                $this->getApiPassword(),
-                $body
-            );
-        } catch (ClientException $e) {
-            $this->log($e->getCode() . ': ' . $e->getMessage());
-            throw new InvalidConfigException('Something went wrong. Klarna Response: '.$e->getResponse()->getBody()->getContents());
-        }
+        $response = new Refund($this, $transaction, (int)($amount*100), $note);
 
         $response->setTransactionReference($transaction->reference);
         if($response->isSuccessful()) $this->log('Refunded '.$amount.' from order '.$transaction->order->number.' ('.$transaction->order->id.')');
