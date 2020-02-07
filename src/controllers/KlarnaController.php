@@ -75,7 +75,15 @@ class KlarnaController extends BaseFrontEndController
 		$transaction->paymentAmount = $last_transaction->paymentAmount;
 
 		if($paymentType == 'purchase') {
-			$gateway->capture($transaction, 'automatic_capture');
+			$capture = $gateway->capture($transaction, 'Automatic Capture on Order complete');
+
+            // Create Acknowledge Transaction
+            $transaction->status = 'success';
+            $transaction->code = $capture->getCode();
+            $transaction->message = $capture->getMessage();
+            $transaction->note = 'Order Captured';
+
+            if(!$plugin->getTransactions()->saveTransaction($transaction)) throw new BadRequestHttpException('Could not save acknowledge transaction');
 		}
 		else {
 			// Acknowledge the order
