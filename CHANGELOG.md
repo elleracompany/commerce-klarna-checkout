@@ -1,9 +1,9 @@
 # Release Notes for Klarna Checkout for Craft Commerce
 ## 1.1.7 - 2020-03-03
+
+### Updated
 - Made compatible with Commerce ^3.0.0
 
-### Fixed
-- Added TAX to the capture request so settlements will have the correct values.
 
 ## 1.1.6 - 2020-01-31
 
