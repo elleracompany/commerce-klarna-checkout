@@ -245,13 +245,16 @@ class KlarnaCheckout extends BaseGateway
 		return $response;
 	}
 
-	/**
-	 * @param Order $order
-	 *
-	 * @throws InvalidConfigException
-	 * @throws \GuzzleHttp\Exception\GuzzleException
-	 * @throws \yii\base\ErrorException
-	 */
+    /**
+     * @param Order $order
+     * @throws InvalidConfigException
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws \Throwable
+     * @throws \craft\commerce\errors\OrderStatusException
+     * @throws \craft\errors\ElementNotFoundException
+     * @throws \yii\base\ErrorException
+     * @throws \yii\base\Exception
+     */
 	public function updateOrder(Order $order)
 	{
 		try {
@@ -268,6 +271,7 @@ class KlarnaCheckout extends BaseGateway
 			$order->setBillingAddress($this->createAddressFromResponse($response->getData()->billing_address));
 			if($response->getData()->billing_address->email) $order->setEmail($response->getData()->billing_address->email);
 		}
+		if($response->isSuccessful()) $order->markAsComplete();
 	}
 
 	/**
