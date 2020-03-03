@@ -3,9 +3,11 @@
 This plugin provides [Klarna](https://www.klarna.com) integrations for [Craft Commerce](https://craftcms.com/commerce).
 
 **Note: this plugin is still undergoing testing and improvements. Please report any and all errors trough our support channels.**
+
+**When upgrading from v1.x to v2.x please refer to [UPDATE_v2.md](UPDATE_v2.md)**
 ## Requirements
 
-This plugin requires Craft Commerce 2.0.0 or later.
+This plugin requires Craft Commerce 2.2.0 or later.
 
 ## Installation
 
@@ -30,20 +32,24 @@ The plugin logs errors and transactions to `@storage/logs/commerce-klarna-checko
 2.  and Base URL in `Settings -> Sites -> sitename -> Base URL`.
 3.  Install the plugin.
 4.  Navigate to `Commerce -> System Settings -> Gateways` and `+ New Gateway`
-5.  Select Klarna Checkout from the dropdown.
+5.  Select Klarna Checkout or Klarna Hosted Payment Page from the dropdown.
 6.  Set your information Playground credentials in API Credentials Europe Test Username (UID)/Test Password.
 7.  Get Klarna Production Approval for your site
 8.  Turn off "Testing Mode" and add production credentials for the Gateway
 
 
-#### Payment button
-Since Klarna is rendering its own payment button, the craft-commerce default 'Pay' button must be removed.
+#### Klarna Checkout: Payment button
+Since Klarna Checkout is rendering its own payment button, the craft-commerce default 'Pay' button must be removed.
 You can copy and overwrite your shop default `checkout/payment.html` file with `vendor/ellera/commerce-klarna-checkout/src/templates/pages/checkout/payment.html` or simply update your existing template with
 ```
 {% if cart.gateway.handle is not same as('klarna') %}
     <button class="button button-primary" type="submit">Pay {{ cart.totalPrice|commerceCurrency(cart.paymentCurrency,convert=true) }}</button>
 {% endif %}
 ```
+#### Klarna Hosted Payment Page
+For hosted payment pages the 'Pay' button is required to send the user to Klarna. When selecting Logo and Background images 
+for Klarna HPP it is important that the Image asset is in a web accessible Volume.
+ 
 #### Get Klarna Approval
 You need approval from klarna before you can change to production mode.
 
