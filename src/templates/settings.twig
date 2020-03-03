@@ -1,0 +1,165 @@
+{% import "_includes/forms" as forms %}
+
+{% if siteUrl | slice(0,4) != 'http' %}
+    <div class="pane alert" style="background-color: #f8d7da; color: #721c24; border-color: #f5c6cb;">
+        It does not look like the Base URL is configured properly. This might create issues with the generation of merchant URLs for Klarna.<br>
+        Please update the following setting:
+        <br><br>
+        <code>Settings -> Sites -> sitename -> Base URL</code>
+    </div>
+{% endif %}
+
+{{ forms.textField({
+    label: gateway.getAttributeLabel('title'),
+    name: 'title',
+    value: gateway.title,
+    errors: gateway.getErrors('title')
+}) }}
+
+{{ forms.textAreaField({
+    label: gateway.getAttributeLabel('description'),
+    name: 'description',
+    value: gateway.description,
+    rows: 4,
+    errors: gateway.getErrors('description')
+}) }}
+
+{{ forms.lightswitchField({
+    label: gateway.getAttributeLabel('send_product_urls'),
+    name: 'send_product_urls',
+    on: gateway.send_product_urls,
+    instructions: 'Send product and product image URLs to Klarna' | t('klarna-checkout'),
+    errors: gateway.getErrors('send_product_urls')
+}) }}
+
+{{ forms.lightswitchField({
+    label: gateway.getAttributeLabel('log_debug_messages'),
+    name: 'log_debug_messages',
+    on: gateway.log_debug_messages,
+    instructions: 'Log debug messages' | t('klarna-checkout'),
+    errors: gateway.getErrors('log_debug_messages')
+}) }}
+
+{{ forms.lightswitchField({
+    label: gateway.getAttributeLabel('test_mode'),
+    name: 'test_mode',
+    on: gateway.test_mode,
+    instructions: 'Enable Test Mode' | t('klarna-checkout'),
+    errors: gateway.getErrors('test_mode')
+}) }}
+
+{{ forms.lightswitchField({
+    label: gateway.getAttributeLabel('mandatory_date_of_birth'),
+    name: 'mandatory_date_of_birth',
+    on: gateway.mandatory_date_of_birth,
+    instructions: 'Make customer date of birth mandatory' | t('klarna-checkout'),
+    errors: gateway.getErrors('mandatory_date_of_birth')
+}) }}
+
+{{ forms.lightswitchField({
+    label: gateway.getAttributeLabel('mandatory_national_identification_number'),
+    name: 'mandatory_national_identification_number',
+    on: gateway.mandatory_national_identification_number,
+    instructions: 'Make national identification number mandatory' | t('klarna-checkout'),
+    errors: gateway.getErrors('mandatory_national_identification_number')
+}) }}
+
+<h2>Merchant URLs</h2>
+
+{{ forms.textField({
+    label: gateway.getAttributeLabel('terms'),
+    name: 'terms',
+    value: gateway.terms,
+    errors: gateway.getErrors('terms')
+}) }}
+{{ forms.textField({
+    label: gateway.getAttributeLabel('push'),
+    name: 'push',
+    value: gateway.push,
+    instructions: 'Order number is passed as parameter <code>number</code>' | t('klarna-checkout'),
+    errors: gateway.getErrors('push')
+}) }}
+{{ forms.textField({
+    label: gateway.getAttributeLabel('checkout'),
+    name: 'checkout',
+    value: gateway.checkout,
+    errors: gateway.getErrors('checkout')
+}) }}
+
+<h2>API Credentials euope</h2>
+
+{{ forms.textField({
+    label: gateway.getAttributeLabel('api_eu_uid'),
+    name: 'api_eu_uid',
+    value: gateway.api_eu_uid,
+    errors: gateway.getErrors('api_eu_uid')
+}) }}
+
+{{ forms.textField({
+    label: gateway.getAttributeLabel('api_eu_password'),
+    name: 'api_eu_password',
+    value: gateway.api_eu_password,
+    errors: gateway.getErrors('api_eu_password')
+}) }}
+
+{{ forms.textField({
+    first: true,
+    label: gateway.getAttributeLabel('api_eu_test_uid'),
+    name: 'api_eu_test_uid',
+    value: gateway.api_eu_test_uid,
+    errors: gateway.getErrors('api_eu_test_uid')
+}) }}
+
+{{ forms.textField({
+    label: gateway.getAttributeLabel('api_eu_test_password'),
+    name: 'api_eu_test_password',
+    value: gateway.api_eu_test_password,
+    errors: gateway.getErrors('api_eu_test_password')
+}) }}
+
+{{ forms.lightswitchField({
+    label: gateway.getAttributeLabel('api_eu_title_mandatory'),
+    name: 'api_eu_title_mandatory',
+    on: gateway.api_eu_title_mandatory,
+    instructions: 'Make customer title mandatory' | t('klarna-checkout'),
+    errors: gateway.getErrors('api_eu_title_mandatory')
+}) }}
+<!--
+{{ forms.lightswitchField({
+    label: gateway.getAttributeLabel('api_eu_consent_notice'),
+    name: 'api_eu_consent_notice',
+    on: gateway.api_eu_consent_notice,
+    instructions: 'Only applicable for stores based in Germany and Austria' | t('klarna-checkout'),
+    errors: gateway.getErrors('api_eu_consent_notice')
+}) }}
+<!--
+<h2>API Credentials United States</h2>
+
+{{ forms.textField({
+    label: gateway.getAttributeLabel('api_us_uid'),
+    name: 'api_us_uid',
+    value: gateway.api_us_uid,
+    errors: gateway.getErrors('api_us_uid')
+}) }}
+
+{{ forms.textField({
+    label: gateway.getAttributeLabel('api_us_password'),
+    name: 'api_us_password',
+    value: gateway.api_us_password,
+    errors: gateway.getErrors('api_us_password')
+}) }}
+
+{{ forms.textField({
+    label: gateway.getAttributeLabel('api_us_test_uid'),
+    name: 'api_us_test_uid',
+    value: gateway.api_us_test_uid,
+    errors: gateway.getErrors('api_us_test_uid')
+}) }}
+
+{{ forms.textField({
+    label: gateway.getAttributeLabel('api_us_test_password'),
+    name: 'api_us_test_password',
+    value: gateway.api_us_test_password,
+    errors: gateway.getErrors('api_us_test_password')
+}) }}
+-->

@@ -8,7 +8,7 @@ use craft\commerce\elements\Order;
 use craft\commerce\models\LineItem;
 use ellera\commerce\klarna\helpers\TaxExtractor;
 
-class OrderLine extends Model
+class KlarnaOrderLine extends Model
 {
 	/**
 	 * Product Name
@@ -76,7 +76,7 @@ class OrderLine extends Model
 		$tax = new TaxExtractor($line);
 		$this->name = $line->purchasable->title;
         $this->product_id = $line->purchasable->id;
-		$this->quantity = (int)$line->qty;
+		$this->quantity = $line->qty;
 		$this->unit_price = $tax->getUnitGross();
 		$this->tax_rate = $tax->getTaxRate();
 		$this->total_amount = $tax->getTotalGross();
