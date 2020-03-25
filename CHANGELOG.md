@@ -1,4 +1,10 @@
 # Release Notes for Klarna Checkout for Craft Commerce
+
+## 1.1.8 - 2020-03-25
+
+### Bugfix
+- Now using paymentCurrency instead of order currency in Klarna order
+
 ## 1.1.7 - 2020-03-03
 
 ### Updated
