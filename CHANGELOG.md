@@ -1,5 +1,10 @@
 # Release Notes for Klarna Checkout for Craft Commerce
 
+## 1.1.9 - 2020-05-04
+
+### Bugfix
+- Fixed type cast error (Issue #31)
+
 ## 1.1.8 - 2020-03-25
 
 ### Bugfix
