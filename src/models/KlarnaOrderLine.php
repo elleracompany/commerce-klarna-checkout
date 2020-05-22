@@ -108,7 +108,8 @@ class KlarnaOrderLine extends Model
 		$this->name = $method->getName();
 		$this->total_amount = (int) (($shipping_base_price+$tax_excluded)*100*$this->quantity);
 		$this->total_tax_amount = (int) (($tax_included+$tax_excluded)*100);
-		$this->tax_rate = (int) round((($tax_excluded+$tax_included)/($shipping_base_price-$tax_included))*10000);
+		$this->tax_rate = 0;
+		if($shipping_base_price-$tax_included > 0) $this->tax_rate = (int) round((($tax_excluded+$tax_included)/($shipping_base_price-$tax_included))*10000);
 	}
 
 	/**
