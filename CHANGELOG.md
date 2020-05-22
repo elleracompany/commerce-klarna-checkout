@@ -1,5 +1,10 @@
 # Release Notes for Klarna Checkout for Craft Commerce
 
+## 1.1.10 - 2020-05-22
+
+### Bugfix
+- Fixed division by zero shipping with discount issue (Issue #35)
+
 ## 1.1.9 - 2020-05-04
 
 ### Bugfix
