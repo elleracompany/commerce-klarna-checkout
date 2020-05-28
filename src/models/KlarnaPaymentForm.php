@@ -130,6 +130,7 @@ class KlarnaPaymentForm extends BasePaymentForm
 		$this->merchant_reference2 = $transaction->order->number;
 		$this->options = [
 			'date_of_birth_mandatory' => $gateway->mandatory_date_of_birth == '1',
+            'allow_separate_shipping_address' => true,
 			'national_identification_number_mandatory' => $gateway->mandatory_national_identification_number == '1',
 			'title_mandatory' => $gateway->api_eu_title_mandatory == '1',
 			'show_subtotal_detail' => true

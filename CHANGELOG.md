@@ -1,5 +1,10 @@
 # Release Notes for Klarna Checkout for Craft Commerce
 
+## 1.1.11 - 2020-05-28
+
+### Bugfix
+- Added `allow_separate_shipping_address` in klarna order (Issue #33)
+
 ## 1.1.10 - 2020-05-22
 
 ### Bugfix
