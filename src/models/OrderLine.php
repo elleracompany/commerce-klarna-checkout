@@ -103,7 +103,7 @@ class OrderLine extends Model
 				else $tax_excluded+=$adjustment->amount;
 			}
 		}
-		$this->unit_price = (int) ($shipping_base_price+$tax_excluded)*100;
+		$this->unit_price = (int) (($shipping_base_price+$tax_excluded)*100);
 		$this->quantity = 1;
 		$this->name = $method->getName();
 		$this->total_amount = (int) (($shipping_base_price+$tax_excluded)*100*$this->quantity);
