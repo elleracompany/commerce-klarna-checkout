@@ -10,6 +10,26 @@
 - Added Hosted Payment Page gateway (#19)
 - Un-truncated error messages from GuzzleHTTP (#18) 
 
+## 1.1.11 - 2020-05-28
+
+### Bugfix
+- Added `allow_separate_shipping_address` in klarna order (Issue #33)
+
+## 1.1.10 - 2020-05-22
+
+### Bugfix
+- Fixed division by zero shipping with discount issue (Issue #35)
+
+## 1.1.9 - 2020-05-04
+
+### Bugfix
+- Fixed type cast error (Issue #31)
+
+## 1.1.8 - 2020-03-25
+
+### Bugfix
+- Now using paymentCurrency instead of order currency in Klarna order
+
 ## 1.1.7 - 2020-03-03
 
 ### Updated

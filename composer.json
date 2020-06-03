@@ -1,7 +1,7 @@
 {
   "name": "elleracompany/commerce-klarna-checkout",
-  "description": "Klarna Checkout integration for Craft Commerce 2",
-  "version": "2.0.0-BETA",
+  "description": "Klarna Checkout integration for Craft Commerce",
+  "version": "3.0.0-BETA",
   "type": "craft-plugin",
   "keywords": [
     "klarna",
@@ -27,7 +27,7 @@
   "require": {
     "ext-json": "*",
     "craftcms/cms": "^3.1.0",
-    "craftcms/commerce": "^2.2.0",
+    "craftcms/commerce": "^3.0.0",
     "guzzlehttp/guzzle": "^6.5.0"
   },
   "autoload": {
