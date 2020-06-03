@@ -7,6 +7,7 @@
 - Refactored the entire plugin code base to be easier to maintain
 - Added Hosted Payment Page gateway (#19)
 - Un-truncated error messages from GuzzleHTTP (#18) 
+- Added support for external payment methods (#34)
 
 ## 1.1.11 - 2020-05-28
 

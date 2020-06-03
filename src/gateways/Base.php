@@ -204,6 +204,13 @@ class Base extends Gateway
      */
     public $send_product_urls = true;
 
+    /**
+     * Setting: External Payment Methods
+     *
+     * @var array
+     */
+    public $external_payment_methods = null;
+
     // Public Methods
     // =========================================================================
 

@@ -115,6 +115,8 @@
     errors: gateway.getFirstError('api_eu_title_mandatory')
 }) }}
 
+{% include 'commerce-klarna-checkout/settings/includes/_payment_methods.twig' %}
+
 <h2>Merchant URLs</h2>
 
 {{ forms.textField({

@@ -121,6 +121,11 @@ class BasePaymentForm extends CommerceBasePaymentForm
     public $gateway;
 
     /**
+     * @var array
+     */
+    public $external_payment_methods;
+
+    /**
      * @param Transaction $transaction
      * @param Base $gateway
      * @throws InvalidConfigException
@@ -146,6 +151,7 @@ class BasePaymentForm extends CommerceBasePaymentForm
         $this->order_lines = $order_lines;
         $this->merchant_reference1 = $transaction->order->shortNumber;
         $this->merchant_reference2 = $transaction->order->number;
+        $this->external_payment_methods = $gateway->external_payment_methods;
         $this->options = [
             'date_of_birth_mandatory' => $gateway->mandatory_date_of_birth == '1',
             'national_identification_number_mandatory' => $gateway->mandatory_national_identification_number == '1',
@@ -180,7 +186,7 @@ class BasePaymentForm extends CommerceBasePaymentForm
      */
     public function generateCreateOrderRequestBody(): array
     {
-        return [
+        $body = [
             'purchase_country' => $this->purchase_country,
             'purchase_currency' => $this->purchase_currency,
             'locale' => $this->locale,
@@ -194,5 +200,7 @@ class BasePaymentForm extends CommerceBasePaymentForm
             'options' => $this->options,
             'merchant_urls' => $this->merchant_urls
         ];
+        if(is_array($this->external_payment_methods) && !empty($this->external_payment_methods)) $body['external_payment_methods'] = $this->external_payment_methods;
+        return $body;
     }
 }

@@ -1,0 +1,35 @@
+<h2>External Payment Methods</h2>
+<p>Implements external payment providers. Please follow the
+    <a href="https://developers.klarna.com/documentation/klarna-checkout/external-payment-methods/#supported-external-payment-methods-in-kco" target="_blank">Klarna Documentation</a>.</p>
+<strong>Note: fee is in minor units.</strong>
+{% import "_includes/forms" as forms %}
+{{ forms.editableTable({
+    id: 'external_payment_methods',
+    name: 'external_payment_methods',
+    label: gateway.getAttributeLabel('external_payment_methods'),
+    required: false,
+    cols: {
+        name: {
+            heading: "name",
+            type: "singleline"
+        },
+        redirect_url: {
+            heading: "redirect_url",
+            type: "singleline"
+        },
+        image_url: {
+            heading: "image_url",
+            type: "singleline"
+        },
+        fee: {
+            heading: "fee",
+            type: "singleline"
+        },
+        description: {
+            heading: "Description"|t('cookie-consent'),
+            type: "multiline"
+        }
+    },
+    errors: gateway.getErrors("external_payment_methods"),
+    rows: gateway.external_payment_methods
+}) }}
