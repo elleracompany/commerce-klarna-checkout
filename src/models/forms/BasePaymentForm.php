@@ -187,6 +187,8 @@ class BasePaymentForm extends CommerceBasePaymentForm
             'order_amount' => $this->order_amount,
             'order_tax_amount' => $this->order_lines[0],
             'order_lines' => $this->order_lines[1],
+            'billing_address' => $this->billing_address,
+            'shipping_address' => $this->shipping_address,
             'merchant_reference1' => $this->merchant_reference1,
             'merchant_reference2' => $this->merchant_reference2,
             'options' => $this->options,
