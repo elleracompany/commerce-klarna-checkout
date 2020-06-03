@@ -2,9 +2,7 @@
 
 ## 3.0.0 - 2020-XX-XX
 
-> {warning} Caution! This update makes several major changes to the plugin. Test the update in a local environment before updating production.
-
-> {info} Read UPDATE_v3.md when upgrading from 1.x versions to 3.x versions.
+> {warning} Caution! This update makes several major changes to the plugin. Test the update in a local environment before updating production. Read UPDATE_v3.md when upgrading from 1.x versions to 3.x versions.
 
 - Refactored the entire plugin code base to be easier to maintain
 - Added Hosted Payment Page gateway (#19)
