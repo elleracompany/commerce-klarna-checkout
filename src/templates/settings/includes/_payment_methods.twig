@@ -1,9 +1,9 @@
-<h2>External Payment Methods</h2>
+<h2>External Implementations</h2>
 <p>Implements external payment providers. Please follow the
-    <a href="https://developers.klarna.com/documentation/klarna-checkout/external-payment-methods/#supported-external-payment-methods-in-kco" target="_blank">Klarna Documentation</a>.</p>
-<strong>Note: fee is in minor units.</strong>
+    <a href="https://developers.klarna.com/documentation/klarna-checkout/external-payment-methods/#supported-external-payment-methods-in-kco" target="_blank">External Payment Documentation</a> or <a href="https://developers.klarna.com/documentation/klarna-checkout/external-payment-methods/#external-checkouts-in-klarna-checkout" target="_blank">External Checkout Documentation</a>.</p>
+
 {% import "_includes/forms" as forms %}
-{{ forms.editableTable({
+{{ forms.editableTableField({
     id: 'external_payment_methods',
     name: 'external_payment_methods',
     label: gateway.getAttributeLabel('external_payment_methods'),
@@ -31,5 +31,38 @@
         }
     },
     errors: gateway.getErrors("external_payment_methods"),
-    rows: gateway.external_payment_methods
+    rows: gateway.external_payment_methods,
+    warning: "Fee is given in minor unit (ex. 100 = $1). Redirect URL must be prepended with http(s)://"
+}) }}
+
+{{ forms.editableTableField({
+    id: 'external_checkouts',
+    name: 'external_checkouts',
+    label: gateway.getAttributeLabel('external_checkouts'),
+    required: false,
+    cols: {
+        name: {
+            heading: "name",
+            type: "singleline"
+        },
+        redirect_url: {
+            heading: "redirect_url",
+            type: "singleline"
+        },
+        image_url: {
+            heading: "image_url",
+            type: "singleline"
+        },
+        fee: {
+            heading: "fee",
+            type: "singleline"
+        },
+        description: {
+            heading: "Description"|t('cookie-consent'),
+            type: "multiline"
+        }
+    },
+    errors: gateway.getErrors("external_checkouts"),
+    rows: gateway.external_checkouts,
+    warning: "Fee is given in minor unit (ex. 100 = $1). Redirect URL must be prepended with http(s)://. image_url is required, even if it does not state that in the documentation."
 }) }}

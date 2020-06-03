@@ -126,6 +126,11 @@ class BasePaymentForm extends CommerceBasePaymentForm
     public $external_payment_methods;
 
     /**
+     * @var array
+     */
+    public $external_checkouts;
+
+    /**
      * @param Transaction $transaction
      * @param Base $gateway
      * @throws InvalidConfigException
@@ -151,7 +156,8 @@ class BasePaymentForm extends CommerceBasePaymentForm
         $this->order_lines = $order_lines;
         $this->merchant_reference1 = $transaction->order->shortNumber;
         $this->merchant_reference2 = $transaction->order->number;
-        $this->external_payment_methods = $gateway->external_payment_methods;
+        $this->external_payment_methods = $this->formatMethods($gateway->external_payment_methods);
+        $this->external_checkouts = $this->formatMethods($gateway->external_checkouts);
         $this->options = [
             'date_of_birth_mandatory' => $gateway->mandatory_date_of_birth == '1',
             'national_identification_number_mandatory' => $gateway->mandatory_national_identification_number == '1',
@@ -159,6 +165,25 @@ class BasePaymentForm extends CommerceBasePaymentForm
             'title_mandatory' => $gateway->api_eu_title_mandatory == '1',
             'show_subtotal_detail' => true
         ];
+    }
+
+    public function formatMethods($methods)
+    {
+        $formatted = [];
+        foreach ($methods as $method)
+        {
+            $clean = [];
+            if(isset($method['name']) && strlen($method['name']) > 1) $clean['name'] = $method['name'];
+            if(isset($method['redirect_url']) && strlen($method['redirect_url']) > 1) $clean['redirect_url'] = $method['redirect_url'];
+            if(isset($method['image_url']) && strlen($method['image_url']) > 1) $clean['image_url'] = $method['image_url'];
+            if(isset($method['fee']) && strlen($method['fee']) > 1) $clean['fee'] = $method['fee'];
+            if(isset($method['description']) && strlen($method['description']) > 1) $clean['description'] = $method['description'];
+            if(isset($method['countries']) && strlen($method['countries']) > 1) $clean['countries'] = $method['countries'];
+            if(isset($method['label']) && strlen($method['label']) > 1) $clean['label'] = $method['label'];
+            $formatted[] = $clean;
+        }
+
+        return $formatted;
     }
 	/**
 	 * Returns the full store URL
@@ -201,6 +226,7 @@ class BasePaymentForm extends CommerceBasePaymentForm
             'merchant_urls' => $this->merchant_urls
         ];
         if(is_array($this->external_payment_methods) && !empty($this->external_payment_methods)) $body['external_payment_methods'] = $this->external_payment_methods;
+        if(is_array($this->external_checkouts) && !empty($this->external_checkouts)) $body['external_checkouts'] = $this->external_checkouts;
         return $body;
     }
 }

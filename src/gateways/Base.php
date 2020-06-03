@@ -211,6 +211,13 @@ class Base extends Gateway
      */
     public $external_payment_methods = null;
 
+    /**
+     * Setting: External Checkouts
+     *
+     * @var array
+     */
+    public $external_checkouts = null;
+
     // Public Methods
     // =========================================================================
 
