@@ -170,7 +170,7 @@ class BasePaymentForm extends CommerceBasePaymentForm
     public function formatMethods($methods)
     {
         $formatted = [];
-        foreach ($methods as $method)
+        if(is_array($methods)) foreach ($methods as $method)
         {
             $clean = [];
             if(isset($method['name']) && strlen($method['name']) > 1) $clean['name'] = $method['name'];
