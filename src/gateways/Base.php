@@ -464,21 +464,42 @@ class Base extends Gateway
         return $address;
     }
 
+    /**
+     * Returns the API url for the current environment
+     * and region
+     *
+     * @return string
+     */
     public function getApiUrl()
     {
         return $this->test_mode !== '1' ? $this->prod_url[$this->getRegion()] : $this->test_url[$this->getRegion()];
     }
 
+    /**
+     * Returns the API UID based on environment
+     *
+     * @return string
+     */
     public function getApiId()
     {
         return $this->test_mode !== '1' ? $this->api_uid : $this->api_test_uid;
     }
 
+    /**
+     * Returns the API Password based on environment
+     *
+     * @return string
+     */
     public function getApiPassword()
     {
         return $this->test_mode !== '1' ? $this->api_password : $this->api_test_password;
     }
 
+    /**
+     * Returns the selected region
+     *
+     * @return string
+     */
     public function getRegion()
     {
         if(in_array($this->region, array_keys($this->available_regions))) return $this->region;
