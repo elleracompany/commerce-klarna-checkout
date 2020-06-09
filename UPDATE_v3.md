@@ -1,6 +1,6 @@
 # Klarna Checkout for Craft Commerce
 
-## Updating from v1.x to v2.x
+## Updating from v1.x to v3.x
 1. Take as screenshot of your gateway settings
 2. Back up your database and files so you can easily reset the changes should you need to
 3. Update the Klarna Checkout for Craft Commerce in the plugin panel
