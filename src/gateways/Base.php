@@ -97,8 +97,8 @@ class Base extends Gateway
      */
     protected $test_url = [
         'eu' => 'https://api.playground.klarna.com',
-        'na' => 'https://api-na.klarna.com',
-        'oc' => 'https://api-oc.klarna.com'
+        'na' => 'https://api-na.playground.klarna.com',
+        'oc' => 'https://api-oc.playground.klarna.com'
     ];
 
     /**
@@ -688,14 +688,10 @@ class Base extends Gateway
         return [
             'title' => 'Title',
             'description' => 'Description',
-            'api_eu_uid' => 'Production Username (UID)',
-            'api_eu_password' => 'Production Password',
-            'api_eu_test_uid' => 'Test Username (UID)',
-            'api_eu_test_password' => 'Test Password',
-            'api_us_uid' => 'Production Username (UID)',
-            'api_us_password' => 'Production Password',
-            'api_us_test_uid' => 'Test Username (UID)',
-            'api_us_test_password' => 'Test Password',
+            'api_uid' => 'Production Username (UID)',
+            'api_password' => 'Production Password',
+            'api_test_uid' => 'Test Username (UID)',
+            'api_test_password' => 'Test Password',
             'send_product_urls' => 'Send Product URLs',
             'log_debug_messages' => 'Logging',
             'test_mode' => 'Test Mode',
@@ -722,14 +718,10 @@ class Base extends Gateway
                 [
                     'title',
                     'description',
-                    'api_eu_uid',
-                    'api_eu_password',
-                    'api_eu_test_uid',
-                    'api_eu_test_password',
-                    'api_us_uid',
-                    'api_us_password',
-                    'api_us_test_uid',
-                    'api_us_test_password',
+                    'api_uid',
+                    'api_password',
+                    'api_test_uid',
+                    'api_test_password',
                     'terms',
                     'success',
                     'checkout'

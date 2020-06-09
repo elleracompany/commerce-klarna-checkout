@@ -275,6 +275,11 @@ class KlarnaResponse implements RequestResponseInterface
                 $request
             );
         } catch (ClientException $e) {
+            if($e->getCode() == 401)
+            {
+                $this->gateway->log($e->getCode() . ' Unauthorized: ' . $e->getRequest()->getMethod() . ' ' . $e->getRequest()->getUri());
+                throw new InvalidConfigException('Could not authorize with Klarna. Check your credentials.');
+            }
             $this->gateway->log($e->getCode() . ': ' . $e->getResponse()->getBody()->getContents());
             throw new InvalidConfigException('Something went wrong when communicating with Klarna. See logs for more information.');
         }
