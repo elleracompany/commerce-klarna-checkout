@@ -9,6 +9,7 @@
 - Un-truncated error messages from GuzzleHTTP (#18) 
 - Added support for external payment methods (#34)
 - Added support for external checkouts
+- Added support for US and OC stores (#16)
 
 ## 1.1.11 - 2020-05-28
 
