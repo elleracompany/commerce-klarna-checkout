@@ -1,0 +1,24 @@
+<h2>Hosted Payment Page Settings</h2>
+{% import "_includes/forms" as forms %}
+
+{{ forms.elementSelectField({
+    label: gateway.getAttributeLabel('logo_id'),
+    id: 'logo_id',
+    name: 'logo_id',
+    elements: [gateway.getLogoAsset()],
+    elementType: 'craft\\elements\\Asset',
+    selectionLabel: "Choose"|t('app'),
+    limit: 1,
+    errors: gateway.getFirstError('logo_id')
+}) }}
+
+{{ forms.elementSelectField({
+    label: gateway.getAttributeLabel('background_id'),
+    id: 'background_id',
+    name: 'background_id',
+    elements: [gateway.getBackgroundAsset()],
+    elementType: 'craft\\elements\\Asset',
+    selectionLabel: "Choose"|t('app'),
+    limit: 1,
+    errors: gateway.getFirstError('background_id')
+}) }}

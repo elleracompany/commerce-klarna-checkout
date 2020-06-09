@@ -1,0 +1,22 @@
+<h2>Merchant URLs</h2>
+{% import "_includes/forms" as forms %}
+
+{{ forms.textField({
+    label: gateway.getAttributeLabel('terms'),
+    name: 'terms',
+    value: gateway.terms,
+    errors: gateway.getFirstError('terms')
+}) }}
+{{ forms.textField({
+    label: gateway.getAttributeLabel('success'),
+    name: 'success',
+    value: gateway.success,
+    instructions: 'Order success page. Passes order number as parameter \'number\'' | t('klarna-checkout'),
+    errors: gateway.getFirstError('success')
+}) }}
+{{ forms.textField({
+    label: gateway.getAttributeLabel('checkout'),
+    name: 'checkout',
+    value: gateway.checkout,
+    errors: gateway.getFirstError('checkout')
+}) }}

@@ -1,0 +1,27 @@
+<h2>Environment</h2>
+{% import "_includes/forms" as forms %}
+
+{{ forms.lightswitchField({
+    label: gateway.getAttributeLabel('test_mode'),
+    name: 'test_mode',
+    on: gateway.test_mode,
+    instructions: 'Enable Test Mode' | t('klarna-checkout'),
+    errors: gateway.getFirstError('test_mode')
+}) }}
+
+<div class="field">
+    <div class="heading">
+        <label class="required">Region</label>
+        <div class="instructions"><p>Select your Klarna account region</p>
+        </div>
+    </div>
+    <div class="input ltr">
+        {{ forms.select({
+            label: gateway.getAttributeLabel('region'),
+            name: 'region',
+            value: gateway.region,
+            options: gateway.available_regions,
+            errors: gateway.getFirstError('region')
+        }) }}
+    </div>
+</div>

@@ -686,7 +686,6 @@ class Base extends Gateway
     public function attributeLabels()
     {
         return [
-            'title' => 'Title',
             'description' => 'Description',
             'api_uid' => 'Production Username (UID)',
             'api_password' => 'Production Password',
@@ -713,10 +712,8 @@ class Base extends Gateway
     public function rules()
     {
         return [
-            [['title'], 'required'],
             [
                 [
-                    'title',
                     'description',
                     'api_uid',
                     'api_password',
