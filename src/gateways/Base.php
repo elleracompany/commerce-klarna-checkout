@@ -53,72 +53,53 @@ class Base extends Gateway
     public $log_debug_messages = true;
 
     /**
-     * Setting: API User (Prod, EU)
+     * Setting: API User (Prod)
      *
      * @var string
      */
-    public $api_eu_uid;
+    public $api_uid;
 
     /**
-     * Setting: API Password (Prod, EU)
+     * Setting: API Password (Prod)
      *
      * @var string
      */
-    public $api_eu_password;
+    public $api_password;
 
     /**
-     * Setting:  API User (Test, EU)
+     * Setting:  API User (Test)
      *
      * @var string
      */
-    public $api_eu_test_uid;
+    public $api_test_uid;
 
     /**
-     * Setting: API Password (Test, EU)
+     * Setting: API Password (Test)
      *
      * @var string
      */
-    public $api_eu_test_password;
+    public $api_test_password;
 
-    /**
-     * Setting: API User (Prod, US)
-     *
-     * @var string
-     */
-    public $api_us_uid;
-
-    /**
-     * Setting: API Password (Prod, US)
-     *
-     * @var string
-     */
-    public $api_us_password;
-
-    /**
-     * Setting: API User (Test, US)
-     *
-     * @var string
-     */
-    public $api_us_test_uid;
-
-    /**
-     * Setting: API Password (Test, US)
-     *
-     * @var string
-     */
-    public $api_us_test_password;
 
     /**
      * Production API URL
-     * @var string
+     * @var array
      */
-    protected $prod_url = 'https://api.klarna.com';
+    protected $prod_url = [
+        'eu' => 'https://api.klarna.com',
+        'na' => 'https://api-na.klarna.com',
+        'oc' => 'https://api-oc.klarna.com'
+    ];
 
     /**
      * Test API URL
-     * @var string
+     * @var array
      */
-    protected $test_url = 'https://api.playground.klarna.com';
+    protected $test_url = [
+        'eu' => 'https://api.playground.klarna.com',
+        'na' => 'https://api-na.klarna.com',
+        'oc' => 'https://api-oc.klarna.com'
+    ];
 
     /**
      * Setting: Mandatory DOB
@@ -217,6 +198,23 @@ class Base extends Gateway
      * @var array
      */
     public $external_checkouts = null;
+
+    /**
+     * Current Klarna Region
+     *
+     * @var string
+     */
+    public $region = 'eu';
+
+    /**
+     * Available regions
+     * @var array
+     */
+    public $available_regions = [
+        'eu' => 'Europe',
+        'na' => 'North America',
+        'oc' => 'Oceania'
+    ];
 
     // Public Methods
     // =========================================================================
@@ -468,17 +466,23 @@ class Base extends Gateway
 
     public function getApiUrl()
     {
-        return $this->test_mode !== '1' ? $this->prod_url : $this->test_url;
+        return $this->test_mode !== '1' ? $this->prod_url[$this->getRegion()] : $this->test_url[$this->getRegion()];
     }
 
     public function getApiId()
     {
-        return $this->test_mode !== '1' ? $this->api_eu_uid : $this->api_eu_test_uid;
+        return $this->test_mode !== '1' ? $this->api_uid : $this->api_test_uid;
     }
 
     public function getApiPassword()
     {
-        return $this->test_mode !== '1' ? $this->api_eu_password : $this->api_eu_test_password;
+        return $this->test_mode !== '1' ? $this->api_password : $this->api_test_password;
+    }
+
+    public function getRegion()
+    {
+        if(in_array($this->region, array_keys($this->available_regions))) return $this->region;
+        return 'eu';
     }
 
     /**
