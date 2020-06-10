@@ -721,7 +721,7 @@ class KlarnaCheckout extends BaseGateway
 
         $body = [
             'order_amount' => $order->getTotal()*100,
-            'captured_amount' => (int)$transaction->paymentAmount * 100,
+            'captured_amount' => (int) ($transaction->paymentAmount * 100),
             'description' => $transaction->hash,
         ];
 
