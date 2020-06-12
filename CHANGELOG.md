@@ -10,6 +10,7 @@
 - Added support for external payment methods (#34)
 - Added support for external checkouts
 - Added support for US and OC stores (#16)
+- Added option to control credentials and mode with environment variables (#15)
 
 ## 1.1.11 - 2020-05-28
 

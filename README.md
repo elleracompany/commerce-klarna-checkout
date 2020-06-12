@@ -69,6 +69,23 @@ To render the Klarna Order Complete HTML you can use this code in your `shop/cus
 Klarna requires tax to be sent per order line, not on the order in total, so for VAT and Taxes to be passed along to Klarna correctly, the taxable subject must be set to "Line item price".
 If the shipping cost is taxable as well, you need to create a separate tax rate for shipping and set that to "Order total shipping cost"
 
+#### Using environment variables
+UID, Password and Test Mode options can be controlled with environment variables.
+Add environment variables to your .env files and reference them in the settings page (Read more in the [documentation](https://docs.craftcms.com/v3/config/environments.html#control-panel-settings)).
+
+The Test Mode setting can also be controlled with an environment variable, but this format is strict.
+Use `KLARNA_TEST_MODE_<id>` where <id> is the gateway ID.
+
+Example .env:
+```
+# Klarna
+KLARNA_TEST_UID="PKXXX_XXXXXXXXXX"
+KLARNA_TEST_PWD="XXXXXXXXXXXXXX"
+KLARNA_PROD_UID="PKXXX_XXXXXXXXXX"
+KLARNA_PROD_PWD="XXXXXXXXXXXXXX"
+KLARNA_TEST_MODE_2="true"
+```
+
 ## Troubleshooting
 
 #### I get 401 or 403 response when I turn off Test Mode

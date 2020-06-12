@@ -24,6 +24,7 @@ use GuzzleHttp\Exception\ClientException;
 use Throwable;
 use yii\base\InvalidConfigException;
 use yii\web\BadRequestHttpException;
+use craft\behaviors\EnvAttributeParserBehavior;
 
 /**
  * Class Base
@@ -218,6 +219,21 @@ class Base extends Gateway
 
     // Public Methods
     // =========================================================================
+
+    public function behaviors()
+    {
+        return [
+            'parser' => [
+                'class' => EnvAttributeParserBehavior::class,
+                'attributes' => [
+                    'api_uid',
+                    'api_password',
+                    'api_test_uid',
+                    'api_test_password',
+                ],
+            ],
+        ];
+    }
 
     /**
      * Render Settings HTML
@@ -464,6 +480,27 @@ class Base extends Gateway
         return $address;
     }
 
+    public function isInProductionMode()
+    {
+        if($this->overrideModeFromEnv()) return !$this->getModeFromEnv();
+        return $this->test_mode !== '1';
+    }
+
+    public function overrideModeFromEnv()
+    {
+        return $this->getModeFromEnv() !== $this->getModeEnvVar();
+    }
+
+    public function getModeFromEnv()
+    {
+        return Craft::parseEnv($this->getModeEnvVar());
+    }
+
+    public function getModeEnvVar()
+    {
+        return "\$KLARNA_TEST_MODE_{$this->id}";
+    }
+
     /**
      * Returns the API url for the current environment
      * and region
@@ -472,7 +509,7 @@ class Base extends Gateway
      */
     public function getApiUrl()
     {
-        return $this->test_mode !== '1' ? $this->prod_url[$this->getRegion()] : $this->test_url[$this->getRegion()];
+        return $this->isInProductionMode() !== '1' ? $this->prod_url[$this->getRegion()] : $this->test_url[$this->getRegion()];
     }
 
     /**
@@ -482,7 +519,7 @@ class Base extends Gateway
      */
     public function getApiId()
     {
-        return $this->test_mode !== '1' ? $this->api_uid : $this->api_test_uid;
+        return $this->isInProductionMode() !== '1' ? Craft::parseEnv($this->api_uid) : Craft::parseEnv($this->api_test_uid);
     }
 
     /**
@@ -492,7 +529,7 @@ class Base extends Gateway
      */
     public function getApiPassword()
     {
-        return $this->test_mode !== '1' ? $this->api_password : $this->api_test_password;
+        return $this->isInProductionMode() !== '1' ? Craft::parseEnv($this->api_password) : Craft::parseEnv($this->api_test_password);
     }
 
     /**
@@ -721,7 +758,8 @@ class Base extends Gateway
                     'api_test_password',
                     'terms',
                     'success',
-                    'checkout'
+                    'checkout',
+                    'terms'
                 ],
                 'string'
             ],
