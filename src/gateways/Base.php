@@ -480,25 +480,46 @@ class Base extends Gateway
         return $address;
     }
 
+    /**
+     * Check if the gateway is in production mode
+     *
+     * @return bool
+     */
     public function isInProductionMode()
     {
         if($this->overrideModeFromEnv()) return !$this->getModeFromEnv();
         return $this->test_mode !== '1';
     }
 
+    /**
+     * Check if the test mode setting is overridden in .env
+     *
+     * @return bool
+     */
     public function overrideModeFromEnv()
     {
         return $this->getModeFromEnv() !== $this->getModeEnvVar();
     }
 
+    /**
+     * Returns the value of KLARNA_TEST_MODE_<handle>
+     * in the .env file
+     *
+     * @return bool|string|null
+     */
     public function getModeFromEnv()
     {
         return Craft::parseEnv($this->getModeEnvVar());
     }
 
+    /**
+     * Get the variable name for the test mode setting in .env
+     *
+     * @return string
+     */
     public function getModeEnvVar()
     {
-        return "\$KLARNA_TEST_MODE_{$this->id}";
+        return "\$KLARNA_TEST_MODE_{$this->handle}";
     }
 
     /**

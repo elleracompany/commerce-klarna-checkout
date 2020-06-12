@@ -1,6 +1,6 @@
 # Release Notes for Klarna Checkout for Craft Commerce
 
-## 3.0.0 - 2020-XX-XX
+## 3.0.0-beta.1 - 2020-06-12
 
 > {warning} Caution! This update makes several major changes to the plugin. Test the update in a local environment before updating production. Read UPDATE_v3.md when upgrading from 1.x versions to 3.x versions.
 

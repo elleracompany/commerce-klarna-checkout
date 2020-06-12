@@ -74,7 +74,7 @@ UID, Password and Test Mode options can be controlled with environment variables
 Add environment variables to your .env files and reference them in the settings page (Read more in the [documentation](https://docs.craftcms.com/v3/config/environments.html#control-panel-settings)).
 
 The Test Mode setting can also be controlled with an environment variable, but this format is strict.
-Use `KLARNA_TEST_MODE_<id>` where <id> is the gateway ID.
+Use `KLARNA_TEST_MODE_<handle>` where <handle> is the gateway handle.
 
 Example .env:
 ```
@@ -83,7 +83,7 @@ KLARNA_TEST_UID="PKXXX_XXXXXXXXXX"
 KLARNA_TEST_PWD="XXXXXXXXXXXXXX"
 KLARNA_PROD_UID="PKXXX_XXXXXXXXXX"
 KLARNA_PROD_PWD="XXXXXXXXXXXXXX"
-KLARNA_TEST_MODE_2="true"
+KLARNA_TEST_MODE_klarnaCheckout="true"
 ```
 
 ## Troubleshooting
