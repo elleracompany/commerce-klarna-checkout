@@ -530,7 +530,7 @@ class Base extends Gateway
      */
     public function getApiUrl()
     {
-        return $this->isInProductionMode() !== '1' ? $this->prod_url[$this->getRegion()] : $this->test_url[$this->getRegion()];
+        return $this->isInProductionMode() ? $this->prod_url[$this->getRegion()] : $this->test_url[$this->getRegion()];
     }
 
     /**
@@ -540,7 +540,7 @@ class Base extends Gateway
      */
     public function getApiId()
     {
-        return $this->isInProductionMode() !== '1' ? Craft::parseEnv($this->api_uid) : Craft::parseEnv($this->api_test_uid);
+        return $this->isInProductionMode() ? Craft::parseEnv($this->api_uid) : Craft::parseEnv($this->api_test_uid);
     }
 
     /**
@@ -550,7 +550,7 @@ class Base extends Gateway
      */
     public function getApiPassword()
     {
-        return $this->isInProductionMode() !== '1' ? Craft::parseEnv($this->api_password) : Craft::parseEnv($this->api_test_password);
+        return $this->isInProductionMode() ? Craft::parseEnv($this->api_password) : Craft::parseEnv($this->api_test_password);
     }
 
     /**

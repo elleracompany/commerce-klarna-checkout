@@ -22,3 +22,14 @@
     limit: 1,
     errors: gateway.getFirstError('background_id')
 }) }}
+
+{# forms.multiSelectField({
+    label: 'Available Payment Methods'|t('commerce'),
+    instructions: "Select the payment methods you want to be available. Leave blank for all payment methods."|t('klarna-commerce'),
+    id: 'methods',
+    name: 'methods',
+    options: gateway.getAvailablePaymentMethods(),
+    values: gateway.methods,
+    errors: gateway.getErrors('methods'),
+    class: 'selectize fullwidth',
+}) #}
