@@ -34,8 +34,8 @@ class TaxExtractor
 	public function __construct(LineItem $line)
 	{
 		$this->line = $line;
-		$this->included = $line->getAdjustmentsTotalByType('tax', true);
-		$this->excluded = $line->getAdjustmentsTotalByType('tax', false);
+		$this->included = $line->getTaxIncluded();
+		$this->excluded = $line->getTax();
 	}
 
 	/**
