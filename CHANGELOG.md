@@ -1,5 +1,10 @@
 # Release Notes for Klarna Checkout for Craft Commerce
 
+## 1.1.13 - 2020-06-10
+
+### Updated
+- Fixed deprecated functions (PR #40 by @matternow)
+
 ## 1.1.12 - 2020-06-10
 
 ### Bugfix
