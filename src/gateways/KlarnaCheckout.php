@@ -12,6 +12,7 @@ use craft\commerce\models\payments\BasePaymentForm;
 use craft\commerce\models\PaymentSource;
 use craft\commerce\models\Transaction;
 use craft\commerce\records\Country;
+use craft\helpers\ArrayHelper;
 use craft\web\Response as WebResponse;
 use ellera\commerce\klarna\models\KlarnaOrder;
 use ellera\commerce\klarna\models\KlarnaOrderLine;
@@ -118,6 +119,13 @@ class KlarnaCheckout extends BaseGateway
 	 * @var string
 	 */
 	public $api_eu_consent_notice = false;
+
+    /**
+     * Setting: Store Country
+     *
+     * @var string
+     */
+    public $store_country = null;
 
 	/**
 	 * Setting: API User (Prod, US)
@@ -609,6 +617,18 @@ class KlarnaCheckout extends BaseGateway
 	{
 		return Craft::$app->getView()->renderTemplate('commerce-klarna-checkout/settings', ['gateway' => $this]);
 	}
+
+	public function getCountryDropdown()
+    {
+        return array_merge(
+            [0 => 'Use Store Default'],
+            ArrayHelper::map(
+                Country::find()->select(['id', 'name'])->all(),
+                'id',
+                'name'
+            )
+        );
+    }
 
 	/**
 	 * Settings validation rules

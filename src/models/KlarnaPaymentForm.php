@@ -6,6 +6,7 @@ use Craft;
 use craft\commerce\elements\Order;
 use craft\commerce\models\payments\BasePaymentForm;
 use craft\commerce\models\Transaction;
+use craft\commerce\records\Country;
 use ellera\commerce\klarna\gateways\KlarnaCheckout;
 use yii\base\InvalidConfigException;
 use craft\helpers\UrlHelper;
@@ -113,8 +114,17 @@ class KlarnaPaymentForm extends BasePaymentForm
 	public function populate(Transaction $transaction, KlarnaCheckout $gateway) : void
 	{
 		$commerce = Commerce::getInstance();
-		$country = $commerce->getAddresses()->getStoreLocationAddress()->getCountry();
-		if(!isset($country->iso) || $country->iso == null) throw new InvalidConfigException('Klarna requires Store Location Country to be set. Please visit Commerce -> Store Settings -> Store Location and update the information.');
+
+		if(is_numeric($gateway->store_country) && $gateway->store_country > 0)
+        {
+            $country = Country::findOne($gateway->store_country);
+            if(!$country) throw new InvalidConfigException("Invalid country selected for the gateway (ID:{$gateway->store_country}).");
+        }
+		else
+        {
+            $country = $commerce->getAddresses()->getStoreLocationAddress()->getCountry();
+            if(!isset($country->iso) || $country->iso == null) throw new InvalidConfigException('Klarna requires Store Location Country to be set. Please visit Commerce -> Store Settings -> Store Location and update the information.');
+        }
 
 		if(Craft::$app->plugins->getPlugin('commerce')->is(Commerce::EDITION_LITE)) $order_lines = $this->getOrderLinesLite($transaction->order, $gateway);
 		else $order_lines = $this->getOrderLines($transaction->order, $gateway);

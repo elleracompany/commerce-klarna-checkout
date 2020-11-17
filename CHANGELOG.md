@@ -1,5 +1,8 @@
 # Release Notes for Klarna Checkout for Craft Commerce
 
+## 1.1.14 - 2020-11-17
+
+
 ## 1.1.13 - 2020-06-10
 
 ### Updated
