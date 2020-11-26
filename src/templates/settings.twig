@@ -24,6 +24,15 @@
     errors: gateway.getErrors('description')
 }) }}
 
+{{ forms.selectField({
+    label: gateway.getAttributeLabel('store_country'),
+    name: 'store_country',
+    options: gateway.getCountryDropdown(),
+    value: gateway.store_country,
+    errors: gateway.getErrors('store_country'),
+    instructions: 'Uses the country under Store Settings if left blank' | t('klarna-checkout')
+}) }}
+
 {{ forms.lightswitchField({
     label: gateway.getAttributeLabel('send_product_urls'),
     name: 'send_product_urls',
@@ -86,7 +95,7 @@
     errors: gateway.getErrors('checkout')
 }) }}
 
-<h2>API Credentials euope</h2>
+<h2>API Credentials Europe</h2>
 
 {{ forms.textField({
     label: gateway.getAttributeLabel('api_eu_uid'),
