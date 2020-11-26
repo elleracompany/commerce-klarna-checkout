@@ -622,11 +622,13 @@ class KlarnaCheckout extends BaseGateway
     {
         return array_merge(
             [0 => 'Use Store Default'],
-            ArrayHelper::map(
-                Country::find()->select(['id', 'name'])->all(),
-                'id',
-                'name'
-            )
+            array_map(function($country) {
+                /** @var $country Country */
+                return [
+                    'label' => $country->name,
+                    'value' => $country->id,
+                ];
+            }, Country::find()->select(['id', 'name'])->all())
         );
     }
 

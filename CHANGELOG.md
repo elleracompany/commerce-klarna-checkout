@@ -1,6 +1,6 @@
 # Release Notes for Klarna Checkout for Craft Commerce
 
-## 1.1.14 - 2020-11-17
+## 1.1.14 - 2020-11-26
 
 ### Added
 - Added store location selector on Klarna gateways
