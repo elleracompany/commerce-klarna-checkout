@@ -2,12 +2,10 @@
 
 This plugin provides [Klarna](https://www.klarna.com) integrations for [Craft Commerce](https://craftcms.com/commerce).
 
-**Note: this plugin is still undergoing testing and improvements. Please report any and all errors trough our support channels.**
-
-**When upgrading from v1.x to v2.x please refer to [UPDATE_v2.md](UPDATE_v2.md)**
+**When upgrading from v1.x to v3.x please refer to [UPDATE_v3.md](UPDATE_v3.md)**
 ## Requirements
 
-This plugin requires Craft Commerce 2.2.0 or later.
+This plugin requires Craft Commerce 3.0.0 or later.
 
 ## Installation
 

@@ -316,7 +316,12 @@ class Hosted extends Base
         if($background instanceof Asset) {
             // Background URLs does not work unless its on HTTPS
             $parsed = parse_url($background->getUrl(), PHP_URL_SCHEME);
-            if($parsed !== 'https') return false;
+
+            if($parsed !== 'https')
+            {
+                $this->log("Klarna asset did not start with https ({$background->getUrl()})");
+                return false;
+            }
 
             $small = [
                 'mode' => 'fit',
@@ -335,20 +340,21 @@ class Hosted extends Base
             ];
             return [
                 [
-                    'url' => $background->getUrl($small),
+                    'url' => $background->getUrl($small, true),
                     'width' => $background->getWidth($small)
                 ],
                 [
-                    'url' => $background->getUrl($medium),
+                    'url' => $background->getUrl($medium, true),
                     'width' => $background->getWidth($medium)
                 ],
                 [
-                    'url' => $background->getUrl($large),
+                    'url' => $background->getUrl($large, true),
                     'width' => $background->getWidth($large)
                 ]
             ];
         }
-
+        $class = get_class($background);
+        $this->log("Klarna asset was not an instance of \\Craft\\Elements\\Asset ({$class})");
         return false;
     }
 
