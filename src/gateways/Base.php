@@ -772,7 +772,6 @@ class Base extends Gateway
         return [
             [
                 [
-                    'description',
                     'name',
                     'paymentType',
                     'handle'
