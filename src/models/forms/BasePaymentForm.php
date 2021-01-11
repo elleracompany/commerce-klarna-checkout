@@ -150,7 +150,7 @@ class BasePaymentForm extends CommerceBasePaymentForm
         $this->purchase_country = $country->iso;
         $this->purchase_currency = $transaction->order->paymentCurrency;
         $this->locale = $transaction->order->orderLanguage;
-        $this->order_amount = $transaction->order->getTotalPrice()*100;
+        $this->order_amount = round($transaction->order->getTotalPrice()*100);
         $this->billing_address = $transaction->order->billingAddress instanceof Address ? $gateway->formatAddress($transaction->order->billingAddress, $transaction->order->email) : null;
         $this->shipping_address = $transaction->order->shippingAddress instanceof Address ? $gateway->formatAddress($transaction->order->shippingAddress, $transaction->order->email) : null;
         $this->order_lines = $order_lines;
