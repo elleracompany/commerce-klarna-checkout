@@ -6,10 +6,11 @@
     name: 'test_mode',
     disabled: gateway.overrideModeFromEnv(),
     on: not gateway.isInProductionMode(),
-    instructions: not gateway.overrideModeFromEnv() ? "This setting can be set with environment variable using <code>#{gateway.getModeEnvVar}</code>" | t('klarna-checkout') : null,
+    instructions: not gateway.overrideModeFromEnv() ? '<p class="notice with-icon">This can be set to the environment variable <code>$KLARNA_TEST_MODE_&lt;handle&gt;</code>. <a href="https://craftcms.com/docs/3.x/config/#environmental-configuration" class="go" rel="noopener" target="_blank">Learn more</a>'|raw | t('klarna-checkout') : null,
     errors: gateway.getFirstError('test_mode'),
     warning: gateway.overrideModeFromEnv() ? "This variable is controlled by the environment variable <code>#{gateway.getModeEnvVar}</code>" : null
 }) }}
+</p>
 
 <div class="field">
     <div class="heading">

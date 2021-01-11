@@ -773,6 +773,33 @@ class Base extends Gateway
             [
                 [
                     'description',
+                    'name',
+                    'paymentType',
+                    'handle'
+                ],
+                'required'
+            ],
+            [
+                [
+                    'api_uid',
+                    'api_password',
+                ],
+                'required', 'when' => function($model) {
+                    return $model->test_mode == 0;
+                }
+            ],
+            [
+                [
+                    'api_test_uid',
+                    'api_test_password',
+                ],
+                'required', 'when' => function($model) {
+                    return $model->test_mode == 1;
+                }
+            ],
+            [
+                [
+                    'description',
                     'api_uid',
                     'api_password',
                     'api_test_uid',
