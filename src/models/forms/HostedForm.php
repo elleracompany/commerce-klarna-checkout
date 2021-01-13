@@ -103,7 +103,7 @@ class HostedForm extends BasePaymentForm
             else $body['options']['payment_method_categories'] = $this->gateway->methods;
         }
         /** @var $this->gateway Hosted */
-        if($this->gateway->getLogoUrl()) $body['options']['logo'] = $this->gateway->getLogoUrl();
+        if($this->gateway->getLogoUrl()) $body['options']['logo_url'] = $this->gateway->getLogoUrl();
         if($this->gateway->getBackgroundUrl()) $body['options']['background_images'] = $this->gateway->getBackgroundUrl();
         /*
         if(is_array($this->gateway->methods) && !empty($this->gateway->methods))

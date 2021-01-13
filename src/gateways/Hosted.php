@@ -11,6 +11,7 @@ use craft\elements\Asset;
 use ellera\commerce\klarna\models\forms\HostedForm;
 use craft\fields\data\MultiOptionsFieldData;
 use yii\web\BadRequestHttpException;
+use craft\helpers\UrlHelper;
 
 /**
  * Class Hosted
@@ -305,7 +306,15 @@ class Hosted extends Base
     public function getLogoUrl()
     {
         $logo = $this->getLogoAsset();
-        if($logo instanceof Asset) return $logo->url;
+        $url = UrlHelper::baseUrl().$logo->url;
+        $parsed = parse_url($url, PHP_URL_SCHEME);
+
+        if($parsed !== 'https')
+        {
+            $this->log("Klarna logo asset did not start with https ({$url})");
+            return false;
+        }
+        if($logo instanceof Asset) return $url;
         return false;
     }
 
@@ -315,14 +324,15 @@ class Hosted extends Base
 
         if($background instanceof Asset) {
             // Background URLs does not work unless its on HTTPS
-            $parsed = parse_url($background->getUrl(), PHP_URL_SCHEME);
+            $url = UrlHelper::baseUrl().$background->url;
+            $parsed = parse_url($url, PHP_URL_SCHEME);
 
             if($parsed !== 'https')
             {
-                $this->log("Klarna asset did not start with https ({$background->getUrl()})");
+                $this->log("Klarna background asset did not start with https ({$url})");
                 return false;
             }
-
+            /*
             $small = [
                 'mode' => 'fit',
                 'name' => 'klarna_hpp_small',
@@ -340,16 +350,23 @@ class Hosted extends Base
             ];
             return [
                 [
-                    'url' => $background->getUrl($small, true),
+                    'url' => UrlHelper::baseUrl().$background->getUrl($small, true),
                     'width' => $background->getWidth($small)
                 ],
                 [
-                    'url' => $background->getUrl($medium, true),
+                    'url' => UrlHelper::baseUrl().$background->getUrl($medium, true),
                     'width' => $background->getWidth($medium)
                 ],
                 [
-                    'url' => $background->getUrl($large, true),
+                    'url' => UrlHelper::baseUrl().$background->getUrl($large, true),
                     'width' => $background->getWidth($large)
+                ]
+            ];
+            */
+            return [
+                [
+                    'url' => UrlHelper::baseUrl().$background->url,
+                    'width' => $background->getWidth()
                 ]
             ];
         }
