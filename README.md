@@ -1,3 +1,5 @@
+![Version 3.0](src/banner.png)
+
 # Klarna Checkout for Craft Commerce
 
 This plugin provides [Klarna](https://www.klarna.com) integrations for [Craft Commerce](https://craftcms.com/commerce).
