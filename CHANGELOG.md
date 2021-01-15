@@ -12,6 +12,21 @@
 - Added support for NA and OC stores (#16)
 - Added option to control credentials and mode with environment variables (#15)
 
+## 1.1.14 - 2020-11-26
+
+### Added
+- Added store location selector on Klarna gateways
+
+## 1.1.13 - 2020-06-10
+
+### Updated
+- Fixed deprecated functions (PR #40 by @matternow)
+
+## 1.1.12 - 2020-06-10
+
+### Bugfix
+- Fixed a typecast error on capture amount (Issue #38 / ESU-15)
+
 ## 1.1.11 - 2020-05-28
 
 ### Bugfix
