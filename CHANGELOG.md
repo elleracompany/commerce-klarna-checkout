@@ -1,6 +1,6 @@
 # Release Notes for Klarna Checkout for Craft Commerce
 
-## 3.0.0-beta.1 - 2020-06-12
+## 3.0.0 - 2021-01-15
 
 > {warning} Caution! This update makes several major changes to the plugin. Test the update in a local environment before updating production. Read UPDATE_v3.md when upgrading from 1.x versions to 3.x versions.
 
@@ -9,7 +9,7 @@
 - Un-truncated error messages from GuzzleHTTP (#18) 
 - Added support for external payment methods (#34)
 - Added support for external checkouts
-- Added support for US and OC stores (#16)
+- Added support for NA and OC stores (#16)
 - Added option to control credentials and mode with environment variables (#15)
 
 ## 1.1.11 - 2020-05-28

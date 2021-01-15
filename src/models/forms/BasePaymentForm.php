@@ -6,6 +6,7 @@ use Craft;
 use craft\commerce\elements\Order;
 use craft\commerce\models\Address;
 use craft\commerce\models\Country;
+use craft\commerce\records\Country as CountryRecord;
 use craft\helpers\UrlHelper;
 use craft\commerce\Plugin as Commerce;
 use craft\commerce\models\payments\BasePaymentForm as CommerceBasePaymentForm;
@@ -141,8 +142,17 @@ class BasePaymentForm extends CommerceBasePaymentForm
         $this->gateway = $gateway;
         $this->commerce = Commerce::getInstance();
 
-        $country = $this->commerce->getAddresses()->getStoreLocationAddress()->getCountry();
-        if(!isset($country->iso) || $country->iso == null) throw new InvalidConfigException('Klarna requires Store Location Country to be set. Please visit Commerce -> Store Settings -> Store Location and update the information.');
+
+        if(is_numeric($gateway->store_country) && $gateway->store_country > 0)
+        {
+            $country = CountryRecord::findOne($gateway->store_country);
+            if(!$country) throw new InvalidConfigException("Invalid country selected for the gateway (ID:{$gateway->store_country}).");
+        }
+        else
+        {
+            $country = $this->commerce->getAddresses()->getStoreLocationAddress()->getCountry();
+            if(!isset($country->iso) || $country->iso == null) throw new InvalidConfigException('Klarna requires Store Location Country to be set. Please visit Commerce -> Store Settings -> Store Location and update the information.');
+        }
 
         if(Craft::$app->plugins->getPlugin('commerce')->is(Commerce::EDITION_LITE)) $order_lines = $gateway->getOrderLinesLite($transaction->order, $gateway);
         else $order_lines = $gateway->getOrderLines($transaction->order, $gateway);

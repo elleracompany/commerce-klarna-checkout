@@ -17,3 +17,12 @@
     rows: 4,
     errors: gateway.getFirstError('description')
 }) }}
+
+{{ forms.selectField({
+    label: gateway.getAttributeLabel('store_country'),
+    name: 'store_country',
+    options: gateway.getCountryDropdown(),
+    value: gateway.store_country,
+    errors: gateway.getErrors('store_country'),
+    instructions: 'Uses the country under Store Settings if left blank' | t('klarna-checkout')
+}) }}

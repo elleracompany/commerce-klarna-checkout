@@ -208,6 +208,13 @@ class Base extends Gateway
     public $region = 'eu';
 
     /**
+     * Setting: Store Country
+     *
+     * @var string
+     */
+    public $store_country = null;
+
+    /**
      * Available regions
      * @var array
      */
@@ -734,6 +741,21 @@ class Base extends Gateway
     public function supportsWebhooks(): bool
     {
         // TODO: Implement supportsWebhooks() method.
+    }
+
+
+    public function getCountryDropdown()
+    {
+        return array_merge(
+            [0 => 'Use Store Default'],
+            array_map(function($country) {
+                /** @var $country Country */
+                return [
+                    'label' => $country->name,
+                    'value' => $country->id,
+                ];
+            }, Country::find()->select(['id', 'name'])->all())
+        );
     }
 
     /**

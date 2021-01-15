@@ -1,8 +1,14 @@
 # Klarna Checkout for Craft Commerce
 
 This plugin provides [Klarna](https://www.klarna.com) integrations for [Craft Commerce](https://craftcms.com/commerce).
+# Version 3.0 released 🎉
+- Now with support for Europe 🇪🇺 North America 🇺🇸 and Oceania 🇦🇺 !
+- Choose between rendering Klarna and using redirect payments 
+- Add external payment methods and checkouts
 
-**When upgrading from v1.x to v3.x please refer to [UPDATE_v3.md](UPDATE_v3.md)**
+##Note:
+
+**When upgrading from v1.x to v3.x please refer to [UPDATE_v3.md](UPDATE_v3.md)**.
 ## Requirements
 
 This plugin requires Craft Commerce 3.0.0 or later.
@@ -22,7 +28,7 @@ Contact us on support@ellera.no or create a new issue in [GitHub](https://github
 You can also reach us by messaging @Jorgen on Discord.
 
 
-The plugin logs errors and transactions to `@storage/logs/commerce-klarna-checkout.log`. Please provide the relevant logs when reaching out.
+The plugin logs errors and transactions to `@storage/logs/klarna-checkout.log` or `@storage/logs/klarna-hpp.log`. Please provide the relevant logs when reaching out.
 
 ## Setup
 
@@ -93,7 +99,4 @@ Look for the "Resume onboarding" link under the menu on https://eu.portal.klarna
 
 ## Development
 
-- Add support for non-european stores
 - Add support for project sync (project.yaml)
-- Add support non-included tax :heavy_check_mark:
-- Add support for Commerce Lite :heavy_check_mark:
