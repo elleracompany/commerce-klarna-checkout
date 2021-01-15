@@ -5,9 +5,11 @@ namespace ellera\commerce\klarna\controllers;
 use Craft;
 use craft\commerce\controllers\BaseFrontEndController;
 use craft\commerce\Plugin;
-use ellera\commerce\klarna\gateways\KlarnaCheckout;
-use ellera\commerce\klarna\models\KlarnaPaymentForm;
+use ellera\commerce\klarna\gateways\Checkout;
+use ellera\commerce\klarna\klarna\order\Acknowledge;
+use ellera\commerce\klarna\models\forms\BasePaymentForm;
 use yii\web\BadRequestHttpException;
+use yii\web\NotFoundHttpException;
 
 /**
  * Class Checkout Controller
@@ -19,20 +21,19 @@ class KlarnaController extends BaseFrontEndController
 {
 	protected $allowAnonymous = true;
 
-	/**
-	 * @param $hash
-	 *
-	 * @return \yii\web\Response
-	 * @throws BadRequestHttpException
-	 * @throws \GuzzleHttp\Exception\GuzzleException
-	 * @throws \Throwable
-	 * @throws \craft\commerce\errors\TransactionException
-	 * @throws \craft\errors\MissingComponentException
-	 * @throws \yii\base\Exception
-	 */
-	public function actionConfirmation($hash)
+    /**
+     * @param $hash
+     * @param null $hppId
+     * @return \yii\web\Response|null
+     * @throws BadRequestHttpException
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws \craft\commerce\errors\TransactionException
+     * @throws \craft\errors\MissingComponentException
+     * @throws \yii\base\ErrorException
+     * @throws \yii\base\InvalidConfigException
+     */
+	public function actionConfirmation($hash, $hppId = null)
 	{
-
 		$plugin = Plugin::getInstance();
 
 		$request = Craft::$app->getRequest();
@@ -40,7 +41,7 @@ class KlarnaController extends BaseFrontEndController
 
 		$last_transaction = $plugin->getTransactions()->getTransactionByHash($hash);
 
-		/** @var $gateway KlarnaCheckout */
+        /** @var $gateway Checkout */
 		$gateway = $plugin->getGateways()->getGatewayById($last_transaction->gatewayId);
 
 		if (!$last_transaction || !$gateway) {
@@ -64,7 +65,7 @@ class KlarnaController extends BaseFrontEndController
 
 		Craft::$app->session->set('klarna_order_id', $klarna_order_id);
 
-		$gateway->updateOrder($order);
+        $gateway->updateOrder($order);
 
 		if(isset($gateway->paymentTypeOptions[$gateway->paymentType])) $paymentType = $gateway->paymentType;
 		else $paymentType = 'authorize';
@@ -74,29 +75,31 @@ class KlarnaController extends BaseFrontEndController
 		$transaction->paymentAmount = $last_transaction->paymentAmount;
 
 		if($paymentType == 'purchase') {
+			$capture = $gateway->capture($transaction, 'Automatic Capture on Order complete');
 
-			// Get the gateway's payment form
-			$paymentForm = $gateway->getPaymentFormModel();
+            // Create Acknowledge Transaction
+            $transaction->status = 'success';
+            $transaction->code = $capture->getCode();
+            $transaction->message = $capture->getMessage();
+            $transaction->note = 'Order Captured';
 
-			if(!$paymentForm instanceof KlarnaPaymentForm) throw new BadRequestHttpException('Klarna authorize only accepts KlarnaPaymentForm');
-			$paymentForm->populate($transaction, $gateway);
-			$gateway->purchase($transaction, $paymentForm);
+            if(!$plugin->getTransactions()->saveTransaction($transaction)) throw new BadRequestHttpException('Could not save acknowledge transaction');
 		}
 		else {
 			// Acknowledge the order
-			$response = $gateway->getKlarnaResponse('POST', "/ordermanagement/v1/orders/{$klarna_order_id}/acknowledge");
+            $acknowledgement = new Acknowledge($gateway, $klarna_order_id);
 
 			// Create Acknowledge Transaction
 			$transaction->status = 'success';
-			$transaction->code = $response->getCode();
-			$transaction->message = $response->getMessage();
+			$transaction->code = $acknowledgement->getCode();
+			$transaction->message = $acknowledgement->getMessage();
 			$transaction->note = 'Order Acknowledged';
 			if(!$plugin->getTransactions()->saveTransaction($transaction)) throw new BadRequestHttpException('Could not save acknowledge transaction');
 
 			// Check status code
-			if($response->getCode() !== '204') throw new BadRequestHttpException('Could not acknowledge order');
+			if($acknowledgement->getCode() !== '204') throw new BadRequestHttpException('Could not acknowledge order');
 		}
 
-		return $this->redirect('/'.$transaction->gateway->push.'?number='.$transaction->order->number);
+		return $this->redirect('/'.$transaction->gateway->success.'?number='.$transaction->order->number);
 	}
 }

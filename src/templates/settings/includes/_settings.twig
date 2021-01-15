@@ -1,0 +1,42 @@
+<h2>Settings</h2>
+{% import "_includes/forms" as forms %}
+
+{{ forms.lightswitchField({
+    label: gateway.getAttributeLabel('send_product_urls'),
+    name: 'send_product_urls',
+    on: gateway.send_product_urls,
+    instructions: 'Send product and product image URLs to Klarna' | t('klarna-checkout'),
+    errors: gateway.getFirstError('send_product_urls')
+}) }}
+
+{{ forms.lightswitchField({
+    label: gateway.getAttributeLabel('log_debug_messages'),
+    name: 'log_debug_messages',
+    on: gateway.log_debug_messages,
+    instructions: 'Log debug messages' | t('klarna-checkout'),
+    errors: gateway.getFirstError('log_debug_messages')
+}) }}
+
+{{ forms.lightswitchField({
+    label: gateway.getAttributeLabel('mandatory_date_of_birth'),
+    name: 'mandatory_date_of_birth',
+    on: gateway.mandatory_date_of_birth,
+    instructions: 'Make customer date of birth mandatory' | t('klarna-checkout'),
+    errors: gateway.getFirstError('mandatory_date_of_birth')
+}) }}
+
+{{ forms.lightswitchField({
+    label: gateway.getAttributeLabel('mandatory_national_identification_number'),
+    name: 'mandatory_national_identification_number',
+    on: gateway.mandatory_national_identification_number,
+    instructions: 'Make national identification number mandatory' | t('klarna-checkout'),
+    errors: gateway.getFirstError('mandatory_national_identification_number')
+}) }}
+
+{{ forms.lightswitchField({
+    label: gateway.getAttributeLabel('api_eu_title_mandatory'),
+    name: 'api_eu_title_mandatory',
+    on: gateway.api_eu_title_mandatory,
+    instructions: 'Make customer title mandatory' | t('klarna-checkout'),
+    errors: gateway.getFirstError('api_eu_title_mandatory')
+}) }}

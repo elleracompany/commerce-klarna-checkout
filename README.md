@@ -1,11 +1,19 @@
+![Version 3.0](src/banner.png)
+
 # Klarna Checkout for Craft Commerce
 
 This plugin provides [Klarna](https://www.klarna.com) integrations for [Craft Commerce](https://craftcms.com/commerce).
+# Version 3.0 released 🎉
+- Now with support for Europe 🇪🇺 North America 🇺🇸 and Oceania 🇦🇺 !
+- Choose between rendering Klarna and using redirect payments 
+- Add external payment methods and checkouts
 
-**Note: this plugin is still undergoing testing and improvements. Please report any and all errors trough our support channels.**
+##Note:
+
+**When upgrading from v1.x to v3.x please refer to [UPDATE_v3.md](UPDATE_v3.md)**.
 ## Requirements
 
-This plugin requires Craft Commerce 2.0.0 or later.
+This plugin requires Craft Commerce 3.0.0 or later.
 
 ## Installation
 
@@ -22,7 +30,7 @@ Contact us on support@ellera.no or create a new issue in [GitHub](https://github
 You can also reach us by messaging @Jorgen on Discord.
 
 
-The plugin logs errors and transactions to `@storage/logs/commerce-klarna-checkout.log`. Please provide the relevant logs when reaching out.
+The plugin logs errors and transactions to `@storage/logs/klarna-checkout.log` or `@storage/logs/klarna-hpp.log`. Please provide the relevant logs when reaching out.
 
 ## Setup
 
@@ -30,20 +38,24 @@ The plugin logs errors and transactions to `@storage/logs/commerce-klarna-checko
 2.  and Base URL in `Settings -> Sites -> sitename -> Base URL`.
 3.  Install the plugin.
 4.  Navigate to `Commerce -> System Settings -> Gateways` and `+ New Gateway`
-5.  Select Klarna Checkout from the dropdown.
+5.  Select Klarna Checkout or Klarna Hosted Payment Page from the dropdown.
 6.  Set your information Playground credentials in API Credentials Europe Test Username (UID)/Test Password.
 7.  Get Klarna Production Approval for your site
 8.  Turn off "Testing Mode" and add production credentials for the Gateway
 
 
-#### Payment button
-Since Klarna is rendering its own payment button, the craft-commerce default 'Pay' button must be removed.
+#### Klarna Checkout: Payment button
+Since Klarna Checkout is rendering its own payment button, the craft-commerce default 'Pay' button must be removed.
 You can copy and overwrite your shop default `checkout/payment.html` file with `vendor/ellera/commerce-klarna-checkout/src/templates/pages/checkout/payment.html` or simply update your existing template with
 ```
 {% if cart.gateway.handle is not same as('klarna') %}
     <button class="button button-primary" type="submit">Pay {{ cart.totalPrice|commerceCurrency(cart.paymentCurrency,convert=true) }}</button>
 {% endif %}
 ```
+#### Klarna Hosted Payment Page
+For hosted payment pages the 'Pay' button is required to send the user to Klarna. When selecting Logo and Background images 
+for Klarna HPP it is important that the Image asset is in a web accessible Volume.
+ 
 #### Get Klarna Approval
 You need approval from klarna before you can change to production mode.
 
@@ -63,6 +75,23 @@ To render the Klarna Order Complete HTML you can use this code in your `shop/cus
 Klarna requires tax to be sent per order line, not on the order in total, so for VAT and Taxes to be passed along to Klarna correctly, the taxable subject must be set to "Line item price".
 If the shipping cost is taxable as well, you need to create a separate tax rate for shipping and set that to "Order total shipping cost"
 
+#### Using environment variables
+UID, Password and Test Mode options can be controlled with environment variables.
+Add environment variables to your .env files and reference them in the settings page (Read more in the [documentation](https://docs.craftcms.com/v3/config/environments.html#control-panel-settings)).
+
+The Test Mode setting can also be controlled with an environment variable, but this format is strict.
+Use `KLARNA_TEST_MODE_<handle>` where <handle> is the gateway handle.
+
+Example .env:
+```
+# Klarna
+KLARNA_TEST_UID="PKXXX_XXXXXXXXXX"
+KLARNA_TEST_PWD="XXXXXXXXXXXXXX"
+KLARNA_PROD_UID="PKXXX_XXXXXXXXXX"
+KLARNA_PROD_PWD="XXXXXXXXXXXXXX"
+KLARNA_TEST_MODE_klarnaCheckout="true"
+```
+
 ## Troubleshooting
 
 #### I get 401 or 403 response when I turn off Test Mode
@@ -72,7 +101,4 @@ Look for the "Resume onboarding" link under the menu on https://eu.portal.klarna
 
 ## Development
 
-- Add support for non-european stores
 - Add support for project sync (project.yaml)
-- Add support non-included tax :heavy_check_mark:
-- Add support for Commerce Lite :heavy_check_mark:
