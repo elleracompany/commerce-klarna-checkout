@@ -468,11 +468,11 @@ class Base extends Gateway
     }
 
     /**
-     * @param Object $addr
+     * @param \stdClass $addr
      *
      * @return Address
      */
-    protected function createAddressFromResponse(Object $addr)
+    protected function createAddressFromResponse(\stdClass $addr)
     {
         $address = new Address();
         $country = Country::findOne(['iso' => strtoupper($addr->country)]);
