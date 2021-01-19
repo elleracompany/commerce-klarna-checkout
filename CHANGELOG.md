@@ -1,5 +1,10 @@
 # Release Notes for Klarna Checkout for Craft Commerce
 
+## 3.0.1 - 2021-01-19
+
+### Bugfix
+- Type hinting stdClass instead of Object to be compatible with older versions of PHP (#45)
+
 ## 3.0.0 - 2021-01-15
 
 > {warning} Caution! This update makes several major changes to the plugin. Test the update in a local environment before updating production. Read UPDATE_v3.md when upgrading from 1.x versions to 3.x versions.
