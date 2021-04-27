@@ -195,24 +195,6 @@ class BasePaymentForm extends CommerceBasePaymentForm
 
         return $formatted;
     }
-	/**
-	 * Returns the full store URL
-	 *
-	 * @return string
-	 * @throws \craft\errors\SiteNotFoundException
-	 */
-	public function getStoreUrl()
-	{
-		$siteUrl = UrlHelper::baseUrl();
-		if(!UrlHelper::isAbsoluteUrl($siteUrl))
-		{
-			$myUrl = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] && !in_array(strtolower($_SERVER['HTTPS']),['off','no'])) ? 'https' : 'http';
-			$myUrl .= '://'.$_SERVER['HTTP_HOST'];
-			$siteUrl = $myUrl.$siteUrl;
-		}
-
-		return $siteUrl;
-	}
 
     /**
      * Returns a Order Create Request Body
