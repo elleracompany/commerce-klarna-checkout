@@ -13,7 +13,7 @@ use craft\commerce\models\PaymentSource;
 use craft\commerce\models\Transaction;
 use ellera\commerce\klarna\events\FormatAddressEvent;
 use ellera\commerce\klarna\klarna\order\Refund;
-use ellera\commerce\klarna\klarna\order\Update;
+use ellera\commerce\klarna\klarna\order\Get;
 use craft\commerce\elements\Order as CraftOrder;
 use craft\commerce\records\Country;
 use craft\web\Response as WebResponse;
@@ -646,7 +646,7 @@ class Base extends Gateway
      */
     public function updateOrder(CraftOrder $order)
     {
-        $response = new Update($this, $order);
+        $response = new Get($this, $order);
 
         if($response->isSuccessful()) $this->log('Updated order '.$order->number.' ('.$order->id.')');
 

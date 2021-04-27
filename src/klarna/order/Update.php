@@ -4,26 +4,49 @@
 namespace ellera\commerce\klarna\klarna\order;
 
 use ellera\commerce\klarna\gateways\Base;
-use craft\commerce\elements\Order;
 use ellera\commerce\klarna\klarna\KlarnaResponse;
+use ellera\commerce\klarna\models\forms\BasePaymentForm;
 
 class Update extends KlarnaResponse
 {
+    private $successful = false;
+
+    public function isSuccessful(): bool
+    {
+        return $this->successful;
+    }
+
+    public function isProcessing(): bool
+    {
+        return true;
+    }
+
+    public function isRedirect(): bool
+    {
+        return false;
+    }
+
     /**
-     * Update constructor.
+     * Create constructor.
      * @param Base $gateway
-     * @param Order $order
+     * @param BasePaymentForm $form
      * @throws \yii\base\ErrorException
      * @throws \yii\base\InvalidConfigException
      */
-    public function __construct(Base $gateway, Order $order)
+    public function __construct(Base $gateway, BasePaymentForm $form)
     {
         parent::__construct($gateway);
 
-        $this->endpoint = '/ordermanagement/v1/orders/' . $order->getLastTransaction()->reference;
+        $this->endpoint = '/checkout/v3/orders/' . $form->transaction->order->lastTransaction->reference;
 
-        $this->get();
+        $this->body = $form->generateCreateOrderRequestBody();
 
-        if(isset($this->response->order_id)) $this->setTransactionReference($this->response->order_id);
+        $this->post();
+
+        if(isset($this->response->order_id)) {
+            $this->successful = true;
+            $this->setTransactionReference($this->response->order_id);
+        }
+        else $this->setTransactionReference('!No Ref');
     }
 }

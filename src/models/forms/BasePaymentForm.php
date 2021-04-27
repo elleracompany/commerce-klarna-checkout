@@ -11,6 +11,7 @@ use craft\helpers\UrlHelper;
 use craft\commerce\Plugin as Commerce;
 use craft\commerce\models\payments\BasePaymentForm as CommerceBasePaymentForm;
 use ellera\commerce\klarna\gateways\Base;
+use ellera\commerce\klarna\klarna\order\Update;
 use ellera\commerce\klarna\models\OrderLine;
 use craft\commerce\models\Transaction;
 use yii\base\InvalidConfigException;
@@ -194,6 +195,18 @@ class BasePaymentForm extends CommerceBasePaymentForm
         }
 
         return $formatted;
+    }
+
+    /**
+     * Create a new Klarna Order
+     *
+     * @return Update
+     * @throws InvalidConfigException
+     * @throws \yii\base\ErrorException
+     */
+    public function updateOrder()
+    {
+        return new Update($this->gateway, $this);
     }
 
     /**

@@ -9,9 +9,11 @@ use ellera\commerce\klarna\models\forms\BasePaymentForm;
 
 class Create extends KlarnaResponse
 {
+    private $successful = false;
+
     public function isSuccessful(): bool
     {
-        return false;
+        return $this->successful;
     }
 
     public function isProcessing(): bool
@@ -41,7 +43,10 @@ class Create extends KlarnaResponse
 
         $this->post();
 
-        if(isset($this->response->order_id)) $this->setTransactionReference($this->response->order_id);
+        if(isset($this->response->order_id)) {
+            $this->successful = true;
+            $this->setTransactionReference($this->response->order_id);
+        }
         else $this->setTransactionReference('!No Ref');
     }
 }

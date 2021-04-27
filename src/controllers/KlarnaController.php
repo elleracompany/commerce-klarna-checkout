@@ -7,9 +7,7 @@ use craft\commerce\controllers\BaseFrontEndController;
 use craft\commerce\Plugin;
 use ellera\commerce\klarna\gateways\Checkout;
 use ellera\commerce\klarna\klarna\order\Acknowledge;
-use ellera\commerce\klarna\models\forms\BasePaymentForm;
 use yii\web\BadRequestHttpException;
-use yii\web\NotFoundHttpException;
 
 /**
  * Class Checkout Controller

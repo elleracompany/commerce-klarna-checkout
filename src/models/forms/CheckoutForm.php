@@ -7,6 +7,8 @@ use craft\commerce\models\Transaction;
 use craft\helpers\UrlHelper;
 use ellera\commerce\klarna\gateways\Base;
 use ellera\commerce\klarna\klarna\order\Create;
+use ellera\commerce\klarna\klarna\order\Get;
+use ellera\commerce\klarna\klarna\order\Update;
 use ellera\commerce\klarna\models\responses\OrderResponse;
 use yii\base\InvalidConfigException;
 use GuzzleHttp\Exception\ClientException;

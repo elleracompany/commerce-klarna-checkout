@@ -127,7 +127,7 @@ class Hosted extends Base
     public $privacy = 'shop/privacy';
 
     /**
-     * Setting: Status Update Page
+     * Setting: Status Get Page
      *
      * @var string
      */
@@ -146,15 +146,31 @@ class Hosted extends Base
      */
     public function authorize(Transaction $transaction, BasePaymentForm $form): RequestResponseInterface
     {
-        $transaction->note = 'Created Klarna Order and HPP Session';
-
         /** @var $form HostedForm */
         if(!$form instanceof HostedForm) throw new BadRequestHttpException('Klarna HPP authorize only accepts HostedForm');
-        $form->populate($transaction, $this);
 
-        $response = $form->createOrder();
+        if(
+            isset($transaction->order->lastTransaction) &&
+            strlen($transaction->order->lastTransaction->reference) > 10 &&
+            $transaction->order->lastTransaction->type === 'purchase' &&
+            $transaction->order->lastTransaction->status === 'redirect' &&
+            $transaction->order->lastTransaction->gatewayId === $transaction->gatewayId
+        ) {
+            // This order is already created
+            $transaction->note = 'Updated authorized Klarna Order';
+            $transaction->parentId = $transaction->order->lastTransaction->message === 'Created' ? $transaction->order->lastTransaction->parentId : $transaction->order->lastTransaction->id;
+            $form->populate($transaction, $this);
+            $response = $form->updateOrder();
 
-        if($response->isSuccessful()) $this->log('Authorized order '.$transaction->order->number.' ('.$transaction->order->id.')');
+            if($response->isSuccessful()) $this->log('Updated authorized order '.$transaction->order->number.' ('.$transaction->order->id.')');
+        }
+        else {
+            $transaction->note = 'Created Klarna Order and HPP Session';
+            $form->populate($transaction, $this);
+            $response = $form->createOrder();
+
+            if($response->isSuccessful()) $this->log('Authorized order '.$transaction->order->number.' ('.$transaction->order->id.')');
+        }
 
         return $response;
     }
@@ -306,6 +322,7 @@ class Hosted extends Base
     public function getLogoUrl()
     {
         $logo = $this->getLogoAsset();
+        if(!$logo) return false;
         $url = UrlHelper::baseUrl().$logo->url;
         $parsed = parse_url($url, PHP_URL_SCHEME);
 
@@ -321,6 +338,7 @@ class Hosted extends Base
     public function getBackgroundUrl()
     {
         $background = $this->getBackgroundAsset();
+        if(!$background) return false;
 
         if($background instanceof Asset) {
             // Background URLs does not work unless its on HTTPS
