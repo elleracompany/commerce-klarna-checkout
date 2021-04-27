@@ -1,5 +1,10 @@
 # Release Notes for Klarna Checkout for Craft Commerce
 
+## 3.0.2 - 2021-04-27
+
+### Enhancement
+- Added event for address formatting (PR #55 from @lenvanessen)
+
 ## 3.0.1 - 2021-01-19
 
 ### Bugfix
