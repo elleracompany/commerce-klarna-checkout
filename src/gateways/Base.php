@@ -11,6 +11,7 @@ use craft\commerce\models\Address;
 use craft\commerce\models\payments\BasePaymentForm;
 use craft\commerce\models\PaymentSource;
 use craft\commerce\models\Transaction;
+use ellera\commerce\klarna\events\FormatAddressEvent;
 use ellera\commerce\klarna\klarna\order\Refund;
 use ellera\commerce\klarna\klarna\order\Update;
 use craft\commerce\elements\Order as CraftOrder;
@@ -38,6 +39,8 @@ class Base extends Gateway
 {
     // Public Variables
     // =========================================================================
+
+    const EVENT_FORMAT_ADDRESS = 'formatAddress';
 
     /**
      * Setting: Title
@@ -451,7 +454,7 @@ class Base extends Gateway
      */
     public function formatAddress(Address $address, string $email = '') : array
     {
-        return [
+        $formattedAddress = [
             "organization_name" => $address->businessName,
             "given_name" => $address->firstName,
             "family_name" => $address->lastName,
@@ -465,6 +468,11 @@ class Base extends Gateway
             "phone" => $address->phone,
             "country" => $address->country->iso,
         ];
+
+        $event = new FormatAddressEvent(['address' => $formattedAddress, 'sourceAddress' => $address]);
+        $this->trigger(self::EVENT_FORMAT_ADDRESS, $event);
+
+        return $event->address;
     }
 
     /**

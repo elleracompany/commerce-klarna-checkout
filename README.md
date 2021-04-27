@@ -92,6 +92,21 @@ KLARNA_PROD_PWD="XXXXXXXXXXXXXX"
 KLARNA_TEST_MODE_klarnaCheckout="true"
 ```
 
+### Formatting / changing the address
+If your set-up uses different fields for the addresses in Commerce, for instance when you store the house number separately from the streetname, you can hook into the address formatter to change the format before it gets sent to Klarna.
+
+The FormatAddressEvent contains two parameters, the `address` parameter that contains the formatted address and the `sourceAddress`, which contains the source Address model.
+```
+    use ellera\commerce\klarna\gateways\Base as KlarnaGateway;
+    
+    Event::on(
+        KlarnaGateway::class,
+        KlarnaGateway::EVENT_FORMAT_ADDRESS,
+        function(FormatAddressEvent $event) {
+            $event->address['street_address'] = "{$event->sourceAddress->address1} {$event->sourceAddress->address3}";
+        }
+    );
+```
 ## Troubleshooting
 
 #### I get 401 or 403 response when I turn off Test Mode
