@@ -4,6 +4,7 @@
 namespace ellera\commerce\klarna\models\forms;
 
 use craft\commerce\models\Transaction;
+use craft\helpers\UrlHelper;
 use ellera\commerce\klarna\gateways\Base;
 use ellera\commerce\klarna\klarna\order\Create;
 use ellera\commerce\klarna\models\responses\OrderResponse;
@@ -23,10 +24,10 @@ class CheckoutForm extends BasePaymentForm
         parent::populate($transaction, $gateway);
 
         $this->merchant_urls = [
-            'terms' => $this->getStoreUrl().$gateway->terms,
-            'confirmation' => $this->getStoreUrl().'actions/commerce-klarna-checkout/klarna/confirmation?hash='.$transaction->hash,
-            'checkout' => $this->getStoreUrl().$gateway->checkout,
-            'push' => $this->getStoreUrl().$gateway->success.'?number='.$transaction->order->number
+            'terms' => UrlHelper::siteUrl($gateway->terms),
+            'confirmation' => UrlHelper::actionUrl('/commerce-klarna-checkout/klarna/confirmation', ['hash' => $transaction->hash]),
+            'checkout' => UrlHelper::siteUrl($gateway->checkout),
+            'push' => UrlHelper::siteUrl($gateway->success, ['number' => $transaction->order->number])
         ];
     }
 

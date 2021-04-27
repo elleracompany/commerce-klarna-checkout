@@ -4,11 +4,14 @@
 namespace ellera\commerce\klarna\models\forms;
 
 use craft\commerce\models\Transaction;
+use craft\errors\SiteNotFoundException;
+use craft\helpers\UrlHelper;
 use ellera\commerce\klarna\gateways\Base;
 use ellera\commerce\klarna\gateways\Hosted;
 use ellera\commerce\klarna\klarna\order\Create as CreateOrder;
 use ellera\commerce\klarna\klarna\session\Create;
 use ellera\commerce\klarna\models\responses\OrderResponse;
+use yii\base\Exception;
 use yii\base\InvalidConfigException;
 use GuzzleHttp\Exception\ClientException;
 
@@ -23,25 +26,26 @@ class HostedForm extends BasePaymentForm
      * @param Transaction $transaction
      * @param Base $gateway
      * @throws InvalidConfigException
-     * @throws \craft\errors\SiteNotFoundException
+     * @throws SiteNotFoundException
+     * @throws Exception
      */
     public function populate(Transaction $transaction, Base $gateway)
     {
         parent::populate($transaction, $gateway);
         /** @var $gateway Hosted */
         $this->merchant_urls = [
-            'terms' => $this->getStoreUrl().$gateway->terms,
-            'confirmation' => $this->getStoreUrl().'actions/commerce-klarna-checkout/klarna/confirmation?hash='.$transaction->hash,
-            'checkout' => $this->getStoreUrl().$gateway->checkout,
-            'push' => $this->getStoreUrl().$gateway->success.'?number='.$transaction->order->number
+            'terms' => UrlHelper::siteUrl($gateway->terms),
+            'confirmation' => UrlHelper::actionUrl('/commerce-klarna-checkout/klarna/confirmation', ['hash' => $transaction->hash]),
+            'checkout' => UrlHelper::siteUrl($gateway->checkout),
+            'push' => UrlHelper::siteUrl($gateway->success, ['number' => $transaction->order->number])
         ];
 
         $this->merchant_session_urls = [
-            'success' => $this->getStoreUrl().'actions/commerce-klarna-checkout/klarna/confirmation?hash='.$transaction->hash,
-            'cancel' => $this->getStoreUrl().$gateway->cancel.'?transaction_token='.$transaction->hash.'&sid={{session_id}}',
-            'back' => $this->getStoreUrl().$gateway->back.'?transaction_token='.$transaction->hash.'&sid={{session_id}}',
-            'failure' => $this->getStoreUrl().$gateway->failure.'?transaction_token='.$transaction->hash.'&sid={{session_id}}',
-            'error' => $this->getStoreUrl().$gateway->error.'?transaction_token='.$transaction->hash.'&sid={{session_id}}'
+            'success' => UrlHelper::actionUrl('/commerce-klarna-checkout/klarna/confirmation', ['hash' => $transaction->hash]),
+            'cancel' => UrlHelper::siteUrl($gateway->cancel, ['transaction_token' => $transaction->hash, 'sid' => '{{session_id}}']),
+            'back' => UrlHelper::siteUrl($gateway->back, ['transaction_token' => $transaction->hash, 'sid' => '{{session_id}}']),
+            'failure' => UrlHelper::siteUrl($gateway->failure, ['transaction_token' => $transaction->hash, 'sid' => '{{session_id}}']),
+            'error' => UrlHelper::siteUrl($gateway->error, ['transaction_token' => $transaction->hash, 'sid' => '{{session_id}}']),
         ];
     }
 

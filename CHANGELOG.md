@@ -1,5 +1,9 @@
 # Release Notes for Klarna Checkout for Craft Commerce
 
+## 3.1.0 - 2021-04-27
+
+- Refactored Store URLs to utilize craft native functions and work with changed actionTrigger changes (#48)
+
 ## 3.0.2 - 2021-04-27
 
 ### Enhancement
