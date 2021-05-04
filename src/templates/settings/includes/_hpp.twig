@@ -23,6 +23,14 @@
     errors: gateway.getFirstError('background_id')
 }) }}
 
+{{ forms.textField({
+    label: gateway.getAttributeLabel('back'),
+    name: 'back',
+    value: gateway.back,
+    instructions: 'Back page. If the users clicks on "go back" from the klarna checkout page. Passes the transaction number as parameter \'transaction_token\'' | t('klarna-checkout'),
+    errors: gateway.getFirstError('success')
+}) }}
+
 {# forms.multiSelectField({
     label: 'Available Payment Methods'|t('commerce'),
     instructions: "Select the payment methods you want to be available. Leave blank for all payment methods."|t('klarna-commerce'),
