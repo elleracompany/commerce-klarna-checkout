@@ -198,18 +198,6 @@ class BasePaymentForm extends CommerceBasePaymentForm
     }
 
     /**
-     * Create a new Klarna Order
-     *
-     * @return Update
-     * @throws InvalidConfigException
-     * @throws \yii\base\ErrorException
-     */
-    public function updateOrder()
-    {
-        return new Update($this->gateway, $this);
-    }
-
-    /**
      * Returns a Order Create Request Body
      *
      * @return array

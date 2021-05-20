@@ -14,6 +14,7 @@ use ellera\commerce\klarna\models\responses\OrderResponse;
 use yii\base\Exception;
 use yii\base\InvalidConfigException;
 use GuzzleHttp\Exception\ClientException;
+use ellera\commerce\klarna\klarna\session\Update;
 
 class HostedForm extends BasePaymentForm
 {
@@ -61,6 +62,18 @@ class HostedForm extends BasePaymentForm
         $order = new CreateOrder($this->gateway, $this);
         $payment_session_url = $this->gateway->getApiUrl().'/checkout/v3/orders/'.$order->getData()->order_id;
         return new Create($this->gateway, $this, $payment_session_url, $order->getTransactionReference());
+    }
+
+    /**
+     * Create a new Klarna Order
+     *
+     * @return Update
+     * @throws InvalidConfigException
+     * @throws \yii\base\ErrorException
+     */
+    public function updateOrder()
+    {
+        return new Update($this->gateway, $this);
     }
 
     /**

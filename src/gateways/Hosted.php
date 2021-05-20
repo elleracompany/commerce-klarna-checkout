@@ -152,7 +152,7 @@ class Hosted extends Base
         if(
             isset($transaction->order->lastTransaction) &&
             strlen($transaction->order->lastTransaction->reference) > 10 &&
-            $transaction->order->lastTransaction->type === 'purchase' &&
+            $transaction->order->lastTransaction->type === 'authorize' &&
             $transaction->order->lastTransaction->status === 'redirect' &&
             $transaction->order->lastTransaction->gatewayId === $transaction->gatewayId
         ) {
@@ -161,15 +161,17 @@ class Hosted extends Base
             $transaction->parentId = $transaction->order->lastTransaction->message === 'Created' ? $transaction->order->lastTransaction->parentId : $transaction->order->lastTransaction->id;
             $form->populate($transaction, $this);
             $response = $form->updateOrder();
-
-            if($response->isSuccessful()) $this->log('Updated authorized order '.$transaction->order->number.' ('.$transaction->order->id.')');
+            if(!$response->getRedirectUrl() || empty($response->getRedirectUrl())) {
+                $response = $form->createOrder();
+                if($response->getRawResponse()->getStatusCode() >= 200 && $response->getRawResponse()->getStatusCode() < 300) $this->log('(Re)Authorized order '.$transaction->order->number.' ('.$transaction->order->id.')');
+            }
+            else $this->log('Updated authorized order '.$transaction->order->number.' ('.$transaction->order->id.')');
         }
         else {
             $transaction->note = 'Created Klarna Order and HPP Session';
             $form->populate($transaction, $this);
             $response = $form->createOrder();
-
-            if($response->isSuccessful()) $this->log('Authorized order '.$transaction->order->number.' ('.$transaction->order->id.')');
+            if($response->getRawResponse()->getStatusCode() >= 200 && $response->getRawResponse()->getStatusCode() < 300) $this->log('Authorized order '.$transaction->order->number.' ('.$transaction->order->id.')');
         }
 
         return $response;
