@@ -317,7 +317,8 @@ class Hosted extends Base
     {
         return array_merge(parent::attributeLabels(), [
             'logo_id' => 'Logo Image',
-            'background_id' => 'Background Image'
+            'background_id' => 'Background Image',
+            'back' => 'Go back URL'
         ]);
     }
 

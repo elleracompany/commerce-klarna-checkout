@@ -1,4 +1,8 @@
 # Release Notes for Klarna Checkout for Craft Commerce
+## 3.0.3 - 2021-05-04
+
+### Enhancement
+- Added return URL for hosted pages (PR #57 from @lenvanessen)
 
 ## 3.1.0 - 2021-04-27
 
