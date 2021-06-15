@@ -4,8 +4,11 @@
 namespace ellera\commerce\klarna\models\forms;
 
 use craft\commerce\models\Transaction;
+use craft\helpers\UrlHelper;
 use ellera\commerce\klarna\gateways\Base;
 use ellera\commerce\klarna\klarna\order\Create;
+use ellera\commerce\klarna\klarna\order\Get;
+use ellera\commerce\klarna\klarna\order\Update;
 use ellera\commerce\klarna\models\responses\OrderResponse;
 use yii\base\InvalidConfigException;
 use GuzzleHttp\Exception\ClientException;
@@ -23,10 +26,10 @@ class CheckoutForm extends BasePaymentForm
         parent::populate($transaction, $gateway);
 
         $this->merchant_urls = [
-            'terms' => $this->getStoreUrl().$gateway->terms,
-            'confirmation' => $this->getStoreUrl().'actions/commerce-klarna-checkout/klarna/confirmation?hash='.$transaction->hash,
-            'checkout' => $this->getStoreUrl().$gateway->checkout,
-            'push' => $this->getStoreUrl().$gateway->success.'?number='.$transaction->order->number
+            'terms' => UrlHelper::siteUrl($gateway->terms),
+            'confirmation' => UrlHelper::actionUrl('/commerce-klarna-checkout/klarna/confirmation', ['hash' => $transaction->hash]),
+            'checkout' => UrlHelper::siteUrl($gateway->checkout),
+            'push' => UrlHelper::siteUrl($gateway->success, ['number' => $transaction->order->number])
         ];
     }
 
@@ -40,6 +43,18 @@ class CheckoutForm extends BasePaymentForm
     public function createOrder()
     {
         return new Create($this->gateway, $this);
+    }
+
+    /**
+     * Create a new Klarna Order
+     *
+     * @return Update
+     * @throws InvalidConfigException
+     * @throws \yii\base\ErrorException
+     */
+    public function updateOrder()
+    {
+        return new Update($this->gateway, $this);
     }
 
     /**

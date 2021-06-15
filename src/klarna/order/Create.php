@@ -41,7 +41,9 @@ class Create extends KlarnaResponse
 
         $this->post();
 
-        if(isset($this->response->order_id)) $this->setTransactionReference($this->response->order_id);
+        if(isset($this->response->order_id)) {
+            $this->setTransactionReference($this->response->order_id);
+        }
         else $this->setTransactionReference('!No Ref');
     }
 }

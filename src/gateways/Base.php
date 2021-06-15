@@ -13,7 +13,7 @@ use craft\commerce\models\PaymentSource;
 use craft\commerce\models\Transaction;
 use ellera\commerce\klarna\events\FormatAddressEvent;
 use ellera\commerce\klarna\klarna\order\Refund;
-use ellera\commerce\klarna\klarna\order\Update;
+use ellera\commerce\klarna\klarna\order\Get;
 use craft\commerce\elements\Order as CraftOrder;
 use craft\commerce\records\Country;
 use craft\web\Response as WebResponse;
@@ -646,7 +646,7 @@ class Base extends Gateway
      */
     public function updateOrder(CraftOrder $order)
     {
-        $response = new Update($this, $order);
+        $response = new Get($this, $order);
 
         if($response->isSuccessful()) $this->log('Updated order '.$order->number.' ('.$order->id.')');
 
@@ -870,7 +870,7 @@ class Base extends Gateway
             $order_line = new OrderLine();
             $order_line->populate($line);
 
-            if($gateway->send_product_urls == '1') {
+            if($gateway->send_product_urls == '1' && !empty($line->purchasable->getUrl())) {
                 $order_line->product_url = $line->purchasable->getUrl();
             }
 
@@ -947,7 +947,7 @@ class Base extends Gateway
             $order_line->total_amount = $tax_included ? (int)(($line->price)*100*$line->qty) : (int)((($line->price*$line->qty)+$line_tax)*100);
             $order_line->total_tax_amount = (int)($line_tax*100);
 
-            if($gateway->send_product_urls == '1') {
+            if($gateway->send_product_urls == '1' && !empty($line->purchasable->getUrl())) {
                 $order_line->product_url = $line->purchasable->getUrl();
             }
 

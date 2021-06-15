@@ -71,14 +71,28 @@ class Checkout extends Base
         if(!$form instanceof CheckoutForm)
             throw new BadRequestHttpException('Klarna Checkout only accepts CheckoutForm');
 
-        // Populate the form
-        $form->populate($transaction, $this);
+        if(
+            isset($transaction->order->lastTransaction) &&
+            strlen($transaction->order->lastTransaction->reference) > 10 &&
+            $transaction->order->lastTransaction->type === 'authorize' &&
+            $transaction->order->lastTransaction->status === 'pending' &&
+            $transaction->order->lastTransaction->gatewayId === $transaction->gatewayId
+        ) {
+            // This order is already created
+            $transaction->note = 'Updated authorized Klarna Order';
+            $transaction->parentId = $transaction->order->lastTransaction->message === 'OK' ? $transaction->order->lastTransaction->parentId : $transaction->order->lastTransaction->id;
+            $form->populate($transaction, $this);
+            $response = $form->updateOrder();
 
-        $transaction->note = 'Created Klarna Order';
+            if($response->isSuccessful()) $this->log('Updated authorized order '.$transaction->order->number.' ('.$transaction->order->id.')');
+        }
+        else {
+            $transaction->note = 'Created Klarna Order';
+            $form->populate($transaction, $this);
+            $response = $form->createOrder();
 
-        $response = $form->createOrder();
-
-        if($response->isSuccessful()) $this->log('Authorized order '.$transaction->order->number.' ('.$transaction->order->id.')');
+            if($response->isSuccessful()) $this->log('Authorized order '.$transaction->order->number.' ('.$transaction->order->id.')');
+        }
 
         return $response;
     }
@@ -130,8 +144,7 @@ class Checkout extends Base
         $transaction->message = $response->getMessage();
         $commerce->getTransactions()->saveTransaction($transaction);
 
-        if($response->isSuccessful()) $this->log('Created order '.$transaction->order->number.' ('.$transaction->order->id.')');
-        else $this->log('Failed to create order '.$transaction->order->id.'. Klarna responded with '.$response->getCode().': '.$response->getMessage());
+        if(!$response->isSuccessful()) $this->log('Failed to create order '.$transaction->order->id.'. Klarna responded with '.$response->getCode().': '.$response->getMessage());
 
         return new Order($response);
     }
