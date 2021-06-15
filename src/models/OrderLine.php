@@ -74,7 +74,7 @@ class OrderLine extends Model
 	public function populate(LineItem $line)
 	{
 		$tax = new TaxExtractor($line);
-		$this->name = $line->purchasable->title;
+		$this->name = $line->purchasable->title ?? $line->purchasable->getSku();
         $this->product_id = $line->purchasable->id;
 		$this->quantity = (int)$line->qty;
 		$this->unit_price = $tax->getUnitGross();

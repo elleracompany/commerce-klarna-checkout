@@ -870,7 +870,7 @@ class Base extends Gateway
             $order_line = new OrderLine();
             $order_line->populate($line);
 
-            if($gateway->send_product_urls == '1') {
+            if($gateway->send_product_urls == '1' && !empty($line->purchasable->getUrl())) {
                 $order_line->product_url = $line->purchasable->getUrl();
             }
 
@@ -947,7 +947,7 @@ class Base extends Gateway
             $order_line->total_amount = $tax_included ? (int)(($line->price)*100*$line->qty) : (int)((($line->price*$line->qty)+$line_tax)*100);
             $order_line->total_tax_amount = (int)($line_tax*100);
 
-            if($gateway->send_product_urls == '1') {
+            if($gateway->send_product_urls == '1' && !empty($line->purchasable->getUrl())) {
                 $order_line->product_url = $line->purchasable->getUrl();
             }
 

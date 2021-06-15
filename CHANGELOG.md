@@ -4,9 +4,11 @@
 
 ### Enhancement
 - Refactored Store URLs to utilize craft native functions and work with changed actionTrigger changes (#48)
-
+- The payment gateways are now compatible with Donations (#59)
 ### Bugfix
 - Fixed an issue with HPP if LogoAsset or BackgroundAsset is null
+- Added reuse of klarna order-id (#51)
+
 
 ## 3.0.2 - 2021-04-27
 
