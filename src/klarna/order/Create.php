@@ -11,7 +11,7 @@ class Create extends KlarnaResponse
 {
     public function isSuccessful(): bool
     {
-        return false;
+        return 200 <= $this->raw_response->getStatusCode() && $this->raw_response->getStatusCode() < 300;
     }
 
     public function isProcessing(): bool

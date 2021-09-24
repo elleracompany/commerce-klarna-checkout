@@ -16,7 +16,7 @@ class Create extends KlarnaResponse
 
     public function isProcessing(): bool
     {
-        return false;
+        return true;
     }
 
     public function isRedirect(): bool
