@@ -28,7 +28,7 @@
     "ext-json": "*",
     "craftcms/cms": "^3.4.0",
     "craftcms/commerce": "^3.0.0",
-    "guzzlehttp/guzzle": "^6.5.0"
+    "guzzlehttp/guzzle": "^6.5.0||^7.3"
   },
   "autoload": {
     "psr-4": {
