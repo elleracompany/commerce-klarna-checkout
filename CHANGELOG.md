@@ -2,11 +2,10 @@
 
 ## 3.1.1 - 2021-09-24
 
-### Enhancement
-- 
 ### Bugfix
 - Updated TaxExtractor to handle orders lines with 0 cost (#63)
 - Removed slash before return value to be compatible with multisites (#62)
+- Fixed HPP authorize status to pending
 
 ## 3.1.0 - 2021-04-27
 
