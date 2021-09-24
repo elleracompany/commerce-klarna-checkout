@@ -57,7 +57,12 @@ class TaxExtractor
 	 */
 	public function getTaxRate() : int
 	{
-		return (int)round(($this->getTaxTotal()/$this->getTotalNet())*10000);
+        if($this->getTotalNet() === 0) {
+            return 0;
+        }
+        else {
+            return (int)round(($this->getTaxTotal()/$this->getTotalNet())*10000);
+        }
 	}
 
 	/**
