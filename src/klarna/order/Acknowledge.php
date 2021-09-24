@@ -10,7 +10,7 @@ class Acknowledge extends KlarnaResponse
 {
     public function isSuccessful(): bool
     {
-        return true;
+        return 200 <= $this->raw_response->getStatusCode() && $this->raw_response->getStatusCode() < 300;
     }
 
     /**
