@@ -489,6 +489,7 @@ class Base extends Gateway
         $address->address1 = $addr->street_address;
         $address->address2 = $addr->street_address2 ?? null;
         $address->zipCode = $addr->postal_code;
+        $address->businessName = $addr->organization_name ?? null;
         $address->city = $addr->city;
         $address->phone = $addr->phone;
         if($country) $address->countryId = $country->id;
