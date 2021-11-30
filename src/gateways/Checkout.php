@@ -82,9 +82,18 @@ class Checkout extends Base
             $transaction->note = 'Updated authorized Klarna Order';
             $transaction->parentId = $transaction->order->lastTransaction->message === 'OK' ? $transaction->order->lastTransaction->parentId : $transaction->order->lastTransaction->id;
             $form->populate($transaction, $this);
-            $response = $form->updateOrder();
 
-            if($response->isSuccessful()) $this->log('Updated authorized order '.$transaction->order->number.' ('.$transaction->order->id.')');
+            try {
+                $response = $form->updateOrder();
+
+                if($response->isSuccessful()) $this->log('Updated authorized order '.$transaction->order->number.' ('.$transaction->order->id.')');
+            } catch (\Exception $e) {
+                $transaction->note = 'Created Klarna Order';
+                $form->populate($transaction, $this);
+                $response = $form->createOrder();
+
+                if($response->isSuccessful()) $this->log('Could not find Klarna Order. Reauthorized order '.$transaction->order->number.' ('.$transaction->order->id.')');
+            }
         }
         else {
             $transaction->note = 'Created Klarna Order';

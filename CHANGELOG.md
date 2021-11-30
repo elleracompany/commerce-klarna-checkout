@@ -1,5 +1,10 @@
 # Release Notes for Klarna Checkout for Craft Commerce
 
+## 3.1.2 - 2021-11-30
+
+### Bugfix
+- Added exception handling and reauthorization on inactive cart based on the solution suggested by @SandraSundqvist (#67)
+
 ## 3.1.1 - 2021-09-24
 
 ### Bugfix
