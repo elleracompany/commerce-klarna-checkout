@@ -1,3 +1,15 @@
+# ABANDONED
+Unfortunately, this plugin is no longer maintained.
+
+
+
+
+
+
+
+
+---
+
 ![Version 3.0](src/banner.png)
 
 # Klarna Checkout for Craft Commerce
